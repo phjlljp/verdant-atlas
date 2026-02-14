@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style Previews - Planting Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #fff; font-family: 'Inter', sans-serif; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+  h1 { text-align: center; padding: 40px 24px 0; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  p.sub { text-align: center; padding: 8px 24px 24px; color: #888; font-size: 14px; }
+  .preview { border-radius: 20px; overflow: hidden; position: relative; }
+  .preview-label { position: absolute; top: 16px; left: 16px; z-index: 10; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.03em; color: #fff; }
+  .preview-desc { position: absolute; bottom: 0; left: 0; right: 0; z-index: 10; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 60px 20px 20px; }
+  .preview-desc h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .preview-desc p { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+
+  /* ---- STYLE A: Botanical Journal ---- */
+  .style-a { background: #faf8f3; color: #2c2418; }
+  .style-a .header { background: #2c2418; padding: 24px 28px; }
+  .style-a .header h2 { font-family: 'Fraunces', serif; font-size: 22px; color: #faf8f3; font-weight: 600; }
+  .style-a .header p { font-family: 'Fraunces', serif; font-size: 12px; color: #a89f8e; margin-top: 4px; }
+  .style-a .card { display: flex; gap: 20px; padding: 20px 28px; border-bottom: 1px solid #e8e2d6; }
+  .style-a .card img { width: 140px; height: 140px; object-fit: cover; border-radius: 6px; border: 1px solid #e0d8c8; }
+  .style-a .card .info { flex: 1; }
+  .style-a .card h3 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: #2c2418; margin-bottom: 6px; }
+  .style-a .card .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 3px; border: 1px solid #c4b99a; color: #7a6f5a; font-weight: 500; margin-right: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .style-a .bar { height: 16px; border-radius: 3px; background: #ede8dc; margin: 10px 0 8px; position: relative; overflow: hidden; }
+  .style-a .bar .seg1 { position: absolute; left: 18%; width: 12%; height: 100%; background: #8b7355; }
+  .style-a .bar .seg2 { position: absolute; left: 30%; width: 8%; height: 100%; background: #6b8f71; }
+  .style-a .bar .seg3 { position: absolute; left: 38%; width: 15%; height: 100%; background: #9ab87a; }
+  .style-a .bar .seg4 { position: absolute; left: 53%; width: 20%; height: 100%; background: #d4956a; }
+  .style-a .bar .seg5 { position: absolute; left: 73%; width: 3%; height: 100%; background: #a07040; }
+  .style-a .detail { font-size: 12px; color: #7a6f5a; line-height: 22px; }
+  .style-a .detail span { color: #2c2418; font-weight: 500; }
+
+  /* ---- STYLE B: Dark Mode Neon ---- */
+  .style-b { background: #0f0f14; color: #e4e4e7; }
+  .style-b .header { background: linear-gradient(135deg, #0f0f14, #1a1a2e); padding: 24px 28px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .style-b .header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #60f0c0, #40d0f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .style-b .header p { font-size: 12px; color: #5a5a6e; margin-top: 4px; }
+  .style-b .card { display: flex; gap: 20px; padding: 20px 28px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .style-b .card img { width: 140px; height: 140px; object-fit: cover; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+  .style-b .card .info { flex: 1; }
+  .style-b .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; color: #f0f0f4; margin-bottom: 6px; }
+  .style-b .card .badge { display: inline-block; font-size: 10px; padding: 3px 10px; border-radius: 20px; background: rgba(96,240,192,0.12); color: #60f0c0; font-weight: 600; margin-right: 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .style-b .bar { height: 16px; border-radius: 8px; background: #1a1a2e; margin: 10px 0 8px; position: relative; overflow: hidden; }
+  .style-b .bar .seg1 { position: absolute; left: 18%; width: 12%; height: 100%; background: #a78bfa; box-shadow: 0 0 12px rgba(167,139,250,0.4); }
+  .style-b .bar .seg2 { position: absolute; left: 30%; width: 8%; height: 100%; background: #38bdf8; box-shadow: 0 0 12px rgba(56,189,248,0.4); }
+  .style-b .bar .seg3 { position: absolute; left: 38%; width: 15%; height: 100%; background: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.3); }
+  .style-b .bar .seg4 { position: absolute; left: 53%; width: 20%; height: 100%; background: #f472b6; box-shadow: 0 0 12px rgba(244,114,182,0.4); }
+  .style-b .bar .seg5 { position: absolute; left: 73%; width: 3%; height: 100%; background: #fb923c; box-shadow: 0 0 12px rgba(251,146,60,0.4); }
+  .style-b .detail { font-size: 12px; color: #5a5a6e; line-height: 22px; }
+  .style-b .detail span { color: #c4c4d0; font-weight: 500; }
+
+  /* ---- STYLE C: Soft Gradient / Glassmorphism ---- */
+  .style-c { background: linear-gradient(160deg, #e0f2e9 0%, #fce7f3 50%, #ede9fe 100%); color: #1e1b2e; }
+  .style-c .header { background: rgba(255,255,255,0.5); backdrop-filter: blur(20px); padding: 24px 28px; border-bottom: 1px solid rgba(255,255,255,0.6); }
+  .style-c .header h2 { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 700; color: #1e1b2e; }
+  .style-c .header p { font-size: 12px; color: #6b6580; margin-top: 4px; }
+  .style-c .card { display: flex; gap: 20px; padding: 20px 28px; border-bottom: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.3); }
+  .style-c .card img { width: 140px; height: 140px; object-fit: cover; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .style-c .card .info { flex: 1; }
+  .style-c .card h3 { font-family: 'DM Sans', sans-serif; font-size: 17px; font-weight: 700; color: #1e1b2e; margin-bottom: 6px; }
+  .style-c .card .badge { display: inline-block; font-size: 10px; padding: 3px 10px; border-radius: 20px; background: rgba(139,92,246,0.15); color: #7c3aed; font-weight: 600; margin-right: 6px; }
+  .style-c .bar { height: 16px; border-radius: 8px; background: rgba(255,255,255,0.5); margin: 10px 0 8px; position: relative; overflow: hidden; }
+  .style-c .bar .seg1 { position: absolute; left: 18%; width: 12%; height: 100%; background: linear-gradient(90deg, #a78bfa, #8b5cf6); }
+  .style-c .bar .seg2 { position: absolute; left: 30%; width: 8%; height: 100%; background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+  .style-c .bar .seg3 { position: absolute; left: 38%; width: 15%; height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); }
+  .style-c .bar .seg4 { position: absolute; left: 53%; width: 20%; height: 100%; background: linear-gradient(90deg, #f9a8d4, #ec4899); }
+  .style-c .bar .seg5 { position: absolute; left: 73%; width: 3%; height: 100%; background: linear-gradient(90deg, #fdba74, #f97316); }
+  .style-c .detail { font-size: 12px; color: #6b6580; line-height: 22px; }
+  .style-c .detail span { color: #1e1b2e; font-weight: 500; }
+
+  /* ---- STYLE D: Editorial / Magazine ---- */
+  .style-d { background: #ffffff; color: #1a1a1a; }
+  .style-d .header { padding: 28px 28px 20px; border-bottom: 3px solid #1a1a1a; }
+  .style-d .header h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.04em; }
+  .style-d .header p { font-family: 'Inter', sans-serif; font-size: 11px; color: #888; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .style-d .card { display: flex; gap: 24px; padding: 24px 28px; border-bottom: 1px solid #eee; }
+  .style-d .card img { width: 140px; height: 180px; object-fit: cover; }
+  .style-d .card .info { flex: 1; }
+  .style-d .card h3 { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+  .style-d .card .badge { display: inline-block; font-size: 9px; padding: 3px 8px; border: 1px solid #1a1a1a; color: #1a1a1a; font-weight: 600; margin-right: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .style-d .bar { height: 8px; background: #f5f5f5; margin: 12px 0 10px; position: relative; overflow: hidden; }
+  .style-d .bar .seg1 { position: absolute; left: 18%; width: 12%; height: 100%; background: #1a1a1a; }
+  .style-d .bar .seg2 { position: absolute; left: 30%; width: 8%; height: 100%; background: #555; }
+  .style-d .bar .seg3 { position: absolute; left: 38%; width: 15%; height: 100%; background: #888; }
+  .style-d .bar .seg4 { position: absolute; left: 53%; width: 20%; height: 100%; background: #c41e3a; }
+  .style-d .bar .seg5 { position: absolute; left: 73%; width: 3%; height: 100%; background: #d4a76a; }
+  .style-d .detail { font-size: 12px; color: #888; line-height: 24px; font-family: 'Inter', sans-serif; }
+  .style-d .detail span { color: #1a1a1a; font-weight: 600; }
+
+  /* ---- STYLE E: Warm Earthy / Terracotta ---- */
+  .style-e { background: #f5ebe0; color: #3d2c1e; }
+  .style-e .header { background: #3d2c1e; padding: 24px 28px; }
+  .style-e .header h2 { font-family: 'Source Serif 4', serif; font-size: 22px; color: #f5ebe0; font-weight: 600; }
+  .style-e .header p { font-size: 12px; color: #a08c78; margin-top: 4px; }
+  .style-e .card { display: flex; gap: 20px; padding: 20px 28px; border-bottom: 1px solid #e6d5c3; }
+  .style-e .card img { width: 140px; height: 140px; object-fit: cover; border-radius: 50%; border: 3px solid #e6d5c3; }
+  .style-e .card .info { flex: 1; }
+  .style-e .card h3 { font-family: 'Source Serif 4', serif; font-size: 17px; font-weight: 600; color: #3d2c1e; margin-bottom: 6px; }
+  .style-e .card .badge { display: inline-block; font-size: 10px; padding: 3px 10px; border-radius: 20px; background: #c17547; color: #fff; font-weight: 600; margin-right: 6px; }
+  .style-e .bar { height: 14px; border-radius: 7px; background: #e6d5c3; margin: 10px 0 8px; position: relative; overflow: hidden; }
+  .style-e .bar .seg1 { position: absolute; left: 18%; width: 12%; height: 100%; background: #8b6f4e; }
+  .style-e .bar .seg2 { position: absolute; left: 30%; width: 8%; height: 100%; background: #6b9c7c; }
+  .style-e .bar .seg3 { position: absolute; left: 38%; width: 15%; height: 100%; background: #8cb86c; }
+  .style-e .bar .seg4 { position: absolute; left: 53%; width: 20%; height: 100%; background: #c17547; }
+  .style-e .bar .seg5 { position: absolute; left: 73%; width: 3%; height: 100%; background: #8b5e3c; }
+  .style-e .detail { font-size: 12px; color: #8a7560; line-height: 22px; }
+  .style-e .detail span { color: #3d2c1e; font-weight: 500; }
+
+  /* ---- STYLE F: Minimal Scandinavian ---- */
+  .style-f { background: #fafafa; color: #222; }
+  .style-f .header { padding: 28px 28px; border-bottom: 1px solid #eee; }
+  .style-f .header h2 { font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 400; color: #222; letter-spacing: 0.06em; text-transform: uppercase; }
+  .style-f .header p { font-size: 11px; color: #aaa; margin-top: 6px; letter-spacing: 0.04em; }
+  .style-f .card { display: flex; gap: 24px; padding: 24px 28px; border-bottom: 1px solid #f0f0f0; }
+  .style-f .card img { width: 120px; height: 120px; object-fit: cover; border-radius: 4px; }
+  .style-f .card .info { flex: 1; }
+  .style-f .card h3 { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500; color: #222; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .style-f .card .badge { display: inline-block; font-size: 10px; padding: 2px 8px; background: #f0f0f0; color: #888; font-weight: 500; margin-right: 6px; letter-spacing: 0.02em; }
+  .style-f .bar { height: 4px; background: #f0f0f0; margin: 14px 0 10px; position: relative; overflow: hidden; }
+  .style-f .bar .seg1 { position: absolute; left: 18%; width: 12%; height: 100%; background: #222; }
+  .style-f .bar .seg2 { position: absolute; left: 30%; width: 8%; height: 100%; background: #666; }
+  .style-f .bar .seg3 { position: absolute; left: 38%; width: 15%; height: 100%; background: #999; }
+  .style-f .bar .seg4 { position: absolute; left: 53%; width: 20%; height: 100%; background: #bbb; }
+  .style-f .bar .seg5 { position: absolute; left: 73%; width: 3%; height: 100%; background: #888; }
+  .style-f .detail { font-size: 11px; color: #aaa; line-height: 24px; letter-spacing: 0.01em; }
+  .style-f .detail span { color: #222; font-weight: 500; }
+</style>
+</head>
+<body>
+<h1>Choose a Style</h1>
+<p class="sub">Each preview shows how a species card would look. Pick the one you like and I'll apply it to the whole app.</p>
+
+<div class="grid">
+
+  <!-- A: Botanical Journal -->
+  <div class="preview">
+    <div class="style-a" style="border-radius:20px; overflow:hidden;">
+      <div class="header">
+        <h2>Midcoast Maine Planting Calendar</h2>
+        <p>Zone 5b &middot; 147 varieties across 29 species</p>
+      </div>
+      <div class="card">
+        <img src="https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg" alt="flower">
+        <div class="info">
+          <h3>Agastache <span style="font-weight:400; font-size:13px; color:#a89f8e;">12 var</span></h3>
+          <span class="badge">Perennial</span><span class="badge">Frost Hardy</span>
+          <div class="bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div><div class="seg4"></div><div class="seg5"></div></div>
+          <div class="detail">
+            Type &nbsp;<span>Perennial</span><br>
+            Sow &nbsp;<span>Start indoors / Direct sow</span><br>
+            Germination &nbsp;<span>7&ndash;16 days</span><br>
+            Bloom &nbsp;<span>60&ndash;90 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; padding:16px 0;">
+      <span style="color:#a89f8e; font-size:13px; font-weight:500;">A &mdash; Botanical Journal</span><br>
+      <span style="color:#666; font-size:11px;">Warm cream tones, serif typography (Fraunces), antique/field-guide feel</span>
+    </div>
+  </div>
+
+  <!-- B: Dark Neon -->
+  <div class="preview">
+    <div class="style-b" style="border-radius:20px; overflow:hidden;">
+      <div class="header">
+        <h2>Midcoast Maine Planting Calendar</h2>
+        <p>Zone 5b &middot; 147 varieties across 29 species</p>
+      </div>
+      <div class="card">
+        <img src="https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg" alt="flower">
+        <div class="info">
+          <h3>Agastache <span style="font-weight:400; font-size:13px; color:#5a5a6e;">12 var</span></h3>
+          <span class="badge">Perennial</span><span class="badge">Frost Hardy</span>
+          <div class="bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div><div class="seg4"></div><div class="seg5"></div></div>
+          <div class="detail">
+            Type &nbsp;<span>Perennial</span><br>
+            Sow &nbsp;<span>Start indoors / Direct sow</span><br>
+            Germination &nbsp;<span>7&ndash;16 days</span><br>
+            Bloom &nbsp;<span>60&ndash;90 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; padding:16px 0;">
+      <span style="color:#60f0c0; font-size:13px; font-weight:500;">B &mdash; Dark Neon</span><br>
+      <span style="color:#666; font-size:11px;">Dark background, glowing phase bars, Space Grotesk, high contrast</span>
+    </div>
+  </div>
+
+  <!-- C: Glassmorphism -->
+  <div class="preview">
+    <div class="style-c" style="border-radius:20px; overflow:hidden;">
+      <div class="header">
+        <h2>Midcoast Maine Planting Calendar</h2>
+        <p>Zone 5b &middot; 147 varieties across 29 species</p>
+      </div>
+      <div class="card">
+        <img src="https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg" alt="flower">
+        <div class="info">
+          <h3>Agastache <span style="font-weight:400; font-size:13px; color:#6b6580;">12 var</span></h3>
+          <span class="badge">Perennial</span><span class="badge" style="background:rgba(14,165,233,0.12); color:#0284c7;">Frost Hardy</span>
+          <div class="bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div><div class="seg4"></div><div class="seg5"></div></div>
+          <div class="detail">
+            Type &nbsp;<span>Perennial</span><br>
+            Sow &nbsp;<span>Start indoors / Direct sow</span><br>
+            Germination &nbsp;<span>7&ndash;16 days</span><br>
+            Bloom &nbsp;<span>60&ndash;90 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; padding:16px 0;">
+      <span style="color:#8b5cf6; font-size:13px; font-weight:500;">C &mdash; Soft Gradient / Glass</span><br>
+      <span style="color:#666; font-size:11px;">Pastel gradient background, frosted glass cards, gradient phase bars, DM Sans</span>
+    </div>
+  </div>
+
+  <!-- D: Editorial -->
+  <div class="preview">
+    <div class="style-d" style="border-radius:20px; overflow:hidden;">
+      <div class="header">
+        <h2>Midcoast Maine Planting Calendar</h2>
+        <p>Zone 5b &middot; 147 varieties across 29 species</p>
+      </div>
+      <div class="card">
+        <img src="https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg" alt="flower">
+        <div class="info">
+          <h3>Agastache <span style="font-weight:400; font-size:13px; color:#888;">12 var</span></h3>
+          <span class="badge">Perennial</span><span class="badge">Frost Hardy</span>
+          <div class="bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div><div class="seg4"></div><div class="seg5"></div></div>
+          <div class="detail">
+            Type &nbsp;<span>Perennial</span><br>
+            Sow &nbsp;<span>Start indoors / Direct sow</span><br>
+            Germination &nbsp;<span>7&ndash;16 days</span><br>
+            Bloom &nbsp;<span>60&ndash;90 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; padding:16px 0;">
+      <span style="color:#c41e3a; font-size:13px; font-weight:500;">D &mdash; Editorial / Magazine</span><br>
+      <span style="color:#666; font-size:11px;">Clean white, Playfair Display serif, bold borders, thin timeline bars, monochrome + red accent</span>
+    </div>
+  </div>
+
+  <!-- E: Warm Earthy -->
+  <div class="preview">
+    <div class="style-e" style="border-radius:20px; overflow:hidden;">
+      <div class="header">
+        <h2>Midcoast Maine Planting Calendar</h2>
+        <p>Zone 5b &middot; 147 varieties across 29 species</p>
+      </div>
+      <div class="card">
+        <img src="https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg" alt="flower">
+        <div class="info">
+          <h3>Agastache <span style="font-weight:400; font-size:13px; color:#a08c78;">12 var</span></h3>
+          <span class="badge">Perennial</span><span class="badge" style="background:#6b9c7c;">Frost Hardy</span>
+          <div class="bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div><div class="seg4"></div><div class="seg5"></div></div>
+          <div class="detail">
+            Type &nbsp;<span>Perennial</span><br>
+            Sow &nbsp;<span>Start indoors / Direct sow</span><br>
+            Germination &nbsp;<span>7&ndash;16 days</span><br>
+            Bloom &nbsp;<span>60&ndash;90 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; padding:16px 0;">
+      <span style="color:#c17547; font-size:13px; font-weight:500;">E &mdash; Warm Earthy / Terracotta</span><br>
+      <span style="color:#666; font-size:11px;">Sand/linen tones, terracotta accents, circular thumbnails, Source Serif, cozy garden feel</span>
+    </div>
+  </div>
+
+  <!-- F: Minimal Scandinavian -->
+  <div class="preview">
+    <div class="style-f" style="border-radius:20px; overflow:hidden;">
+      <div class="header">
+        <h2>Midcoast Maine Planting Calendar</h2>
+        <p>Zone 5b &middot; 147 varieties across 29 species</p>
+      </div>
+      <div class="card">
+        <img src="https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg" alt="flower">
+        <div class="info">
+          <h3>Agastache <span style="font-weight:400; font-size:12px; color:#aaa;">12 var</span></h3>
+          <span class="badge">Perennial</span><span class="badge">Frost Hardy</span>
+          <div class="bar"><div class="seg1"></div><div class="seg2"></div><div class="seg3"></div><div class="seg4"></div><div class="seg5"></div></div>
+          <div class="detail">
+            Type &nbsp;<span>Perennial</span><br>
+            Sow &nbsp;<span>Start indoors / Direct sow</span><br>
+            Germination &nbsp;<span>7&ndash;16 days</span><br>
+            Bloom &nbsp;<span>60&ndash;90 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; padding:16px 0;">
+      <span style="color:#888; font-size:13px; font-weight:500;">F &mdash; Minimal Scandinavian</span><br>
+      <span style="color:#666; font-size:11px;">Near-white, ultra-thin timeline, uppercase headers, lots of whitespace, Inter font, grayscale palette</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
