@@ -490,6 +490,7 @@ const FLOWER_DATABASE = {
   Agastache: {
     type: 'perennial',
     germination: [7, 16],
+    bloomDays: [80, 100],
     frostHardy: true,
     sun: [6, 12],
     sowMethod: ['startIndoors', 'directSow'],
@@ -528,6 +529,7 @@ const FLOWER_DATABASE = {
   'Armeria Maritima': {
     type: 'perennial',
     germination: [14, 21],
+    bloomDays: [60, 90],
     frostHardy: true,
     zoneRange: [3, 9],
     sun: [6, 12],
@@ -791,7 +793,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#f472b6', height: 'short', companions: ['Dianthus', 'Snapdragon', 'Sweet Pea'], bloomDuration: 60, firstYearBloom: false,
+    bloomColor: '#f472b6', height: 'short', companions: ['Dianthus', 'Snapdragon', 'Sweet Pea'], bloomDuration: 60,
     varieties: [
       { name: 'Cherry Caramel', url: 'https://www.rareseeds.com/phlox-cherry-caramel' },
       { name: 'Sugar Stars', url: 'https://www.rareseeds.com/phlox-sugar-stars' }
@@ -1079,6 +1081,38 @@ const getCountdown = (tl, todayDoy) => {
   return { label: next.label, days };
 };
 
+function getColorFamily(hex) {
+  if (!hex) return 'other';
+  const r = parseInt(hex.slice(1,3), 16) / 255;
+  const g = parseInt(hex.slice(3,5), 16) / 255;
+  const b = parseInt(hex.slice(5,7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max - min < 0.1) return 'white';
+  let h = 0;
+  const d = max - min;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+  else if (max === g) h = ((b - r) / d + 2) * 60;
+  else h = ((r - g) / d + 4) * 60;
+  if (h >= 330 || h < 15) return 'red';
+  if (h >= 15 && h < 45) return 'orange';
+  if (h >= 45 && h < 70) return 'yellow';
+  if (h >= 70 && h < 170) return 'green';
+  if (h >= 170 && h < 260) return 'blue';
+  if (h >= 260 && h < 330) return 'purple';
+  return 'other';
+}
+
+const COLOR_FAMILIES = {
+  all: 'All colors',
+  'red': 'Red / Pink',
+  'orange': 'Orange',
+  'yellow': 'Yellow / Gold',
+  'blue': 'Blue / Indigo',
+  'purple': 'Purple / Violet',
+  'white': 'White / Neutral'
+};
+
 function PlantingCalendar() {
   const [selectedVariety, setSelectedVariety] = useState(null);
   const [expandedSpecies, setExpandedSpecies] = useState({});
@@ -1086,13 +1120,16 @@ function PlantingCalendar() {
     try { return JSON.parse(localStorage.getItem('myGarden') || '{}'); } catch { return {}; }
   });
   const [copiedList, setCopiedList] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
   const [filterMyGarden, setFilterMyGarden] = useState(false);
   const [bloomColorMode, setBloomColorMode] = useState(false);
   const [sortBy, setSortBy] = useState('alpha');
   const [filterHeight, setFilterHeight] = useState('all');
+  const [filterColorFamily, setFilterColorFamily] = useState('all');
   const [viewMode, setViewMode] = useState('list');
   const [allExpanded, setAllExpanded] = useState(false);
-  const [frostOffset, setFrostOffset] = useState(0); // weeks offset for last frost
+  const [lastFrostOffset, setLastFrostOffset] = useState(0);
+  const [firstFrostOffset, setFirstFrostOffset] = useState(0);
   const [customMidcoast, setCustomMidcoast] = useState(MIDCOAST);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -1102,10 +1139,10 @@ function PlantingCalendar() {
 
   React.useEffect(() => {
     setCustomMidcoast({
-      lastFrost: MIDCOAST.lastFrost + (frostOffset * 7),
-      firstFrost: MIDCOAST.firstFrost - (frostOffset * 7) // earlier first frost = shorter season
+      lastFrost: MIDCOAST.lastFrost + (lastFrostOffset * 7),
+      firstFrost: MIDCOAST.firstFrost + (firstFrostOffset * 7)
     });
-  }, [frostOffset]);
+  }, [lastFrostOffset, firstFrostOffset]);
 
   // Read initial state from URL hash
   React.useEffect(() => {
@@ -1116,11 +1153,13 @@ function PlantingCalendar() {
     if (params.get('sow')) setFilterSow(params.get('sow'));
     if (params.get('type')) setFilterType(params.get('type'));
     if (params.get('height')) setFilterHeight(params.get('height'));
+    if (params.get('colorFamily')) setFilterColorFamily(params.get('colorFamily'));
     if (params.get('sort')) setSortBy(params.get('sort'));
     if (params.get('search')) setSearchTerm(params.get('search'));
     if (params.get('color') === '1') setBloomColorMode(true);
     if (params.get('garden') === '1') setFilterMyGarden(true);
-    if (params.get('frost')) setFrostOffset(parseInt(params.get('frost')) || 0);
+    if (params.get('frostL')) setLastFrostOffset(parseInt(params.get('frostL')) || 0);
+    if (params.get('frostF')) setFirstFrostOffset(parseInt(params.get('frostF')) || 0);
   }, []);  // nextAction sort option will round-trip through this effect
 
   // Write state to URL hash
@@ -1130,14 +1169,16 @@ function PlantingCalendar() {
     if (filterSow !== 'all') params.set('sow', filterSow);
     if (filterType !== 'all') params.set('type', filterType);
     if (filterHeight !== 'all') params.set('height', filterHeight);
+    if (filterColorFamily !== 'all') params.set('colorFamily', filterColorFamily);
     if (sortBy !== 'alpha') params.set('sort', sortBy);
     if (searchTerm) params.set('search', searchTerm);
     if (bloomColorMode) params.set('color', '1');
     if (filterMyGarden) params.set('garden', '1');
-    if (frostOffset !== 0) params.set('frost', String(frostOffset));
+    if (lastFrostOffset !== 0) params.set('frostL', String(lastFrostOffset));
+    if (firstFrostOffset !== 0) params.set('frostF', String(firstFrostOffset));
     const hash = params.toString();
     window.history.replaceState(null, '', hash ? '#' + hash : window.location.pathname);
-  }, [viewMode, filterSow, filterType, filterHeight, sortBy, searchTerm, bloomColorMode, filterMyGarden, frostOffset]);
+  }, [viewMode, filterSow, filterType, filterHeight, filterColorFamily, sortBy, searchTerm, bloomColorMode, filterMyGarden, lastFrostOffset, firstFrostOffset]);
 
   React.useEffect(() => {
     const handleKey = (e) => {
@@ -1199,6 +1240,20 @@ function PlantingCalendar() {
   const todayDoy = doy(today.getMonth() + 1, today.getDate());
   const todayPct = ((todayDoy - 1) / 365) * 100;
 
+  const hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha';
+
+  const clearAllFilters = useCallback(() => {
+    setSearchTerm('');
+    setFilterSow('all');
+    setFilterType('all');
+    setFilterHeight('all');
+    setFilterColorFamily('all');
+    setFilterPlantNow(false);
+    setFilterBloomNow(false);
+    setFilterMyGarden(false);
+    setSortBy('alpha');
+  }, []);
+
   // Build species-level data with timeline + varieties
   const speciesData = useMemo(() => {
     const result = [];
@@ -1212,6 +1267,17 @@ function PlantingCalendar() {
         bloomDays: sd.bloomDays || [60, 90], frostHardy: sd.frostHardy,
         sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height,
         flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions || [], bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl, varieties
+      });
+    });
+    // Compute bi-directional companions
+    const speciesNames = new Set(result.map(s => s.species));
+    result.forEach(sd => {
+      sd.companions.forEach(comp => {
+        if (!speciesNames.has(comp)) return; // skip companions not in database
+        const target = result.find(s => s.species === comp);
+        if (target && !target.companions.includes(sd.species)) {
+          target.companions = [...target.companions, sd.species];
+        }
       });
     });
     return result;
@@ -1242,9 +1308,10 @@ function PlantingCalendar() {
         if (!hasSelected) return false;
       }
       if (filterHeight !== 'all' && sd.height !== filterHeight) return false;
+      if (filterColorFamily !== 'all' && getColorFamily(sd.bloomColor) !== filterColorFamily) return false;
       return true;
     });
-  }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, todayDoy]);
+  }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy]);
 
   const totalVarieties = useMemo(() => filtered.reduce((sum, sd) => sum + sd.varieties.length, 0), [filtered]);
 
@@ -1434,22 +1501,30 @@ function PlantingCalendar() {
             <div>
               <h1 className="font-bold" style={{ fontSize: '20px', letterSpacing: '4px', textTransform: 'uppercase', color: '#1e293b' }}>MIDCOAST MAINE</h1>
               <p style={{ fontWeight: 400, color: '#475569', letterSpacing: '3px', fontSize: '11px', textTransform: 'uppercase' }}>Planting Calendar</p>
-              <p className="mt-1" style={{ fontWeight: 400, color: '#94a3b8', letterSpacing: '1px', fontSize: '11px' }}>Zone 5b · Last frost {formatDoy(customMidcoast.lastFrost)} · First frost {formatDoy(customMidcoast.firstFrost)} · {totalVarieties} varieties, {filtered.length} species</p>
-              <div className="mt-1 flex items-center gap-2" style={{ fontSize: '11px' }}>
-                <span style={{ color: '#94a3b8' }}>Frost adjustment:</span>
-                <button onClick={() => setFrostOffset(f => f - 1)} style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                <span style={{ color: frostOffset === 0 ? '#94a3b8' : '#1e293b', fontWeight: frostOffset !== 0 ? 700 : 400, minWidth: '60px', textAlign: 'center' }}>
-                  {frostOffset === 0 ? 'Standard' : `${frostOffset > 0 ? '+' : ''}${frostOffset}w`}
-                </span>
-                <button onClick={() => setFrostOffset(f => f + 1)} style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
-                {frostOffset !== 0 && (
-                  <button onClick={() => setFrostOffset(0)} style={{ color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', textDecoration: 'underline' }}>reset</button>
-                )}
-                {frostOffset !== 0 && (
-                  <span style={{ color: '#64748b' }}>
-                    Last frost: {formatDoy(customMidcoast.lastFrost)} · First frost: {formatDoy(customMidcoast.firstFrost)}
+              <p className="mt-1" style={{ fontWeight: 400, color: '#94a3b8', letterSpacing: '1px', fontSize: '11px' }}>Zone 5b · {totalVarieties} varieties, {filtered.length} species</p>
+              <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ fontSize: '11px' }}>
+                <div className="flex items-center gap-2">
+                  <span style={{ color: '#94a3b8' }}>Last frost:</span>
+                  <button onClick={() => setLastFrostOffset(f => f - 1)} style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                  <span style={{ color: lastFrostOffset === 0 ? '#94a3b8' : '#1e293b', fontWeight: lastFrostOffset !== 0 ? 700 : 400, minWidth: '50px', textAlign: 'center' }}>
+                    {formatDoy(customMidcoast.lastFrost)}
                   </span>
+                  <button onClick={() => setLastFrostOffset(f => f + 1)} style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                  {lastFrostOffset !== 0 && <span style={{ color: '#64748b', fontSize: '10px' }}>({lastFrostOffset > 0 ? '+' : ''}{lastFrostOffset}w)</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span style={{ color: '#94a3b8' }}>First frost:</span>
+                  <button onClick={() => setFirstFrostOffset(f => f - 1)} style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                  <span style={{ color: firstFrostOffset === 0 ? '#94a3b8' : '#1e293b', fontWeight: firstFrostOffset !== 0 ? 700 : 400, minWidth: '50px', textAlign: 'center' }}>
+                    {formatDoy(customMidcoast.firstFrost)}
+                  </span>
+                  <button onClick={() => setFirstFrostOffset(f => f + 1)} style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                  {firstFrostOffset !== 0 && <span style={{ color: '#64748b', fontSize: '10px' }}>({firstFrostOffset > 0 ? '+' : ''}{firstFrostOffset}w)</span>}
+                </div>
+                {(lastFrostOffset !== 0 || firstFrostOffset !== 0) && (
+                  <button onClick={() => { setLastFrostOffset(0); setFirstFrostOffset(0); }} style={{ color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', textDecoration: 'underline' }}>reset</button>
                 )}
+                <span style={{ color: '#94a3b8', fontSize: '10px' }}>({Math.round((customMidcoast.firstFrost - customMidcoast.lastFrost) / 7)} week season)</span>
               </div>
               {/* Dashboard summary */}
               <div className="mt-2 flex flex-wrap gap-2" style={{ fontSize: '11px' }}>
@@ -1580,6 +1655,12 @@ function PlantingCalendar() {
                   <option value="tall">Tall (36-60")</option>
                   <option value="vine">Vine</option>
                 </select>
+                <select value={filterColorFamily} onChange={e => setFilterColorFamily(e.target.value)}
+                  className="px-3 py-2 text-sm cursor-pointer" style={{ fontWeight: 700, backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#1e293b', borderRadius: '4px' }}>
+                  {Object.entries(COLOR_FAMILIES).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
                 <select value={sortBy} onChange={e => setSortBy(e.target.value)}
                   className="px-3 py-2 text-sm cursor-pointer" style={{ fontWeight: 700, backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#1e293b', borderRadius: '4px' }}>
                   <option value="alpha">Sort: A-Z</option>
@@ -1627,6 +1708,13 @@ function PlantingCalendar() {
                     style={{ backgroundColor: '#fff', color: '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px' }}>
                     🖨 Print
                   </button>
+                  {hasActiveFilters && (
+                    <button onClick={clearAllFilters}
+                      className="filter-btn px-2.5 py-2 text-sm whitespace-nowrap"
+                      style={{ backgroundColor: '#fff', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                      ✕ Clear all
+                    </button>
+                  )}
                 </>
               )}
             </div>
@@ -1663,6 +1751,16 @@ function PlantingCalendar() {
                   Weekly
                 </button>
               </div>
+              <button onClick={() => {
+                  navigator.clipboard.writeText(window.location.href).then(() => {
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2000);
+                  });
+                }}
+                className="filter-btn px-2.5 py-1.5 text-sm whitespace-nowrap"
+                style={{ backgroundColor: copiedLink ? '#16a34a' : '#fff', color: copiedLink ? '#fff' : '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                {copiedLink ? '✓ Copied!' : '🔗 Share'}
+              </button>
             </div>
           </div>
 
@@ -1965,8 +2063,75 @@ function PlantingCalendar() {
                     );
                   })()}
                 </div>
+
+                {/* Height layering guide */}
+                {(() => {
+                  const tiers = { ground: [], short: [], medium: [], tall: [], vine: [] };
+                  sortedFiltered.forEach(sd => {
+                    if (sd.height && tiers[sd.height]) tiers[sd.height].push(sd.species);
+                  });
+                  const activeTiers = Object.entries(tiers).filter(([, species]) => species.length > 0);
+                  if (activeTiers.length <= 1) return null;
+                  const TIER_LABELS = { ground: 'Front · 0–6"', short: 'Low · 6–18"', medium: 'Mid · 18–36"', tall: 'Back · 36–60"', vine: 'Trellis' };
+                  const TIER_COLORS = { ground: '#a3e635', short: '#84cc16', medium: '#16a34a', tall: '#15803d', vine: '#6366f1' };
+                  return (
+                    <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 20px', marginBottom: '12px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#94a3b8', marginBottom: '8px' }}>Height Layering Guide</p>
+                      <div className="space-y-1">
+                        {['vine', 'tall', 'medium', 'short', 'ground'].filter(t => tiers[t].length > 0).map(tier => (
+                          <div key={tier} className="flex items-center gap-3" style={{ fontSize: '12px' }}>
+                            <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: TIER_COLORS[tier], flexShrink: 0 }} />
+                            <span style={{ color: '#94a3b8', fontSize: '10px', fontWeight: 700, minWidth: '90px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{TIER_LABELS[tier]}</span>
+                            <span style={{ color: '#475569', fontWeight: 600 }}>{tiers[tier].join(', ')}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p style={{ fontSize: '10px', color: '#94a3b8', marginTop: '6px', fontStyle: 'italic' }}>Arrange tallest at back, shortest in front for visibility.</p>
+                    </div>
+                  );
+                })()}
               </div>
             )}
+
+            {/* This Week action card */}
+            {(() => {
+              const actions = [];
+              const window = 7; // this week only
+              speciesData.forEach(sd => {
+                const tl = sd.tl;
+                if (tl.indoorStart && todayDoy >= tl.indoorStart && todayDoy <= tl.indoorStart + window) {
+                  actions.push({ phase: 'indoor', action: 'Start indoors', species: sd.species, date: formatDoy(tl.indoorStart), varieties: sd.varieties.length });
+                }
+                if (tl.transplant && todayDoy >= tl.transplant - 3 && todayDoy <= tl.transplant + 3) {
+                  actions.push({ phase: 'transplant', action: 'Transplant outdoors', species: sd.species, date: formatDoy(tl.transplant), varieties: sd.varieties.length });
+                }
+                if (tl.sowStart && todayDoy >= tl.sowStart && todayDoy <= tl.sowStart + window) {
+                  actions.push({ phase: 'sow', action: 'Direct sow', species: sd.species, date: formatDoy(tl.sowStart), varieties: sd.varieties.length });
+                }
+              });
+              if (actions.length === 0) return null;
+              return (
+                <div style={{ backgroundColor: '#fff', border: '2px solid #6366f1', borderRadius: '8px', padding: '16px 20px', marginBottom: '12px' }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff', backgroundColor: '#6366f1', padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>This Week</span>
+                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>{formatDoy(todayDoy)} – {formatDoy(todayDoy + 7)}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {actions.map((a, i) => (
+                      <div key={i} className="flex items-center gap-3" style={{ fontSize: '13px' }}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '2px', backgroundColor: PHASE_COLORS[a.phase].bg, flexShrink: 0 }} />
+                        <span style={{ fontWeight: 700, color: PHASE_COLORS[a.phase].bg, minWidth: '120px' }}>{a.action}</span>
+                        <button onClick={() => { setSearchTerm(a.species); window.scrollTo(0, 0); }}
+                          style={{ fontWeight: 700, color: '#1e293b', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', padding: 0 }}>
+                          {a.species}
+                        </button>
+                        <span style={{ color: '#94a3b8', fontSize: '11px' }}>({a.varieties} var) · {a.date}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {sortedFiltered.map(sd => (
             <div key={sd.species} data-species={sd.species} className="species-card overflow-hidden" style={{ border: '1px solid #e2e8f0', backgroundColor: '#fff', borderRadius: '8px' }}>
@@ -2064,6 +2229,12 @@ function PlantingCalendar() {
                         <div className="flex gap-2 items-center">
                           <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Note</span>
                           <span style={{ color: '#f59e0b', fontSize: '10px', fontWeight: 600 }}>May not bloom first year from seed</span>
+                        </div>
+                      )}
+                      {sd.type === 'annual' && sd.sowMethod.includes('directSow') && sd.bloomDuration && sd.bloomDuration <= 45 && (
+                        <div className="flex gap-2 items-center">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Tip</span>
+                          <span style={{ color: '#16a34a', fontSize: '10px', fontWeight: 600 }}>Sow every 2–3 weeks for continuous bloom ({sd.bloomDuration}d bloom window)</span>
                         </div>
                       )}
                       <div className="flex gap-2">
@@ -2244,6 +2415,12 @@ function PlantingCalendar() {
               {selectedVariety.type === 'perennial' && selectedVariety.firstYearBloom === false && (
                 <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#92400e' }}>
                   Perennial — may not bloom first year from seed. Plan for establishment.
+                </div>
+              )}
+
+              {selectedVariety.type === 'annual' && selectedVariety.sowMethod.includes('directSow') && selectedVariety.bloomDuration && selectedVariety.bloomDuration <= 45 && (
+                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#15803d' }}>
+                  Succession plant every 2–3 weeks for continuous bloom. This variety has a {selectedVariety.bloomDuration}-day bloom window.
                 </div>
               )}
 
