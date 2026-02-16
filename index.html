@@ -1103,6 +1103,14 @@ const PHASE_COLORS = {
     vine: 'Climbing/Trailing'
   };
 
+  const SPACING_DATA = {
+    ground: { spacing: 6, label: '6" apart' },
+    short: { spacing: 12, label: '12" apart' },
+    medium: { spacing: 18, label: '18" apart' },
+    tall: { spacing: 24, label: '24" apart' },
+    vine: { spacing: 36, label: '36" apart' }
+  };
+
 const getCountdown = (tl, todayDoy) => {
   const actions = [
     tl.indoorStart && { doy: tl.indoorStart, label: 'Start indoors' },
@@ -1202,6 +1210,10 @@ function PlantingCalendar() {
   const [copiedList, setCopiedList] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [filterMyGarden, setFilterMyGarden] = useState(false);
+  const [gardenOrder, setGardenOrder] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('gardenOrder') || '[]'); } catch { return []; }
+  });
+  const [draggedSpecies, setDraggedSpecies] = useState(null);
   const [bloomColorMode, setBloomColorMode] = useState(false);
   const [sortBy, setSortBy] = useState('alpha');
   const [filterHeight, setFilterHeight] = useState('all');
@@ -1224,6 +1236,9 @@ function PlantingCalendar() {
     try { return localStorage.getItem('darkMode') === '1'; } catch { return false; }
   });
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    try { return localStorage.getItem('notificationsEnabled') === '1'; } catch { return false; }
+  });
 
   React.useEffect(() => {
     localStorage.setItem('myGarden', JSON.stringify(myGarden));
@@ -1232,6 +1247,10 @@ function PlantingCalendar() {
   React.useEffect(() => {
     localStorage.setItem('gardenNotes', JSON.stringify(gardenNotes));
   }, [gardenNotes]);
+
+  React.useEffect(() => {
+    localStorage.setItem('gardenOrder', JSON.stringify(gardenOrder));
+  }, [gardenOrder]);
 
   React.useEffect(() => {
     setCustomMidcoast({
@@ -1344,6 +1363,41 @@ function PlantingCalendar() {
       setTimeout(() => setCopiedList(false), 2000);
     });
   }, [myGarden]);
+
+  const exportCSV = useCallback(() => {
+    const headers = ['Species', 'Variety', 'Type', 'Height', 'Indoor Start', 'Transplant', 'Direct Sow', 'Bloom Start', 'Bloom End', 'Deer Resistant', 'Pollinators', 'URL'];
+    const rows = [];
+    Object.keys(myGarden).sort().forEach(key => {
+      const [species, variety] = key.split('||');
+      const dbEntry = Object.entries(FLOWER_DATABASE).find(([s]) => s === species);
+      if (!dbEntry) return;
+      const sd = dbEntry[1];
+      const v = sd.varieties.find(vr => vr.name === variety);
+      if (!v) return;
+      const tl = calcTimeline(sd, customMidcoast);
+      rows.push([
+        species,
+        variety,
+        sd.type,
+        HEIGHT_LABELS[sd.height] || '',
+        tl.indoorStart ? formatDoy(tl.indoorStart) : '',
+        tl.transplant ? formatDoy(tl.transplant) : '',
+        tl.sowStart ? formatDoy(tl.sowStart) : '',
+        formatDoy(tl.bloomStart),
+        formatDoy(tl.bloomEnd),
+        sd.deerResistant ? 'Yes' : 'No',
+        (sd.pollinators || []).join('; '),
+        v.url
+      ]);
+    });
+    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'midcoast-maine-garden-plan.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, [myGarden, customMidcoast]);
 
   const downloadICSCalendar = useCallback(() => {
     const events = [];
@@ -1463,6 +1517,55 @@ function PlantingCalendar() {
     return result;
   }, [customMidcoast]);
 
+  const enableNotifications = useCallback(() => {
+    if (!('Notification' in window)) { alert('Your browser does not support notifications.'); return; }
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        setNotificationsEnabled(true);
+        localStorage.setItem('notificationsEnabled', '1');
+        checkAndNotify();
+      }
+    });
+  }, []);
+
+  const checkAndNotify = useCallback(() => {
+    if (!notificationsEnabled || Notification.permission !== 'granted') return;
+    const today = new Date();
+    const tdoy = doy(today.getMonth() + 1, today.getDate());
+    const notified = JSON.parse(localStorage.getItem('notifiedEvents') || '{}');
+
+    Object.keys(myGarden).forEach(key => {
+      const [species] = key.split('||');
+      const sd = speciesData.find(s => s.species === species);
+      if (!sd) return;
+      const events = [
+        sd.tl.indoorStart && { doy: sd.tl.indoorStart, label: 'Start indoors' },
+        sd.tl.transplant && { doy: sd.tl.transplant, label: 'Transplant' },
+        sd.tl.sowStart && { doy: sd.tl.sowStart, label: 'Direct sow' },
+      ].filter(Boolean);
+
+      events.forEach(evt => {
+        const daysUntil = evt.doy - tdoy;
+        const notifKey = `${species}-${evt.label}-${evt.doy}`;
+        if (daysUntil >= 0 && daysUntil <= 3 && !notified[notifKey]) {
+          new Notification(`🌱 ${evt.label}: ${species}`, {
+            body: daysUntil === 0 ? 'Today!' : `In ${daysUntil} day${daysUntil > 1 ? 's' : ''}. ${formatDoy(evt.doy)}`,
+            icon: '🌿'
+          });
+          notified[notifKey] = true;
+          localStorage.setItem('notifiedEvents', JSON.stringify(notified));
+        }
+      });
+    });
+  }, [notificationsEnabled, myGarden, speciesData]);
+
+  React.useEffect(() => {
+    if (!notificationsEnabled) return;
+    checkAndNotify();
+    const interval = setInterval(checkAndNotify, 3600000);
+    return () => clearInterval(interval);
+  }, [notificationsEnabled, checkAndNotify]);
+
   const filtered = useMemo(() => {
     return speciesData.filter(sd => {
       if (searchTerm) {
@@ -1523,8 +1626,19 @@ function PlantingCalendar() {
         default: return a.species.localeCompare(b.species);
       }
     });
+    // Apply custom garden order if in My Garden mode
+    if (filterMyGarden && gardenOrder.length > 0) {
+      arr.sort((a, b) => {
+        const ai = gardenOrder.indexOf(a.species);
+        const bi = gardenOrder.indexOf(b.species);
+        if (ai === -1 && bi === -1) return 0;
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      });
+    }
     return arr;
-  }, [filtered, sortBy]);
+  }, [filtered, sortBy, filterMyGarden, gardenOrder]);
 
   const dashboardItems = useMemo(() => {
     const window = 14;
@@ -1741,6 +1855,36 @@ function PlantingCalendar() {
                   <button onClick={() => { setLastFrostOffset(0); setFirstFrostOffset(0); }} style={{ color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', textDecoration: 'underline' }}>reset</button>
                 )}
                 <span style={{ color: '#94a3b8', fontSize: '10px' }}>({Math.round((customMidcoast.firstFrost - customMidcoast.lastFrost) / 7)} week season)</span>
+                <div style={{ width: '100%', marginTop: '6px' }}>
+                  <div style={{ height: '4px', backgroundColor: '#334155', borderRadius: '2px', position: 'relative', overflow: 'hidden' }}>
+                    {/* Growing season fill */}
+                    <div style={{
+                      position: 'absolute',
+                      left: ((customMidcoast.lastFrost / 365) * 100) + '%',
+                      width: (((customMidcoast.firstFrost - customMidcoast.lastFrost) / 365) * 100) + '%',
+                      height: '100%',
+                      backgroundColor: '#16a34a',
+                      opacity: 0.4
+                    }} />
+                    {/* Today marker */}
+                    <div style={{
+                      position: 'absolute',
+                      left: ((todayDoy / 365) * 100) + '%',
+                      width: '3px',
+                      height: '100%',
+                      backgroundColor: todayDoy >= customMidcoast.lastFrost && todayDoy <= customMidcoast.firstFrost ? '#fff' : '#ef4444',
+                      borderRadius: '1px',
+                      transform: 'translateX(-1px)'
+                    }} />
+                  </div>
+                  <div className="flex justify-between" style={{ fontSize: '9px', color: '#64748b', marginTop: '2px' }}>
+                    <span>Jan</span>
+                    <span>Apr</span>
+                    <span>Jul</span>
+                    <span>Oct</span>
+                    <span>Dec</span>
+                  </div>
+                </div>
                 {showZipInput && (
                   <div className="flex items-center gap-2" style={{ marginTop: '8px', padding: '8px', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
                     <input
@@ -1868,6 +2012,34 @@ function PlantingCalendar() {
 
       {/* Sticky toolbar */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: dm.toolbarBg, borderBottom: '2px solid ' + dm.border, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+        {(() => {
+          const weekActions = [];
+          speciesData.forEach(sd => {
+            const tl = sd.tl;
+            if (tl.indoorStart && todayDoy >= tl.indoorStart && todayDoy <= tl.indoorStart + 7) {
+              weekActions.push({ action: 'Start indoors', species: sd.species, phase: 'indoor' });
+            }
+            if (tl.transplant && todayDoy >= tl.transplant - 3 && todayDoy <= tl.transplant + 3) {
+              weekActions.push({ action: 'Transplant', species: sd.species, phase: 'transplant' });
+            }
+            if (tl.sowStart && todayDoy >= tl.sowStart && todayDoy <= tl.sowStart + 7) {
+              weekActions.push({ action: 'Direct sow', species: sd.species, phase: 'sow' });
+            }
+          });
+          if (weekActions.length === 0) return null;
+          return (
+            <div style={{ padding: '6px 20px', backgroundColor: '#eef2ff', borderBottom: '1px solid #c7d2fe', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '1px' }}>This week</span>
+              {weekActions.map((a, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '2px', backgroundColor: PHASE_COLORS[a.phase].bg, display: 'inline-block' }} />
+                  <span style={{ color: '#475569' }}>{a.action} <strong style={{ color: '#1e293b' }}>{a.species}</strong></span>
+                  {i < weekActions.length - 1 && <span style={{ color: '#cbd5e1', margin: '0 2px' }}>·</span>}
+                </span>
+              ))}
+            </div>
+          );
+        })()}
         <div className="max-w-6xl mx-auto" style={{ paddingLeft: '20px', paddingRight: '20px' }}>
           <div className="flex flex-col sm:flex-row gap-3 py-3 flex-wrap items-center">
             {/* GROUP A: Filters (Search + dropdowns) */}
@@ -2002,6 +2174,12 @@ function PlantingCalendar() {
                     className="filter-btn px-2.5 py-2 text-sm font-bold whitespace-nowrap"
                     style={{ backgroundColor: '#fff', color: '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px' }}>
                     🖨 Print
+                  </button>
+                  <button onClick={notificationsEnabled ? () => { setNotificationsEnabled(false); localStorage.setItem('notificationsEnabled', '0'); } : enableNotifications}
+                    title={notificationsEnabled ? 'Disable planting reminders' : 'Get browser notifications 3 days before planting events'}
+                    className="filter-btn px-2.5 py-2 text-sm font-bold whitespace-nowrap"
+                    style={{ backgroundColor: notificationsEnabled ? '#16a34a' : '#fff', color: notificationsEnabled ? '#fff' : '#94a3b8', border: '1px solid ' + (notificationsEnabled ? '#16a34a' : '#e2e8f0'), borderRadius: '4px', fontSize: '11px' }}>
+                    {notificationsEnabled ? '🔔 On' : '🔔 Remind'}
                   </button>
                   <button onClick={downloadICSCalendar}
                     title="Download calendar events for your garden plan"
@@ -2558,7 +2736,25 @@ function PlantingCalendar() {
 
             {sortedFiltered.map(sd => (
             <LazyCard key={sd.species}>
-            <div data-species={sd.species} className={'species-card overflow-hidden ' + (expandedSpecies[sd.species] ? 'species-card-expanded' : 'species-card-collapsed')} style={{ border: '1px solid ' + dm.border, backgroundColor: dm.cardBg, borderRadius: '8px' }}>
+            <div data-species={sd.species}
+              draggable={filterMyGarden}
+              onDragStart={filterMyGarden ? (e) => { setDraggedSpecies(sd.species); e.dataTransfer.effectAllowed = 'move'; } : undefined}
+              onDragOver={filterMyGarden ? (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } : undefined}
+              onDrop={filterMyGarden ? (e) => {
+                e.preventDefault();
+                if (!draggedSpecies || draggedSpecies === sd.species) return;
+                const currentOrder = gardenOrder.length > 0 ? [...gardenOrder] : sortedFiltered.map(s => s.species);
+                const fromIdx = currentOrder.indexOf(draggedSpecies);
+                const toIdx = currentOrder.indexOf(sd.species);
+                if (fromIdx === -1 || toIdx === -1) return;
+                currentOrder.splice(fromIdx, 1);
+                currentOrder.splice(toIdx, 0, draggedSpecies);
+                setGardenOrder(currentOrder);
+                setDraggedSpecies(null);
+              } : undefined}
+              onDragEnd={() => setDraggedSpecies(null)}
+              className={'species-card overflow-hidden ' + (expandedSpecies[sd.species] ? 'species-card-expanded' : 'species-card-collapsed')}
+              style={{ border: '1px solid ' + dm.border, backgroundColor: dm.cardBg, borderRadius: '8px', opacity: draggedSpecies === sd.species ? 0.5 : 1, cursor: filterMyGarden ? 'grab' : 'default' }}>
               <div className="flex gap-4 px-5 py-4 flex-col sm:flex-row">
                 {/* Species thumbnail */}
                 {(() => {
@@ -2595,6 +2791,7 @@ function PlantingCalendar() {
                         style={{ marginRight: '6px', accentColor: '#6366f1' }}
                       />
                     )}
+                    {filterMyGarden && <span style={{ color: '#94a3b8', fontSize: '14px', cursor: 'grab', userSelect: 'none' }} title="Drag to reorder">⠿</span>}
                     <span className="shrink-0 flex items-center justify-center" style={{ width: '22px', height: '22px', borderRadius: '4px', backgroundColor: expandedSpecies[sd.species] ? '#6366f1' : '#f1f5f9', transition: 'all 0.15s ease' }}>
                       {expandedSpecies[sd.species]
                         ? <ChevronUp size={13} style={{ color: '#fff' }} />
@@ -2662,6 +2859,47 @@ function PlantingCalendar() {
                 <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Height</span>
                 <span className="font-bold" style={{ color: '#475569' }}>{HEIGHT_LABELS[sd.height] || '?'}</span>
               </div>
+              {sd.height && SPACING_DATA[sd.height] && (
+                <div className="flex gap-2 items-center">
+                  <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Spacing</span>
+                  <span className="flex items-center gap-2">
+                    <svg width="80" height="20" viewBox="0 0 80 20">
+                      {/* Ground line */}
+                      <line x1="0" y1="18" x2="80" y2="18" stroke="#e2e8f0" strokeWidth="1" />
+                      {/* Plants */}
+                      {(() => {
+                        const sp = SPACING_DATA[sd.height];
+                        const count = Math.min(Math.floor(72 / (sp.spacing * 72 / 36)) + 1, 5);
+                        const gap = 72 / Math.max(count - 1, 1);
+                        return Array.from({ length: count }, (_, i) => {
+                          const cx = 4 + i * gap;
+                          return (
+                            <g key={i}>
+                              <line x1={cx} y1="18" x2={cx} y2="8" stroke="#16a34a" strokeWidth="1.5" />
+                              <circle cx={cx} cy="6" r="3" fill="#16a34a" opacity="0.6" />
+                            </g>
+                          );
+                        });
+                      })()}
+                      {/* Spacing arrow */}
+                      {(() => {
+                        const sp = SPACING_DATA[sd.height];
+                        const count = Math.min(Math.floor(72 / (sp.spacing * 72 / 36)) + 1, 5);
+                        if (count < 2) return null;
+                        const gap = 72 / Math.max(count - 1, 1);
+                        return (
+                          <>
+                            <line x1="4" y1="2" x2={4 + gap} y2="2" stroke="#94a3b8" strokeWidth="0.5" />
+                            <line x1="4" y1="0" x2="4" y2="4" stroke="#94a3b8" strokeWidth="0.5" />
+                            <line x1={4 + gap} y1="0" x2={4 + gap} y2="4" stroke="#94a3b8" strokeWidth="0.5" />
+                          </>
+                        );
+                      })()}
+                    </svg>
+                    <span className="font-bold" style={{ color: '#475569', fontSize: '11px' }}>{SPACING_DATA[sd.height].label}</span>
+                  </span>
+                </div>
+              )}
                       {sd.type === 'perennial' && sd.firstYearBloom === false && (
                         <div className="flex gap-2 items-center">
                           <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Note</span>
@@ -2754,6 +2992,29 @@ function PlantingCalendar() {
               {/* Expanded: variety card grid */}
               {expandedSpecies[sd.species] && (
                 <div style={{ borderTop: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }} className="px-5 py-4">
+                  {/* Image filmstrip */}
+                  {(() => {
+                    const withImg = (filterMyGarden ? sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]) : sd.varieties).filter(v => v.img);
+                    if (withImg.length < 2) return null;
+                    return (
+                      <div style={{ marginBottom: '12px', position: 'relative' }}>
+                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'thin' }}>
+                          {withImg.map((v, i) => (
+                            <div key={i}
+                              onClick={() => setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions, bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl: sd.tl })}
+                              style={{ flexShrink: 0, cursor: 'pointer', position: 'relative', borderRadius: '6px', overflow: 'hidden', border: myGarden[sd.species + '||' + v.name] ? '2px solid #6366f1' : '1px solid #e2e8f0' }}>
+                              <img src={v.img} alt={v.name}
+                                style={{ width: '120px', height: '90px', objectFit: 'cover', display: 'block' }}
+                                loading="lazy" />
+                              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '3px 6px', backgroundColor: 'rgba(0,0,0,0.6)', fontSize: '9px', color: '#fff', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {v.name}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))' }}>
                     {(filterMyGarden ? sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]) : sd.varieties).map((v, i) => {
                       const inGarden = myGarden[sd.species + '||' + v.name];
@@ -2917,6 +3178,7 @@ function PlantingCalendar() {
                   { label: 'Frost Hardy', value: selectedVariety.frostHardy ? 'Yes' : 'No' },
                   { label: 'Sun', value: selectedVariety.sun ? `${selectedVariety.sun[0]}–${selectedVariety.sun[1]}hr` : 'Full' },
                   { label: 'Height', value: HEIGHT_LABELS[selectedVariety.height] || '?' },
+                  { label: 'Spacing', value: SPACING_DATA[selectedVariety.height]?.label || '?' },
                   { label: 'Germination', value: `${selectedVariety.germination[0]}–${selectedVariety.germination[1]}d` },
                   { label: 'Days to Bloom', value: `${selectedVariety.bloomDays[0]}–${selectedVariety.bloomDays[1]}d` },
                   { label: 'Sowing', value: selectedVariety.sowMethod.map(m => m === 'startIndoors' ? 'Indoor' : 'Direct').join(' / ') }
