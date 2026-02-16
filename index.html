@@ -7,8 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -461,10 +461,13 @@ const IMAGE_MAP = {
   "zinnia-persian-carpet": "media/catalog/product/z/i/zinnia_persian_carpet.jpg",
   "zinnia-peruviana": "media/catalog/product/z/i/zinnia_peruviana.jpg"
 };
-function getImageUrl(url) {
+function getImageUrl(url, size = 'modal') {
   const slug = url.replace('https://www.rareseeds.com/', '');
   const suffix = IMAGE_MAP[slug];
-  return suffix ? IMG_BASE + suffix : null;
+  if (!suffix) return null;
+  const sizes = { thumb: 'c_fill,w_80,h_80', chip: 'c_fill,w_160,h_120', modal: 'c_fit,w_400,h_400' };
+  const transform = sizes[size] || sizes.modal;
+  return `https://res.cloudinary.com/rareseeds/image/upload/${transform}/f_auto,q_auto,dpr_auto/v1/${suffix}`;
 }
 
         // SVG Icon Components
@@ -497,6 +500,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors', 'directSow'],
     sowTiming: 'Start 6-8 weeks before last frost or direct sow after',
     bloomColor: '#8b6bb5', height: 'medium', companions: ['Rudbeckia', 'Zinnia'], bloomDuration: 90, firstYearBloom: true,
+    deerResistant: true, soil: 'any', moisture: 'any', pollinators: ['bee', 'hummingbird', 'butterfly'],
     varieties: [
       { name: 'Anise Hyssop', url: 'https://www.rareseeds.com/agastache-anise-hyssop' },
       { name: 'Apache Sunset', url: 'https://www.rareseeds.com/agastache-apache-sunset' },
@@ -521,6 +525,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
     bloomColor: '#4a7aad', height: 'short', companions: ['Calendula', 'Marigold', 'Zinnia'], bloomDuration: 75,
+    deerResistant: true, soil: 'any', moisture: 'any', pollinators: ['butterfly'],
     varieties: [
       { name: 'Ball Mixed', url: 'https://www.rareseeds.com/ageratum-ball-mixed' },
       { name: 'Leda', url: 'https://www.rareseeds.com/ageratum-leda' },
@@ -536,7 +541,9 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors', 'directSow'],
     sowTiming: 'Start indoors or direct sow',
-    bloomColor: '#d4647a', height: 'ground', companions: ['Dianthus', 'Phlox'], bloomDuration: 45, firstYearBloom: false, varieties: [
+    bloomColor: '#d4647a', height: 'ground', companions: ['Dianthus', 'Phlox'], bloomDuration: 45, firstYearBloom: false,
+    soil: 'any', moisture: 'any', pollinators: [],
+    varieties: [
       { name: 'Morning Star Deep Rose', url: 'https://www.rareseeds.com/armeria-maritima-morning-star-deep-rose' },
       { name: 'Morning Star White', url: 'https://www.rareseeds.com/armeria-maritima-seeds-morning-star-white' }
 ]
@@ -550,6 +557,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
     bloomColor: '#e8e2d0', height: 'short', companions: ['Snapdragon', 'Stock', 'Sweet Pea'], bloomDuration: 40,
+    deerResistant: true, soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Covent Garden', url: 'https://www.rareseeds.com/baby-s-breath-seeds-covent-garden' }
 ]
@@ -563,6 +571,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in early spring',
     bloomColor: '#4a7aad', height: 'medium', companions: ['Poppy', 'Calendula', 'Baby\'s Breath'], bloomDuration: 45,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Blue Boy', url: 'https://www.rareseeds.com/bachelor-s-button-blue-boy' },
       { name: 'Classic Fantastic', url: 'https://www.rareseeds.com/bachelor-s-button-classic-fantastic' },
@@ -578,7 +587,9 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#f59e0b', height: 'vine', companions: ['Morning Glory', 'Nasturtium'], bloomDuration: 75, varieties: [
+    bloomColor: '#f59e0b', height: 'vine', companions: ['Morning Glory', 'Nasturtium'], bloomDuration: 75,
+    soil: 'any', moisture: 'any', pollinators: [],
+    varieties: [
       { name: 'African Sunset Mix', url: 'https://www.rareseeds.com/black-eyed-susan-vine-seeds-african-sunset-mix' },
       { name: 'Spanish Eyes', url: 'https://www.rareseeds.com/black-eyed-susan-vine-seeds-spanish-eyes' }
 ]
@@ -591,7 +602,9 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#3b82f6', height: 'vine', companions: ['Morning Glory', 'Sweet Pea'], bloomDuration: 70, varieties: [
+    bloomColor: '#3b82f6', height: 'vine', companions: ['Morning Glory', 'Sweet Pea'], bloomDuration: 70,
+    soil: 'any', moisture: 'any', pollinators: [],
+    varieties: [
       { name: 'Blue Queen', url: 'https://www.rareseeds.com/butterfly-pea-blue-queen' },
       { name: 'Lavender Queen', url: 'https://www.rareseeds.com/butterfly-pea-lavender-queen' },
       { name: 'Thai Blue', url: 'https://www.rareseeds.com/butterfly-pea-seeds-thai-double-blue' },
@@ -608,6 +621,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in spring or fall',
     bloomColor: '#f97316', height: 'short', companions: ['Nasturtium', 'Marigold', 'Bachelor\'s Button'], bloomDuration: 90,
+    deerResistant: true, soil: 'any', moisture: 'any', pollinators: ['bee', 'butterfly'],
     varieties: [
       { name: "Ball's Improved Orange", url: 'https://www.rareseeds.com/calendula-ball-s-improved-orange' },
       { name: 'Orange King', url: 'https://www.rareseeds.com/calendula-orange-king' },
@@ -627,6 +641,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
     bloomColor: '#ec4899', height: 'tall', companions: ['Zinnia', 'Sunflower', 'Marigold'], bloomDuration: 90,
+    deerResistant: true, soil: 'neutral', moisture: 'dry', pollinators: ['bee', 'butterfly'],
     varieties: [
       { name: 'Apricot Lemonade', url: 'https://www.rareseeds.com/cosmos-apricot-lemonade' },
       { name: 'Apricotta', url: 'https://www.rareseeds.com/cosmos-apricotta' },
@@ -657,6 +672,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow', 'startIndoors'],
     sowTiming: 'Direct sow or start indoors',
     bloomColor: '#f472b6', height: 'short', companions: ['Armeria Maritima', 'Phlox', 'Snapdragon'], bloomDuration: 60, firstYearBloom: true,
+    deerResistant: true, soil: 'alkaline', moisture: 'dry', pollinators: ['butterfly'],
     varieties: [
       { name: 'Black Adder', url: 'https://www.rareseeds.com/dianthus-seeds-black-adder' },
       { name: 'Flora Mix', url: 'https://www.rareseeds.com/dianthus-seeds-flora-mix' },
@@ -673,6 +689,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
     bloomColor: '#e879f9', height: 'medium', companions: ['Zinnia', 'Marigold'], bloomDuration: 90,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Atomic Purple', url: 'https://www.rareseeds.com/gomphrena-atomic-purple' }
 ]
@@ -685,7 +702,9 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#4a7aad', height: 'medium', companions: ['Cosmos', 'Snapdragon', 'Scabiosa'], bloomDuration: 45, varieties: [
+    bloomColor: '#4a7aad', height: 'medium', companions: ['Cosmos', 'Snapdragon', 'Scabiosa'], bloomDuration: 45,
+    soil: 'any', moisture: 'any', pollinators: [],
+    varieties: [
       { name: 'Blue Lace', url: 'https://www.rareseeds.com/lace-flower-blue' },
       { name: 'White Lace', url: 'https://www.rareseeds.com/lace-flower-white' }
 ]
@@ -699,6 +718,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors, requires well-drained soil',
     bloomColor: '#f472b6', height: 'ground', companions: ['Armeria Maritima', 'Dianthus'], bloomDuration: 40, firstYearBloom: false,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Elise Mix', url: 'https://www.rareseeds.com/lewisia-seeds-elise-mix' }
 ]
@@ -712,6 +732,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
     bloomColor: '#f59e0b', height: 'medium', companions: ['Zinnia', 'Nasturtium', 'Calendula'], bloomDuration: 90,
+    deerResistant: true, soil: 'neutral', moisture: 'average', pollinators: ['bee'],
     varieties: [
       { name: 'Crackerjack Mix', url: 'https://www.rareseeds.com/marigold-crackerjack-mix' }
 ]
@@ -724,7 +745,9 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#3b82f6', height: 'vine', companions: ['Black-Eyed Susan Vine', 'Butterfly Pea'], bloomDuration: 75, varieties: [
+    bloomColor: '#3b82f6', height: 'vine', companions: ['Black-Eyed Susan Vine', 'Butterfly Pea'], bloomDuration: 75,
+    soil: 'any', moisture: 'any', pollinators: [],
+    varieties: [
       { name: 'Carnevale di Venezia', url: 'https://www.rareseeds.com/morning-glory-carnevale-di-venezia' }
 ]
   },
@@ -737,6 +760,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
     bloomColor: '#f97316', height: 'short', companions: ['Calendula', 'Marigold', 'Sunflower'], bloomDuration: 75,
+    deerResistant: true, soil: 'neutral', moisture: 'dry', pollinators: ['hummingbird'],
     varieties: [
       { name: 'Alaska Mix', url: 'https://www.rareseeds.com/nasturtium-alaska-mix' },
       { name: 'Black Velvet', url: 'https://www.rareseeds.com/nasturtium-black-velvet' },
@@ -756,6 +780,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
     bloomColor: '#a78bfa', height: 'tall', companions: ['Petunia', 'Snapdragon'], bloomDuration: 70,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Bronze Queen', url: 'https://www.rareseeds.com/nicotiana-bronze-queen' },
       { name: 'Crimson Bedder', url: 'https://www.rareseeds.com/nicotiana-crimson-bedder' },
@@ -773,6 +798,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
     bloomColor: '#ec4899', height: 'short', companions: ['Nicotiana', 'Verbena'], bloomDuration: 90,
+    soil: 'any', moisture: 'any', pollinators: ['hummingbird'],
     varieties: [
       { name: 'Balcony Mix', url: 'https://www.rareseeds.com/petunia-balcony-mix' },
       { name: 'Copper Spotted', url: 'https://www.rareseeds.com/petunia-seeds-copper-spotted' },
@@ -795,6 +821,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
     bloomColor: '#f472b6', height: 'short', companions: ['Dianthus', 'Snapdragon', 'Sweet Pea'], bloomDuration: 60,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Cherry Caramel', url: 'https://www.rareseeds.com/phlox-cherry-caramel' },
       { name: 'Sugar Stars', url: 'https://www.rareseeds.com/phlox-sugar-stars' }
@@ -809,6 +836,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in early spring',
     bloomColor: '#ef4444', height: 'medium', companions: ['Bachelor\'s Button', 'Calendula', 'Baby\'s Breath'], bloomDuration: 21,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Amazing Grey', url: 'https://www.rareseeds.com/poppy-amazing-grey' },
       { name: 'Flemish Antique', url: 'https://www.rareseeds.com/poppy-flemish-antique' },
@@ -825,6 +853,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
     bloomColor: '#fbbf24', height: 'medium', companions: ['Agastache', 'Sunflower'], bloomDuration: 75, firstYearBloom: true,
+    deerResistant: true, soil: 'neutral', moisture: 'average', pollinators: ['bee', 'butterfly'],
     varieties: [
       { name: 'Cherry Brandy', url: 'https://www.rareseeds.com/rudbeckia-cherry-brandy' }
 ]
@@ -838,6 +867,7 @@ const FLOWER_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
     bloomColor: '#7c3aed', height: 'medium', companions: ['Nicotiana', 'Petunia', 'Snapdragon'], bloomDuration: 50,
+    soil: 'any', moisture: 'any', pollinators: [],
     varieties: [
       { name: 'Kew Blue', url: 'https://www.rareseeds.com/salpiglossis-kew-blue' }
 ]
@@ -1006,6 +1036,8 @@ function calcTimeline(sd, midcoast) {
   if (sd.sowMethod.includes('startIndoors')) {
     t.indoorStart = midcoast.lastFrost - 56; // 8 weeks before
     t.indoorEnd = midcoast.lastFrost - 14;
+    t.hardenStart = t.indoorEnd;
+    t.hardenEnd = midcoast.lastFrost + (sd.frostHardy ? -14 : 7);
     t.transplant = midcoast.lastFrost + (sd.frostHardy ? -14 : 7);
   }
   if (sd.sowMethod.includes('directSow')) {
@@ -1028,10 +1060,12 @@ function calcTimeline(sd, midcoast) {
 }
 
 function getPhaseAtDoy(tl, dayOfYear) {
-  // Indoor phase: from indoorStart until transplant day (no gap)
-  if (tl.indoorStart && tl.transplant && dayOfYear >= tl.indoorStart && dayOfYear < tl.transplant) return 'indoor';
+  // Indoor phase: from indoorStart until harden start
+  if (tl.indoorStart && tl.hardenStart && dayOfYear >= tl.indoorStart && dayOfYear < tl.hardenStart) return 'indoor';
   // Indoor-only (no transplant): use indoorEnd
-  if (tl.indoorStart && !tl.transplant && dayOfYear >= tl.indoorStart && dayOfYear <= (tl.indoorEnd || tl.indoorStart + 42)) return 'indoor';
+  if (tl.indoorStart && !tl.hardenStart && dayOfYear >= tl.indoorStart && dayOfYear <= (tl.indoorEnd || tl.indoorStart + 42)) return 'indoor';
+  // Hardening off phase
+  if (tl.hardenStart && tl.hardenEnd && dayOfYear >= tl.hardenStart && dayOfYear < tl.hardenEnd) return 'harden';
   // Transplant until germination ends
   if (tl.transplant && dayOfYear >= tl.transplant && dayOfYear < tl.germEnd) return 'transplant';
   // Direct sow window (only for species without indoor start, or overlapping sow window)
@@ -1050,6 +1084,7 @@ function getPhaseAtDoy(tl, dayOfYear) {
 
 const PHASE_COLORS = {
   indoor: { bg: '#7c3aed', label: 'Start Indoors' },
+  harden: { bg: '#0891b2', label: 'Harden Off' },
   transplant: { bg: '#2563eb', label: 'Transplant' },
   sow: { bg: '#16a34a', label: 'Direct Sow' },
   germination: { bg: '#84cc16', label: 'Germination' },
@@ -1080,6 +1115,27 @@ const getCountdown = (tl, todayDoy) => {
   const days = next.doy - todayDoy;
   if (days > 60) return null;
   return { label: next.label, days };
+};
+
+function doyToICSDate(dayOfYear) {
+  const d = new Date(2026, 0, dayOfYear);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}${m}${day}`;
+}
+
+const ZIP_FROST_DATA = {
+  '04101': { lastFrost: 125, firstFrost: 284 },
+  '04005': { lastFrost: 128, firstFrost: 280 },
+  '04841': { lastFrost: 135, firstFrost: 274 },
+  '04843': { lastFrost: 135, firstFrost: 274 },
+  '04011': { lastFrost: 130, firstFrost: 278 },
+  '04609': { lastFrost: 140, firstFrost: 268 },
+  '04401': { lastFrost: 138, firstFrost: 270 },
+  '04330': { lastFrost: 140, firstFrost: 265 },
+  '04210': { lastFrost: 142, firstFrost: 262 },
+  '04901': { lastFrost: 145, firstFrost: 258 }
 };
 
 function getColorFamily(hex) {
@@ -1114,11 +1170,32 @@ const COLOR_FAMILIES = {
   'white': 'White / Neutral'
 };
 
+function LazyCard({ children }) {
+  const ref = React.useRef(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (!ref.current) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setVisible(true); obs.disconnect(); }
+    }, { rootMargin: '200px' });
+    obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <div ref={ref} style={{ minHeight: visible ? 'auto' : '120px' }}>
+      {visible ? children : null}
+    </div>
+  );
+}
+
 function PlantingCalendar() {
   const [selectedVariety, setSelectedVariety] = useState(null);
   const [expandedSpecies, setExpandedSpecies] = useState({});
   const [myGarden, setMyGarden] = useState(() => {
     try { return JSON.parse(localStorage.getItem('myGarden') || '{}'); } catch { return {}; }
+  });
+  const [gardenNotes, setGardenNotes] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('gardenNotes') || '{}'); } catch { return {}; }
   });
   const [copiedList, setCopiedList] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -1136,10 +1213,23 @@ function PlantingCalendar() {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     try { return !localStorage.getItem('onboardingDismissed'); } catch { return true; }
   });
+  const [showZipInput, setShowZipInput] = useState(false);
+  const [zipCode, setZipCode] = useState('');
+  const [zipResult, setZipResult] = useState(null);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareSpecies, setCompareSpecies] = useState([]);
+  const [darkMode, setDarkMode] = useState(() => {
+    try { return localStorage.getItem('darkMode') === '1'; } catch { return false; }
+  });
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   React.useEffect(() => {
     localStorage.setItem('myGarden', JSON.stringify(myGarden));
   }, [myGarden]);
+
+  React.useEffect(() => {
+    localStorage.setItem('gardenNotes', JSON.stringify(gardenNotes));
+  }, [gardenNotes]);
 
   React.useEffect(() => {
     setCustomMidcoast({
@@ -1147,6 +1237,21 @@ function PlantingCalendar() {
       firstFrost: MIDCOAST.firstFrost + (firstFrostOffset * 7)
     });
   }, [lastFrostOffset, firstFrostOffset]);
+
+  React.useEffect(() => {
+    localStorage.setItem('darkMode', darkMode ? '1' : '0');
+    document.body.style.backgroundColor = darkMode ? '#0f172a' : '#f8fafc';
+    document.body.style.color = darkMode ? '#e2e8f0' : '#1e293b';
+  }, [darkMode]);
+
+  React.useEffect(() => {
+    const handleGlobal = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      if (e.key === '?') { setShowShortcuts(prev => !prev); e.preventDefault(); }
+    };
+    document.addEventListener('keydown', handleGlobal);
+    return () => document.removeEventListener('keydown', handleGlobal);
+  }, []);
 
   // Read initial state from URL hash
   React.useEffect(() => {
@@ -1164,6 +1269,8 @@ function PlantingCalendar() {
     if (params.get('garden') === '1') setFilterMyGarden(true);
     if (params.get('frostL')) setLastFrostOffset(parseInt(params.get('frostL')) || 0);
     if (params.get('frostF')) setFirstFrostOffset(parseInt(params.get('frostF')) || 0);
+    if (params.get('deer')) setFilterDeer(params.get('deer'));
+    if (params.get('poll')) setFilterPollinator(params.get('poll'));
   }, []);  // nextAction sort option will round-trip through this effect
 
   // Write state to URL hash
@@ -1180,9 +1287,11 @@ function PlantingCalendar() {
     if (filterMyGarden) params.set('garden', '1');
     if (lastFrostOffset !== 0) params.set('frostL', String(lastFrostOffset));
     if (firstFrostOffset !== 0) params.set('frostF', String(firstFrostOffset));
+    if (filterDeer !== 'all') params.set('deer', filterDeer);
+    if (filterPollinator !== 'all') params.set('poll', filterPollinator);
     const hash = params.toString();
     window.history.replaceState(null, '', hash ? '#' + hash : window.location.pathname);
-  }, [viewMode, filterSow, filterType, filterHeight, filterColorFamily, sortBy, searchTerm, bloomColorMode, filterMyGarden, lastFrostOffset, firstFrostOffset]);
+  }, [viewMode, filterSow, filterType, filterHeight, filterColorFamily, sortBy, searchTerm, bloomColorMode, filterMyGarden, lastFrostOffset, firstFrostOffset, filterDeer, filterPollinator]);
 
   React.useEffect(() => {
     const handleKey = (e) => {
@@ -1234,22 +1343,79 @@ function PlantingCalendar() {
     });
   }, [myGarden]);
 
+  const downloadICSCalendar = useCallback(() => {
+    const events = [];
+    Object.keys(myGarden).forEach(key => {
+      const [species, variety] = key.split('||');
+      const sd = speciesData.find(s => s.species === species);
+      if (!sd) return;
+      const tl = sd.tl;
+      if (tl.indoorStart) {
+        const date = doyToICSDate(tl.indoorStart);
+        events.push({
+          summary: `Start Indoors: ${species}`,
+          description: `Start ${species} seeds indoors in trays`,
+          date: date
+        });
+      }
+      if (tl.transplant) {
+        const date = doyToICSDate(tl.transplant);
+        events.push({
+          summary: `Transplant: ${species}`,
+          description: `Transplant ${species} seedlings outdoors`,
+          date: date
+        });
+      }
+      if (tl.sowStart) {
+        const date = doyToICSDate(tl.sowStart);
+        events.push({
+          summary: `Direct Sow: ${species}`,
+          description: `Direct sow ${species} seeds outdoors`,
+          date: date
+        });
+      }
+      if (tl.bloomStart) {
+        const date = doyToICSDate(tl.bloomStart);
+        events.push({
+          summary: `Expected Bloom: ${species}`,
+          description: `${species} should begin blooming`,
+          date: date
+        });
+      }
+    });
+    let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Midcoast Maine Garden Planner//EN\nCALSCALE:GREGORIAN\n`;
+    events.forEach(e => {
+      const nextDay = String(parseInt(e.date) + 1).padStart(8, '0');
+      ics += `BEGIN:VEVENT\nDTSTART;VALUE=DATE:${e.date}\nDTEND;VALUE=DATE:${nextDay}\nSUMMARY:${e.summary}\nDESCRIPTION:${e.description}\nEND:VEVENT\n`;
+    });
+    ics += `END:VCALENDAR`;
+    const blob = new Blob([ics], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'garden-plan.ics';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [myGarden, speciesData]);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
   const [filterSow, setFilterSow] = useState('all');
   const [filterType, setFilterType] = useState('all');
   const [filterPlantNow, setFilterPlantNow] = useState(false);
   const [filterBloomNow, setFilterBloomNow] = useState(false);
+  const [filterDeer, setFilterDeer] = useState('all');
+  const [filterPollinator, setFilterPollinator] = useState('all');
 
   const today = new Date();
   const todayDoy = doy(today.getMonth() + 1, today.getDate());
   const todayPct = ((todayDoy - 1) / 365) * 100;
 
-  const hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha';
+  const hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha' || filterDeer !== 'all' || filterPollinator !== 'all';
 
   const activeFilterCount = [
     searchTerm, filterSow !== 'all', filterType !== 'all', filterHeight !== 'all',
-    filterColorFamily !== 'all', filterPlantNow, filterBloomNow, filterMyGarden
+    filterColorFamily !== 'all', filterPlantNow, filterBloomNow, filterMyGarden, filterDeer !== 'all', filterPollinator !== 'all'
   ].filter(Boolean).length;
 
   const clearAllFilters = useCallback(() => {
@@ -1262,6 +1428,8 @@ function PlantingCalendar() {
     setFilterBloomNow(false);
     setFilterMyGarden(false);
     setSortBy('alpha');
+    setFilterDeer('all');
+    setFilterPollinator('all');
   }, []);
 
   // Build species-level data with timeline + varieties
@@ -1319,9 +1487,12 @@ function PlantingCalendar() {
       }
       if (filterHeight !== 'all' && sd.height !== filterHeight) return false;
       if (filterColorFamily !== 'all' && getColorFamily(sd.bloomColor) !== filterColorFamily) return false;
+      if (filterDeer === 'resistant' && !sd.deerResistant) return false;
+      if (filterDeer === 'vulnerable' && sd.deerResistant) return false;
+      if (filterPollinator !== 'all' && (!sd.pollinators || !sd.pollinators.includes(filterPollinator))) return false;
       return true;
     });
-  }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy]);
+  }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy, filterDeer, filterPollinator]);
 
   const totalVarieties = useMemo(() => filtered.reduce((sum, sd) => sum + sd.varieties.length, 0), [filtered]);
 
@@ -1473,6 +1644,7 @@ function PlantingCalendar() {
                 const base = `${PHASE_COLORS[seg.phase].label}: ${formatDoy(seg.startDoy)} – ${formatDoy(seg.endDoy)}`;
                 const tips = {
                   indoor: 'Sow seeds in trays under grow lights or on a sunny windowsill.',
+                  harden: 'Move seedlings to a sheltered outdoor location for a few hours daily, gradually increasing exposure.',
                   transplant: 'Move hardened-off seedlings outdoors after frost danger passes.',
                   sow: 'Plant seeds directly into prepared garden soil.',
                   germination: 'Seeds are sprouting. Keep soil moist.',
@@ -1519,16 +1691,30 @@ function PlantingCalendar() {
     );
   };
 
+  const dm = useMemo(() => ({
+    bg: darkMode ? '#0f172a' : '#f8fafc',
+    cardBg: darkMode ? '#1e293b' : '#fff',
+    border: darkMode ? '#334155' : '#e2e8f0',
+    text: darkMode ? '#e2e8f0' : '#1e293b',
+    textMuted: darkMode ? '#94a3b8' : '#64748b',
+    textFaint: darkMode ? '#64748b' : '#94a3b8',
+    headerBg: darkMode ? '#1e293b' : '#fff',
+    toolbarBg: darkMode ? 'rgba(30,41,59,0.97)' : 'rgba(255,255,255,0.97)',
+    inputBg: darkMode ? '#334155' : '#fff',
+    chipBg: darkMode ? '#1e293b' : '#fff',
+    altRow: darkMode ? '#1e293b' : '#f8fafc',
+  }), [darkMode]);
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f8fafc' }}>
+    <div className="min-h-screen" style={{ backgroundColor: dm.bg }}>
       {/* Header */}
-      <div style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#fff' }}>
+      <div style={{ borderBottom: '1px solid ' + dm.border, backgroundColor: dm.headerBg }}>
         <div className="max-w-6xl mx-auto px-5 py-5" style={{ paddingLeft: '20px', paddingRight: '20px' }}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 className="font-bold" style={{ fontSize: '20px', letterSpacing: '4px', textTransform: 'uppercase', color: '#1e293b' }}>MIDCOAST MAINE</h1>
-              <p style={{ fontWeight: 400, color: '#475569', letterSpacing: '3px', fontSize: '11px', textTransform: 'uppercase' }}>Planting Calendar</p>
-              <p className="mt-1" style={{ fontWeight: 400, color: '#94a3b8', letterSpacing: '1px', fontSize: '11px' }}>Zone 5b · {totalVarieties} varieties, {filtered.length} species</p>
+              <h1 className="font-bold" style={{ fontSize: '20px', letterSpacing: '4px', textTransform: 'uppercase', color: dm.text }}>MIDCOAST MAINE</h1>
+              <p style={{ fontWeight: 400, color: darkMode ? '#cbd5e1' : '#475569', letterSpacing: '3px', fontSize: '11px', textTransform: 'uppercase' }}>Planting Calendar</p>
+              <p className="mt-1" style={{ fontWeight: 400, color: dm.textFaint, letterSpacing: '1px', fontSize: '11px' }}>Zone 5b · {totalVarieties} varieties, {filtered.length} species</p>
               <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ fontSize: '11px' }}>
                 <div className="flex items-center gap-2">
                   <span style={{ color: '#94a3b8' }}>Last frost:</span>
@@ -1538,6 +1724,7 @@ function PlantingCalendar() {
                   </span>
                   <button onClick={() => setLastFrostOffset(f => f + 1)} title="Shift last frost date later by 1 week" style={{ width: '20px', height: '20px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', fontSize: '12px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                   {lastFrostOffset !== 0 && <span style={{ color: '#64748b', fontSize: '10px' }}>({lastFrostOffset > 0 ? '+' : ''}{lastFrostOffset}w)</span>}
+                  <button onClick={() => setShowZipInput(!showZipInput)} title="Look up frost dates by ZIP code" style={{ fontSize: '12px', border: '1px solid #e2e8f0', backgroundColor: '#fff', cursor: 'pointer', borderRadius: '4px', padding: '2px 6px', marginLeft: '8px' }}>📍</button>
                 </div>
                 <div className="flex items-center gap-2">
                   <span style={{ color: '#94a3b8' }}>First frost:</span>
@@ -1552,6 +1739,35 @@ function PlantingCalendar() {
                   <button onClick={() => { setLastFrostOffset(0); setFirstFrostOffset(0); }} style={{ color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px', textDecoration: 'underline' }}>reset</button>
                 )}
                 <span style={{ color: '#94a3b8', fontSize: '10px' }}>({Math.round((customMidcoast.firstFrost - customMidcoast.lastFrost) / 7)} week season)</span>
+                {showZipInput && (
+                  <div className="flex items-center gap-2" style={{ marginTop: '8px', padding: '8px', backgroundColor: '#f8fafc', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+                    <input
+                      type="text"
+                      placeholder="Enter ZIP code"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value.trim())}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const data = ZIP_FROST_DATA[zipCode];
+                          if (data) {
+                            const lastFrostWeekDiff = Math.round((data.lastFrost - MIDCOAST.lastFrost) / 7);
+                            const firstFrostWeekDiff = Math.round((data.firstFrost - MIDCOAST.firstFrost) / 7);
+                            setLastFrostOffset(lastFrostWeekDiff);
+                            setFirstFrostOffset(firstFrostWeekDiff);
+                            setZipResult(zipCode);
+                            setZipCode('');
+                          } else {
+                            setZipResult(null);
+                          }
+                        }
+                      }}
+                      style={{ padding: '4px 6px', fontSize: '12px', border: '1px solid #e2e8f0', borderRadius: '4px', width: '80px' }}
+                    />
+                    {zipResult && <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>✓ {zipResult}</span>}
+                    {zipResult === false && <span style={{ fontSize: '11px', color: '#ef4444' }}>ZIP not found</span>}
+                    {!zipResult && zipCode && <span style={{ fontSize: '10px', color: '#94a3b8' }}>Press Enter</span>}
+                  </div>
+                )}
               </div>
               {/* Dashboard summary */}
               <div className="mt-2 flex flex-wrap gap-2" style={{ fontSize: '11px' }}>
@@ -1649,7 +1865,7 @@ function PlantingCalendar() {
       )}
 
       {/* Sticky toolbar */}
-      <div className="sticky top-0 z-20" style={{ backgroundColor: 'rgba(255,255,255,0.97)', borderBottom: '1px solid #e2e8f0' }}>
+      <div className="sticky top-0 z-20" style={{ backgroundColor: dm.toolbarBg, borderBottom: '1px solid ' + dm.border }}>
         <div className="max-w-6xl mx-auto" style={{ paddingLeft: '20px', paddingRight: '20px' }}>
           <div className="flex flex-col sm:flex-row gap-3 py-3 flex-wrap items-center">
             {/* GROUP A: Filters (Search + dropdowns) */}
@@ -1717,6 +1933,19 @@ function PlantingCalendar() {
                     <option key={k} value={k}>{v}</option>
                   ))}
                 </select>
+                <select value={filterDeer} onChange={e => setFilterDeer(e.target.value)}
+                  className="px-3 py-2 text-sm cursor-pointer" style={{ fontWeight: 700, backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#1e293b', borderRadius: '4px' }}>
+                  <option value="all">All deer</option>
+                  <option value="resistant">Deer resistant</option>
+                  <option value="vulnerable">Deer vulnerable</option>
+                </select>
+                <select value={filterPollinator} onChange={e => setFilterPollinator(e.target.value)}
+                  className="px-3 py-2 text-sm cursor-pointer" style={{ fontWeight: 700, backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#1e293b', borderRadius: '4px' }}>
+                  <option value="all">All pollinators</option>
+                  <option value="bee">Bee friendly</option>
+                  <option value="butterfly">Butterfly</option>
+                  <option value="hummingbird">Hummingbird</option>
+                </select>
                 <select value={sortBy} onChange={e => setSortBy(e.target.value)}
                   className="px-3 py-2 text-sm cursor-pointer" style={{ fontWeight: 700, backgroundColor: '#fff', border: '1px solid #e2e8f0', color: '#1e293b', borderRadius: '4px' }}>
                   <option value="alpha">Sort: A-Z</option>
@@ -1771,6 +2000,22 @@ function PlantingCalendar() {
                     className="filter-btn px-2.5 py-2 text-sm font-bold whitespace-nowrap"
                     style={{ backgroundColor: '#fff', color: '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px' }}>
                     🖨 Print
+                  </button>
+                  <button onClick={downloadICSCalendar}
+                    title="Download calendar events for your garden plan"
+                    className="filter-btn px-2.5 py-2 text-sm font-bold whitespace-nowrap"
+                    style={{ backgroundColor: '#fff', color: '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px' }}>
+                    📅 Calendar
+                  </button>
+                  <button onClick={() => {
+                    if (window.confirm('Remove all varieties from My Garden? This cannot be undone.')) {
+                      setMyGarden({});
+                    }
+                  }}
+                    title="Remove all varieties from your garden plan"
+                    className="filter-btn px-2.5 py-2 text-sm font-bold whitespace-nowrap"
+                    style={{ backgroundColor: '#fff', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '4px', fontSize: '11px' }}>
+                    ✕ Unstar All
                   </button>
                   {hasActiveFilters && (
                     <button onClick={clearAllFilters}
@@ -1835,13 +2080,25 @@ function PlantingCalendar() {
                 style={{ backgroundColor: copiedLink ? '#16a34a' : '#fff', color: copiedLink ? '#fff' : '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
                 {copiedLink ? '✓ Copied!' : '🔗 Share'}
               </button>
+              <button onClick={() => { setCompareMode(!compareMode); setCompareSpecies([]); }}
+                title="Select two species to compare side-by-side"
+                className="filter-btn px-2.5 py-1.5 text-sm whitespace-nowrap"
+                style={{ backgroundColor: compareMode ? '#6366f1' : '#fff', color: compareMode ? '#fff' : '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}>
+                {compareMode ? '✕ Cancel' : '⚖️ Compare'}
+              </button>
+              <button onClick={() => setDarkMode(!darkMode)}
+                title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="filter-btn px-2.5 py-1.5 text-sm whitespace-nowrap"
+                style={{ backgroundColor: darkMode ? '#334155' : '#fff', color: darkMode ? '#f1f5f9' : '#94a3b8', border: '1px solid ' + (darkMode ? '#475569' : '#e2e8f0'), borderRadius: '4px', fontSize: '13px' }}>
+                {darkMode ? '☀️' : '🌙'}
+              </button>
               </div>
             </div>
           </div>
 
           {/* Phase legend row */}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-2" style={{ borderTop: '1px solid #f1f5f9', paddingTop: '6px' }}>
-            {Object.entries(PHASE_COLORS).filter(([k]) => k !== 'dormant').map(([key, val]) => (
+            {Object.entries(PHASE_COLORS).filter(([k]) => k !== 'dormant' && k !== 'decline').map(([key, val]) => (
               <span key={key} className="flex items-center gap-1" style={{ fontSize: '10px', color: '#64748b' }}>
                 <span className="inline-block w-2 h-2 rounded-sm" style={{ backgroundColor: val.bg }} />
                 {val.label}
@@ -2170,6 +2427,36 @@ function PlantingCalendar() {
                     </div>
                   );
                 })()}
+
+                {/* Bloom color palette */}
+                {(() => {
+                  const gardenSpecies = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
+                  if (gardenSpecies.length < 2) return null;
+                  const totalDays = gardenSpecies.reduce((sum, s) => sum + (s.tl.bloomEnd - s.tl.bloomStart), 0);
+                  return (
+                    <div style={{ backgroundColor: dm.cardBg, border: '1px solid ' + dm.border, borderRadius: '8px', padding: '12px 20px', marginBottom: '12px' }}>
+                      <p style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: dm.textFaint, marginBottom: '8px' }}>Bloom Color Palette</p>
+                      <div className="flex" style={{ height: '24px', borderRadius: '4px', overflow: 'hidden', border: '1px solid ' + dm.border }}>
+                        {gardenSpecies.map((sd, i) => {
+                          const duration = sd.tl.bloomEnd - sd.tl.bloomStart;
+                          const pct = (duration / totalDays) * 100;
+                          return (
+                            <div key={i} title={`${sd.species}: ${formatDoy(sd.tl.bloomStart)} – ${formatDoy(sd.tl.bloomEnd)}`}
+                              style={{ width: pct + '%', backgroundColor: sd.bloomColor || '#ec4899', minWidth: '2px' }} />
+                          );
+                        })}
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2" style={{ fontSize: '10px', color: dm.textMuted }}>
+                        {gardenSpecies.map((sd, i) => (
+                          <span key={i} className="flex items-center gap-1">
+                            <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: sd.bloomColor || '#ec4899', display: 'inline-block' }} />
+                            {sd.species}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
@@ -2213,8 +2500,63 @@ function PlantingCalendar() {
               );
             })()}
 
+            {compareMode && compareSpecies.length === 2 && (() => {
+              const [a, b] = compareSpecies.map(name => speciesData.find(s => s.species === name)).filter(Boolean);
+              if (!a || !b) return null;
+              const rows = [
+                { label: 'Type', a: a.type, b: b.type },
+                { label: 'Height', a: HEIGHT_LABELS[a.height] || '?', b: HEIGHT_LABELS[b.height] || '?' },
+                { label: 'Frost Hardy', a: a.frostHardy ? 'Yes' : 'No', b: b.frostHardy ? 'Yes' : 'No' },
+                { label: 'Sow Method', a: a.sowMethod.join(', '), b: b.sowMethod.join(', ') },
+                { label: 'Bloom Start', a: formatDoy(a.tl.bloomStart), b: formatDoy(b.tl.bloomStart) },
+                { label: 'Bloom End', a: formatDoy(a.tl.bloomEnd), b: formatDoy(b.tl.bloomEnd) },
+                { label: 'Bloom Duration', a: (a.bloomDuration || 60) + 'd', b: (b.bloomDuration || 60) + 'd' },
+                { label: 'Varieties', a: String(a.varieties.length), b: String(b.varieties.length) },
+                { label: 'Deer Resistant', a: a.deerResistant ? '🛡️ Yes' : 'No', b: b.deerResistant ? '🛡️ Yes' : 'No' },
+                { label: 'Companions', a: a.companions.join(', ') || 'None', b: b.companions.join(', ') || 'None' },
+              ];
+              const isCompanion = a.companions.includes(b.species) || b.companions.includes(a.species);
+              const bloomOverlap = Math.max(0, Math.min(a.tl.bloomEnd, b.tl.bloomEnd) - Math.max(a.tl.bloomStart, b.tl.bloomStart));
+              const HEIGHT_LABELS = {
+                ground: '0–6" groundcover',
+                short: '6–18"',
+                medium: '18–36"',
+                tall: '36–60"',
+                vine: 'Climbing/Trailing'
+              };
+              return (
+                <div style={{ backgroundColor: dm.cardBg, border: '2px solid #6366f1', borderRadius: '8px', padding: '16px 20px', marginBottom: '12px' }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '1px' }}>Comparison</span>
+                    <button onClick={() => setCompareSpecies([])} style={{ fontSize: '11px', color: dm.textMuted, background: 'none', border: 'none', cursor: 'pointer' }}>Clear</button>
+                  </div>
+                  <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', padding: '4px 8px', color: dm.textMuted, fontWeight: 400, fontSize: '10px', textTransform: 'uppercase', borderBottom: '1px solid ' + dm.border }}></th>
+                        <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700, color: dm.text, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '11px', borderBottom: '1px solid ' + dm.border }}>{a.species}</th>
+                        <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 700, color: dm.text, textTransform: 'uppercase', letterSpacing: '1px', fontSize: '11px', borderBottom: '1px solid ' + dm.border }}>{b.species}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((r, i) => (
+                        <tr key={i} style={{ backgroundColor: i % 2 === 0 ? 'transparent' : dm.altRow }}>
+                          <td style={{ padding: '4px 8px', color: dm.textMuted, fontWeight: 400, fontSize: '10px', textTransform: 'uppercase' }}>{r.label}</td>
+                          <td style={{ padding: '4px 8px', color: darkMode ? '#cbd5e1' : '#475569', fontWeight: 600 }}>{r.a}</td>
+                          <td style={{ padding: '4px 8px', color: darkMode ? '#cbd5e1' : '#475569', fontWeight: 600 }}>{r.b}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {bloomOverlap > 0 && <p style={{ fontSize: '11px', color: '#16a34a', marginTop: '8px' }}>Bloom overlap: {bloomOverlap} days</p>}
+                  {isCompanion && <p style={{ fontSize: '11px', color: '#6366f1', marginTop: '4px' }}>These species are companions ✓</p>}
+                </div>
+              );
+            })()}
+
             {sortedFiltered.map(sd => (
-            <div key={sd.species} data-species={sd.species} className="species-card overflow-hidden" style={{ border: '1px solid #e2e8f0', backgroundColor: '#fff', borderRadius: '8px' }}>
+            <LazyCard key={sd.species}>
+            <div data-species={sd.species} className="species-card overflow-hidden" style={{ border: '1px solid ' + dm.border, backgroundColor: dm.cardBg, borderRadius: '8px' }}>
               <div className="flex gap-4 px-5 py-4 flex-col sm:flex-row">
                 {/* Species thumbnail */}
                 {(() => {
@@ -2238,12 +2580,25 @@ function PlantingCalendar() {
                 <div className="flex-1 min-w-0 flex flex-col">
                   {/* Name row - THIS is the clickable part */}
                   <button onClick={() => toggleSpecies(sd.species)} className="species-name-btn flex items-center gap-2 mb-1.5 text-left w-full" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
+                    {compareMode && (
+                      <input type="checkbox"
+                        checked={compareSpecies.includes(sd.species)}
+                        onChange={() => {
+                          setCompareSpecies(prev => {
+                            if (prev.includes(sd.species)) return prev.filter(s => s !== sd.species);
+                            if (prev.length >= 2) return [prev[1], sd.species];
+                            return [...prev, sd.species];
+                          });
+                        }}
+                        style={{ marginRight: '6px', accentColor: '#6366f1' }}
+                      />
+                    )}
                     <span className="shrink-0 w-5 h-5 flex items-center justify-center" style={{ transition: 'all 0.15s ease' }}>
                       {expandedSpecies[sd.species]
-                        ? <ChevronUp size={13} style={{ color: '#1e293b' }} />
-                        : <ChevronDown size={13} style={{ color: '#94a3b8' }} />}
+                        ? <ChevronUp size={13} style={{ color: dm.text }} />
+                        : <ChevronDown size={13} style={{ color: dm.textFaint }} />}
                     </span>
-                    <span className="font-bold truncate" style={{ fontSize: '14px', letterSpacing: '2px', textTransform: 'uppercase', color: '#1e293b' }}>{sd.species}</span>
+                    <span className="font-bold truncate" style={{ fontSize: '14px', letterSpacing: '2px', textTransform: 'uppercase', color: dm.text }}>{sd.species}</span>
                     <span className="text-xs tabular-nums" style={{ color: '#94a3b8' }}>
                       {(() => {
                         const selCount = sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]).length;
@@ -2312,9 +2667,27 @@ function PlantingCalendar() {
                         </div>
                       )}
                       {sd.type === 'annual' && sd.sowMethod.includes('directSow') && sd.bloomDuration && sd.bloomDuration <= 45 && (
-                        <div className="flex gap-2 items-center">
-                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Tip</span>
-                          <span style={{ color: '#16a34a', fontSize: '10px', fontWeight: 600 }}>Sow every 2–3 weeks for continuous bloom ({sd.bloomDuration}d bloom window)</span>
+                        <div className="flex gap-2 items-start">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Succession</span>
+                          <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: 600 }}>
+                            <span>Sow every 2–3 weeks for continuous bloom:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {(() => {
+                                const dates = [];
+                                const interval = 14;
+                                const start = sd.tl.sowStart;
+                                const end = sd.tl.sowEnd || (sd.tl.sowStart + 42);
+                                for (let d = start; d <= end; d += interval) {
+                                  dates.push(d);
+                                }
+                                return dates.map((d, i) => (
+                                  <span key={i} style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '1px 6px', borderRadius: '3px', fontSize: '10px' }}>
+                                    {formatDoy(d)}
+                                  </span>
+                                ));
+                              })()}
+                            </div>
+                          </div>
                         </div>
                       )}
                       <div className="flex gap-2">
@@ -2344,6 +2717,34 @@ function PlantingCalendar() {
                           </span>
                         </div>
                       )}
+                      {sd.deerResistant && (
+                        <div className="flex gap-2">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Deer</span>
+                          <span className="font-bold" style={{ color: '#16a34a', fontSize: '11px' }}>🛡️ Resistant</span>
+                        </div>
+                      )}
+                      {sd.soil && sd.soil !== 'any' && (
+                        <div className="flex gap-2">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Soil</span>
+                          <span className="capitalize font-bold" style={{ color: '#475569' }}>{sd.soil} pH</span>
+                        </div>
+                      )}
+                      {sd.moisture && sd.moisture !== 'any' && (
+                        <div className="flex gap-2">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Moisture</span>
+                          <span className="capitalize font-bold" style={{ color: '#475569' }}>{sd.moisture}</span>
+                        </div>
+                      )}
+                      {sd.pollinators && sd.pollinators.length > 0 && (
+                        <div className="flex gap-2">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Pollinators</span>
+                          <span style={{ fontSize: '12px' }}>
+                            {sd.pollinators.includes('bee') && '🐝 '}
+                            {sd.pollinators.includes('butterfly') && '🦋 '}
+                            {sd.pollinators.includes('hummingbird') && '🪶 '}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2369,6 +2770,9 @@ function PlantingCalendar() {
                           style={{ top: '4px', right: '4px', width: '22px', height: '22px', backgroundColor: 'rgba(255,255,255,0.9)', border: '1px solid #e2e8f0', fontSize: '11px', cursor: 'pointer', lineHeight: 1 }}>
                           {inGarden ? '★' : '☆'}
                         </button>
+                        {gardenNotes[sd.species + '||' + v.name] && (
+                          <span className="absolute z-10" style={{ top: '4px', left: '4px', fontSize: '10px' }} title="Has notes">📝</span>
+                        )}
                         {v.img ? (
                           <div className="img-skeleton" style={{ width: '100%', height: '100px', position: 'relative' }}>
                             <img src={v.img} alt={v.name}
@@ -2392,6 +2796,7 @@ function PlantingCalendar() {
                 </div>
               )}
             </div>
+            </LazyCard>
             ))}
           </div>
         )}
@@ -2533,8 +2938,39 @@ function PlantingCalendar() {
               )}
 
               {selectedVariety.type === 'annual' && selectedVariety.sowMethod.includes('directSow') && selectedVariety.bloomDuration && selectedVariety.bloomDuration <= 45 && (
-                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#15803d' }}>
-                  Succession plant every 2–3 weeks for continuous bloom. This variety has a {selectedVariety.bloomDuration}-day bloom window.
+                <div className="flex gap-2 items-start" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 12px' }}>
+                  <div style={{ fontSize: '12px', color: '#15803d', fontWeight: 600 }}>
+                    <span>Sow every 2–3 weeks for continuous bloom:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(() => {
+                        const dates = [];
+                        const interval = 14;
+                        const start = selectedVariety.tl.sowStart;
+                        const end = selectedVariety.tl.sowEnd || (selectedVariety.tl.sowStart + 42);
+                        for (let d = start; d <= end; d += interval) {
+                          dates.push(d);
+                        }
+                        return dates.map((d, i) => (
+                          <span key={i} style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', padding: '1px 6px', borderRadius: '3px', fontSize: '10px' }}>
+                            {formatDoy(d)}
+                          </span>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {myGarden[selectedVariety.species + '||' + selectedVariety.name] && (
+                <div>
+                  <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Notes</p>
+                  <textarea
+                    value={gardenNotes[selectedVariety.species + '||' + selectedVariety.name] || ''}
+                    onChange={(e) => setGardenNotes(prev => ({ ...prev, [selectedVariety.species + '||' + selectedVariety.name]: e.target.value }))}
+                    placeholder="Add planting notes, location, quantity..."
+                    rows={3}
+                    style={{ width: '100%', fontSize: '12px', padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '6px', resize: 'vertical', fontFamily: 'Inter, sans-serif', color: '#1e293b', backgroundColor: '#f8fafc' }}
+                  />
                 </div>
               )}
 
@@ -2560,6 +2996,7 @@ function PlantingCalendar() {
                 <div className="space-y-2">
                   {[
                     selectedVariety.tl.indoorStart && { phase: 'indoor', label: 'Start indoors', date: formatDoy(selectedVariety.tl.indoorStart) },
+                    selectedVariety.tl.hardenStart && { phase: 'harden', label: 'Harden off', date: formatDoy(selectedVariety.tl.hardenStart) },
                     selectedVariety.tl.transplant && { phase: 'transplant', label: 'Transplant', date: formatDoy(selectedVariety.tl.transplant) },
                     selectedVariety.tl.sowStart && { phase: 'sow', label: 'Direct sow', date: `${formatDoy(selectedVariety.tl.sowStart)} – ${formatDoy(selectedVariety.tl.sowEnd)}` },
                     { phase: 'germination', label: 'Germination', date: formatDoy(selectedVariety.tl.germEnd) },
@@ -2620,11 +3057,66 @@ function PlantingCalendar() {
           </select>
         </div>
       )}
+
+      <button onClick={() => setShowShortcuts(!showShortcuts)}
+        style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: 30, width: '32px', height: '32px', borderRadius: '50%', backgroundColor: dm.text, color: dm.cardBg, border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+        ?
+      </button>
+
+      {showShortcuts && (
+        <div className="fixed inset-0 flex items-center justify-center z-50" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }} onClick={() => setShowShortcuts(false)}>
+          <div style={{ backgroundColor: dm.cardBg, borderRadius: '12px', padding: '24px', maxWidth: '360px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '16px', color: dm.text, textTransform: 'uppercase', letterSpacing: '2px' }}>Keyboard Shortcuts</h3>
+            <div style={{ fontSize: '13px', lineHeight: 2, color: dm.textMuted }}>
+              {[
+                ['?', 'Toggle this help'],
+                ['← →', 'Browse varieties in modal'],
+                ['Esc', 'Close modal or overlay'],
+              ].map(([key, desc], i) => (
+                <div key={i} className="flex gap-3">
+                  <kbd style={{ fontFamily: 'monospace', backgroundColor: dm.altRow, padding: '2px 8px', borderRadius: '4px', border: '1px solid ' + dm.border, fontSize: '12px', fontWeight: 700, minWidth: '40px', textAlign: 'center', color: dm.text }}>{key}</kbd>
+                  <span>{desc}</span>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowShortcuts(false)} style={{ marginTop: '16px', fontSize: '12px', color: dm.textFaint, background: 'none', border: 'none', cursor: 'pointer' }}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<PlantingCalendar />);
     </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE_NAME = 'garden-planner-v1';
+    const ASSETS = ['/maine-garden-planner/'];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
+          if (resp.ok && e.request.url.includes('cloudinary')) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+          }
+          return resp;
+        }).catch(() => caches.match('/maine-garden-planner/')))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+}
+</script>
 </body>
 </html>
