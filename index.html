@@ -32,6 +32,15 @@
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       .year-bar-seg { transition: opacity 0.15s ease; }
       .year-bar-seg:hover { opacity: 0.75; }
+      @keyframes shimmer {
+        0% { background-position: -200px 0; }
+        100% { background-position: 200px 0; }
+      }
+      .img-skeleton {
+        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+        background-size: 200px 100%;
+        animation: shimmer 1.5s infinite;
+      }
       input:focus, select:focus { outline: none; border-color: #6366f1 !important; box-shadow: 0 0 0 2px rgba(99,102,241,0.15); }
       input, select { color: #1e293b; background: #fff; }
       input::placeholder { color: #94a3b8; }
@@ -59,399 +68,401 @@
 
     <script type="text/babel">
         const { useState, useMemo, useCallback } = React;
+const IMG_BASE = 'https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/';
 const IMAGE_MAP = {
-  "agastache-anise-hyssop": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/h/y/hyssop2-dark-purple-anise-lss-dsc_9247.jpg",
-  "agastache-apache-sunset": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg",
-  "agastache-apricot-sprite": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-apricot-sprite-lss-dsc_2478.jpg",
-  "agastache-seeds-astello-indigo": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-astello-indigo-lss-dsc_9403.jpg",
-  "agastache-fragrant-delight-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-fragrant-delight-mix-lss-dsc_6050.jpg",
-  "agastache-lavender-martini": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache2-lavender-martini-lss-dsc_0278_1_.jpg",
-  "agastache-seeds-liquorice-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-licorice-white-w-butterfly-lss-dsc_3588.jpg",
-  "agastache-navajo-sunset": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-navajo-sunset-lah-_dsf1400.jpg",
-  "agastache-raspberry-daiquiri": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache2-raspberry-daquiri-lss-dsc_8575.jpg",
-  "agastache-rose-mint": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-rose-mint-lss-dsc_8500_1.jpg",
-  "agastache-sunset-yellow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-hyssop-sunset-yellow-lss-dsc_6368.jpg",
-  "agastache-texas-hummingbird-mint-heather-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/agastache-mosquito-plant-or-texas-hummingbird-mint2-heather-queen-hb272-lss-dsc_5175.jpg",
-  "ageratum-ball-mixed": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/ageratum2-ball-mixed-lss-dsc_3405.jpg",
-  "ageratum-leda": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/i/pix_1080x1080-ageratum-seeds-leda.jpg",
-  "ageratum-red-flint": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/g/ageratum2-red-flint-lss-dsc_9996.jpg",
-  "armeria-maritima-morning-star-deep-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/m/ameria-morning-star-deep-rose-lss-dsc_2920.jpg",
-  "armeria-maritima-seeds-morning-star-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/a/r/armeria-mantima-morning-star-white-lss-dsc_8714.jpg",
-  "baby-s-breath-seeds-covent-garden": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/babys-breath-covent-garden-lss-dsc_4028.jpg",
-  "baby-s-breath-festival-star": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/babys-breath-rosea-lss-dsc_3722.jpg",
-  "babys-breath-kermesina": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/babys-breath-carmine-from-applewood-lss-dsc_6717.jpg",
-  "bachelor-s-button-seeds-black-ball": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelors3-button-black-boy-lss-dsc_4167.jpg",
-  "bachelor-s-button-blue-boy": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelor3-button-blue-boy-lss-dsc_5525.jpg",
-  "bachelor-s-button-classic-fantastic": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelor2-button-classic-fantastic-lss-dsc_5755.jpg",
-  "bachelor-s-button-classic-romantic": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelor2-button-classic-romantic-lss-dsc_6066.jpg",
-  "bachelor-s-button-double-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelors3-button-classic-artistic-lss-dsc_1960.jpg",
-  "bachelor-s-button-dwarf-blue-midget": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelors-button-classic-magic-lss-dsc_7374.jpg",
-  "bachelors-button-emperor-william": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelors-button-fireworks-lss-dsc_7127.jpg",
-  "bachelor-s-button-pinkie": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelor-button-tall-double-pinkie-lss-dsc_6129.jpg",
-  "bachelor-s-button-polka-dot-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelor-button-tall-double-lavender-lady-lss-dsc_5644.jpg",
-  "bachelor-s-button-red-ball": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/bachelors-button-red-boy-lss-dsc_7376.jpg",
-  "balloon-flower-astra-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/balloon_flower_fuji_blue_lss_dsc_0327_1x1_1200x1200.jpg",
-  "balloon-flower-astra-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/balloon_flower_fairy_snow_spots_removed_retouched_lss_dsc_0286_1x1_1400x1400.jpg",
-  "balloon-flower-astra-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/balloon-flower-fuji-pink-lss-dsc_0181.jpg",
-  "balloon-flower-astra-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/balloon-flower-fuji-white-lss-dsc_0363.jpg",
-  "balsam-peppermint-stick": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/a/balsam-peppermint-stick-placeholder.jpg",
-  "black-eyed-susan-vine-seeds-african-sunset-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/l/black-eyed-susan-vine-african-sunset-mix-lss-000_6929.jpg",
-  "black-eyed-susan-vine-seeds-spanish-eyes": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/l/black-eyed-susan-vine-spanish-eyes-lss-dsc_1360.jpg",
-  "butterfly-pea-blue-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/u/butterfly_pea_thai_double_blue_lss_dsc_7174_1x1_850x850.jpg",
-  "butterfly-pea-lavender-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/b/u/butterfly_pea_double_double_lavender_queen_lss_dsc_7743_1x1_850x850_1.jpg",
-  "butterfly-pea-seeds-thai-double-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed-packet-butterfly-pea-thai-blue-lss-dsc_5511.jpg",
-  "butterfly-pea-seeds-thai-double-sky-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/Butterfly_Pea_Thai_Double_Sky_Blue_mf3qk8.jpg",
-  "butterfly-pea-white-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/pea_white_butterfly_dsc07799__1x1_1200x1200.jpg",
-  "calendula-ball-s-improved-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_balls_improved_orange.jpg",
-  "calendula-orange-king": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula-orange-king-lss-dsc_7661.jpg",
-  "calendula-seeds-orange-porcupine": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_orange_porcupine.jpg",
-  "calendula-pacific-beauty-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_pacific_mix_lss_dsc_2459_1x1_1200x1200.jpg",
-  "calendula-pink-surprise": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_pink_surprise_lss_dsc_4738_1x1_1200x1200.jpg",
-  "calendula-playtime-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_playtime_mix_lss_dsc_3430_1x1_1200x1200.jpg",
-  "calendula-snow-princess": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_snow_princess.jpg",
-  "calendula-touch-of-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula-strawberry-blonde-lss-dsc_4306.jpg",
-  "calendula-zeolights": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/a/calendula_seeds_yellow_porcupine-lss-dsc_7628.jpg",
-  "cockscomb-seeds-asian-garden": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_asian_garden.jpg",
-  "celosia-bombay-dark-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-eternity-mix-lss-dsc_3010.jpg",
-  "celosia-bombay-fireball": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_flamingo_feathers_lss_dsc_0933_1x1_1200x1200.jpg",
-  "celosia-bombay-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_higyoku_red_stem_lss_dsc_9450_1x1_1200x1200.jpg",
-  "celosia-bombay-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_cockscomb_indiana_giant_lss_dsc_5524_1x1_1200x1200.jpg",
-  "celosia-bombay-purple": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_jessica_mix_cockscomb_zs016_1x1_1200x1200.jpg",
-  "celosia-bombay-yellow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_kurume_kumquat_lss_dsc_3658_1x1_1200x1200.jpg",
-  "celosia-celway-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-cockscomb-lightening-yellow-lss-file418.jpg",
-  "celosia-chief-gold": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-cockscomb-mad-magenta-lss-dsc_7012.jpg",
-  "celosia-chief-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-cockscomb-orient-no-2-lss-dsc_8754.jpg",
-  "celosia-chief-persimmon": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia2-plumosa-glorious-mix-kad-dscf2700.jpg",
-  "celosia-chief-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-rainbow-sherbert-lss-dsc_3623_1.jpg",
-  "cockscomb-seeds-coral-garden-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-cockscomb-raven-red-brianiac-mix-lss-file313.jpg",
-  "cockscomb-cramers-burgundy": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-cockscomb-think-pink-brianiac-lss-file360.jpg",
-  "cockscomb-seeds-cramers-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_tornado_red_cockcomb.jpg",
-  "celosia-dracula": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-cockscomb-variegated-lss-dsc_5330.jpg",
-  "celosia-intenz": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia2-yachiyo-hiryu-lss-dsc_3716.jpg",
-  "celosia-kurume-new-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia2-yachiyo-karyu-lss-dsc_3766.jpg",
-  "cockscomb-seeds-orange-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia2-yachiyo-kinpou-lss-dsc_3614.jpg",
-  "cockscomb-pampas-plume-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia2-yellow-queen-lss-dsc_3648.jpg",
-  "celosia-sunday-gold": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia_chinese_wool_flower_lss_dsc_4716_1x1_1200x1200.jpg",
-  "celosia-sylphid": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/e/celosia-green-sylphid-lss-dsc_3687.jpg",
-  "celosia-toreador": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scenic-celosia-in-restaurant-garden-lss-dsc_8121.jpg",
-  "crimson-clover-seeds": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/r/grains-and-cover-crops-crimson-clover-lss-dsc_8134.jpg",
-  "red-clover-seeds": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/l/clover-red-feathers-lss-dsc_9933.jpg",
-  "coleus-black-dragon": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus-seeds-colocha-chocolate-green-exp-lss-dsc_0024.jpg",
-  "coleus-carefree-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus-colocha-red-exp-lss-dsc_6656.jpg",
-  "coleus-chocolate-mint": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-colocha-rose-zs004-_1_.jpg",
-  "coleus-fairway-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-colocha-scarlet_sunset-zs018_1_.jpg",
-  "coleus-kong-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-folia-mosaic-zs013.jpg",
-  "coleus-premium-sun-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-folia-picasso-zs011.jpg",
-  "coleus-rainbow-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-folia-sunset-zs004.jpg",
-  "coleus-wizard-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-folia-velvet-zs040.jpg",
-  "coleus-wizard-velvet-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coleus2-pinto-mix-lss-dsc_8760.jpg",
-  "columbine-barlow-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/columbine-double-mixed-lss-dsc_6830.jpg",
-  "columbine-mckana-giant-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/columbine-leprechaun-gold-lss-dsc_1642_1.jpg",
-  "columbine-winky-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/columbine-rose-barlow-lss-dsc_3960.jpg",
-  "coreopsis-early-sunrise": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coreopsis-incredible-dwarf-mix-lss-dsc_5697.jpg",
-  "coreopsis-mardi-gras": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coreopsis-incredible-sea-shells-mix-lss-dsc_2569.jpg",
-  "coreopsis-plains": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coreopsis-incredible-swirl-lss-dsc_2018.jpg",
-  "coreopsis-tall-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/coreopsis2-yellow-fluffy-double-lss-dsc_9229.jpg",
-  "cosmos-apricot-lemonade": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-apricot-lemonade-lss-dsc_9223.jpg",
-  "cosmos-apricotta": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-apricotta-lss-dsc_8636.jpg",
-  "cosmos-black-magic-chocolate": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos_black_magic.jpg",
-  "cosmos-bright-lights": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos_bright_lights.jpg",
-  "cosmos-candyfloss-pink-sunrise": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos_candyfloss_pink_sunrise.jpg",
-  "cosmos-candyfloss-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-candyfloss-red-lss-dsc_7669.jpg",
-  "cosmos-cosmic-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos2-cosmic-orange-zs002.jpg",
-  "cosmos-cosmic-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos2-cosmic-red-lss-dsc_4490.jpg",
-  "cosmos-cosmic-yellow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos2-cosmic-yellow-lss-dsc_9030.jpg",
-  "cosmos-double-dutch-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-double-dutch-rose-lss-dsc_8765.jpg",
-  "cosmos-fizzy-rose-picotee": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-fizzy-rose-picotee-op-lss--dsc_8544.jpg",
-  "cosmos-japanese-kiiro": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos_japanese_kiiro.jpg",
-  "cosmos-rubenza": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos--rubenza-zs026.jpg",
-  "cosmos-sensation-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-sea-shells-or-seashells-hand-dyed-yarn-lss-dsc_7064.jpg",
-  "cosmos-xanthos": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/o/cosmos-xanthos-lss-dsc_6980.jpg",
-  "dahlia-bishops-children": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dahlia-seeds-black-beauty-zs006.jpg",
-  "dahlia-cactus-hybrids-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dahlia_cactus_flowered_mix_from_sahin_lss_dsc_8586_850x850.jpg",
-  "dahlia-dandy-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dahlia_dandy_improved_lss_dsc_1990_850x850.jpg",
-  "dahlia-night-butterfly": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dahlia-seeds-black-forest-ruby-lss-dsc_9512.jpg",
-  "dahlia-opera-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dahlia_mignon_single_mix_lss_dsc_1402_850x850.jpg",
-  "dahlia-unwins-dwarf-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/l/flower_dahlia_unwin_s_dsc05701_850x850.jpg",
-  "daisy-bellissima-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy_white_or_blue_disc_lss_dsc_9989_850x850.jpg",
-  "daisy-crazy-daisy": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy_crazy_lss_dsc_7070_850x850.jpg",
-  "daisy-pomponette-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy_chocolate_lss_dsc_9876_850x850.jpg",
-  "daisy-robinsons-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy2-dahlberg-lss-dsc_5738.jpg",
-  "daisy-rominette-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed-packet-chamomile-kelway-golden-lss-dsc_9847.jpg",
-  "daisy-snow-lady": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy_livingstone_pastel_mixed_lss_dsc_7201_850x850.jpg",
-  "daisy-super-enorma-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy-hero2-paper-from-applewood-kad-l1040871.jpg",
-  "daisy-tasso-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/daisy_swan_river_mix_lss_dsc_0327_850x850.jpg",
-  "dandelion-ameliore": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed-packet-chicory-imero-dandelion-zs006.jpg",
-  "dandelion-clio": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/c/h/chichory_dandelion_italiko_rosso_lss_dsc_0589-850x850.jpg",
-  "dandelion-vert-de-montmagny": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dandelion_japanese_white_lss_dsc_3332_850x850.jpg",
-  "dandelion-wild": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/a/dandelion_pink_lss_dsc_5360_850x850.jpg",
-  "dianthus-seeds-black-adder": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/i/dianthus_black_adder.jpg",
-  "dianthus-seeds-flora-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/FL647-Dianthus_Flora_Mix_2_vhf4s2.jpg",
-  "dianthus-seeds-flora-pearl-appleblossom": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/i/dianthus_floral_pearl_appleblossom.jpg",
-  "dianthus-seeds-flora-pearl-salmon": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/i/dianthus_floral_pearl_salmon.jpg",
-  "dianthus-hollandia-purple-crown": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/h/phlox_hollandia_purple_crown_lss_dsc_5305_850x850.jpg",
-  "dianthus-raspberry-ripple": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/i/dianthus_raspberry_ripple_lss_dsc_8586_850x850.jpg",
-  "dianthus-spooky-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/i/dianthus_spooky_mix_lss_dsc_8297_850x850.jpg",
-  "dianthus-zebra-crossing": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/d/i/dianthus-zebra-crossing-lss-dsc_9550.jpg",
-  "forget-me-not-seeds-bellamy-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/o/forget-me-not_bellamy_blue.jpg",
-  "forget-me-not-seeds-bellamy-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/o/forget-me-not_bellamy_pink.jpg",
-  "forget-me-not-seeds-bellamy-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed-packet-forget-me-not-bellamy-white-lss-dsc_6667.jpg",
-  "forget-me-not-seeds-blue-bird": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/o/forget-me-not_blue_bird.jpg",
-  "forget-me-not-seeds-sylva-rosylva": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/o/forget-me-not-sylva-rosylva-lss-dsc_7812.jpg",
-  "gaillardia-arizona-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/a/gaillardia-arizona-apricot-lss-dsc_0709.jpg",
-  "gaillardia-lorenziana-double-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/a/gaillardia-seeds-arizona-red-shades-lss-dsc_5431.jpg",
-  "gaillardia-sundance-bicolor": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/a/galardia_double_sunset_lss_dsc_8689_850x850.jpg",
-  "gaillardia-sundance-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/a/gaillardia-sundance-bicolor-placeholder.jpg",
-  "gomphrena-atomic-purple": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/o/gomphrena_atomic_purple_zs022_850x850.jpg",
-  "gomphrena-buddy-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/o/gomphrena2-buddy-purple-zs012.jpg",
-  "gomphrena-fireworks": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/l/globosa_mixed_gomphrena_fl189_lss_000_6963_850x850.jpg",
-  "gomphrena-qis-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/o/gomphrena2-lavender-lady-lss-dsc_7553.jpg",
-  "gomphrena-qis-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/o/gomphrena_salmon_pastel_lss_dsc_8893_850x850.jpg",
-  "gomphrena-strawberry-fields": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/o/gomphrena_snow_white_zs006_850x850_1.jpg",
-  "grass-frosted-explosion": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/r/grass2-blue-buddy-zs001_1_.jpg",
-  "grass-pampas": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/g/r/grass2-bunny-tail-zs037.jpg",
-  "grass-ruby-silk": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/savannah2-melinis-nerviglumis-lss-dsc_5564.jpg",
-  "hollyhock-halo-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/h/o/hollyhock_creme_de_cassis_lss_dsc_7983_850x850.jpg",
-  "hollyhock-indian-spring": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/h/o/hollyhock_jet_black_or_nigra_lss_dsc_6860_850x850.jpg",
-  "hollyhock-the-watchman": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/h/o/hollyhock_majorette_double_champagne_lss_dsc_0427_850x850.jpg",
-  "iceplant-harlequin-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/i/c/iceplant_purple_stardust_zs005_850x850.jpg",
-  "iceplant-sparkles-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/succulent_iceplant_fl919_lss_000_5351_850x850.jpg",
-  "lace-flower-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/a/lace2-flower-blue-lss-dsc_0727.jpg",
-  "lace-flower-dara": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/a/lace2-flower-pink-lss-dsc_9464.jpg",
-  "lace-flower-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/a/lace2-flower-white-lss-dsc_9347.jpg",
-  "lewisia-ashwood-carousel-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/e/lewisia-golden-yellow-lss-dsc_9566_1.jpg",
-  "lewisia-seeds-elise-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/e/lewisia-mix-fs-goldmedal-lss-dsc_9827.jpg",
-  "lewisia-little-peach": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/e/lewisia-rosy-pink-lss-dsc_9536.jpg",
-  "lewisia-little-plum": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/e/lewisia-ruby-red-lss-dsc_9803.jpg",
-  "lewisia-little-tutti-frutti": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/e/lewisia-ultra-violet-or-ultraviolet-lss-dsc_9786.jpg",
-  "love-in-a-mist-miss-jekyll-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/o/love-in-a-mist2-midnight-nigella-lss-dsc_7861.jpg",
-  "love-in-a-mist-miss-jekyll-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/o/love-in-a-mist2-miss-jekyll-mix-lss-dsc_4484.jpg",
-  "love-in-a-mist-persian-jewels": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/o/love-in-a-mist-nigella-damascena2-mulberry-rose-lss-dsc_3716.jpg",
-  "marigold-brocade-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_bambino.jpg",
-  "marigold-crackerjack-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_crackerjack_mix_dsc03499_850x850.jpg",
-  "marigold-french-vanilla": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold-disco-mix-zs019.jpg",
-  "marigold-giant-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_colossus_red_gold_bicolor_lss_dsc_5324_850x850.jpg",
-  "marigold-honeycomb": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold2-chica-flame-lss-dsc_5249.jpg",
-  "marigold-jolly-jester": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/FL669-Marigold_Dune_Yellow_3_huisue.jpg",
-  "marigold-lemon-drop": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_gypsy_sunshine_lss_dsc_6866_850x850.jpg",
-  "marigold-sparky-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_kee_s_orange.jpg",
-  "marigold-strawberry-blonde": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_kilimanjaro_white_lss_dsc_7191_850x850.jpg",
-  "marvel-of-peru-broken-colors-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marvels-of-peru-four-o-clocks2-marbles-mixed-lss-dsc_8929.jpg",
-  "marvel-of-peru-limelight": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/o/four2-o-clocks-salmon-sunset-lss-dsc_6672.jpg",
-  "marvel-of-peru-marvel-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold_linnaeus_burning_embers_lss_dsc_6471_850x850.jpg",
-  "marvel-of-peru-tea-time-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/a/marigold-little-hero-fire-lss-dsc_5655.jpg",
-  "milkweed-common": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_butterfly_weed_zs002_850x850.jpg",
-  "milkweed-butterfly-flower": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_gay_butterflies_lss_dsc_1267_850x850.jpg",
-  "milkweed-gay-butterflies-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_hello_yellow_lss_dsc_9723_850x850.jpg",
-  "milkweed-hello-yellow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_ice_ballet_lss_dsc_9786_850x850.jpg",
-  "milkweed-oro": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_red_or_swamp.jpg",
-  "milkweed-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_showy_w_pollinators_lss_dsc_7083_850x850.jpg",
-  "milkweed-showy": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/i/milkweed_soul_mate_or_soulmate_lss_dsc_9713_850x850.jpg",
-  "milkweed-swamp": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/t/w/tweedia_heavenly_blue_zs013_850x850.jpg",
-  "milkweed-tuberosa": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/t/w/tweedia-seeds-white-lss-dsc_1087.jpg",
-  "morning-glory-carnevale-di-venezia": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/o/morning_glory_carnevale_di_venezia_lss_000_0416_850x850.jpg",
-  "morning-glory-grandpa-ott": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/l/flowers_morning_glory_moon_flower_img_0460_850x850.jpg",
-  "morning-glory-heavenly-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/o/morning_glory_kanoko_red_speckled.jpg",
-  "morning-glory-scarlett-ohara": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/m/o/morning_glory_kikyozaki_mixed_lss_dsc_5463_850x850.jpg",
-  "morning-glory-sunrise-serenade": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/l/flower_morning_glory_split_second_1523_850x850.jpg",
-  "nasturtium-alaska-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_alaska_mix_zs005_850x850.jpg",
-  "nasturtium-black-velvet": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/l/e/lettuce-ice-queen-with-nasturtium2-black-velvet-lss-dsc_9103.jpg",
-  "nasturtium-bloody-mary": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_bloody_mary_zs026_850x850.jpg",
-  "nasturtium-cherry-rose-jewel": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_cherry_rose_jewel_lss_dsc_5706_850x850.jpg",
-  "nasturtium-cobra": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_alaska_red_shades_lss_dsc_0286_850x850.jpg",
-  "nasturtium-empress-of-india": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed-packet-nasturtium-baby-orange-lss-dsc_5092.jpg",
-  "nasturtium-fiesta-blend": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_golden_jewel.jpg",
-  "nasturtium-jewel-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_orchid_cream_lss_dsc_7219-2_850x850.jpg",
-  "nasturtium-ladybird": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium2-orchid-flame-zs010.jpg",
-  "nasturtium-moonlight": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium2-phoenix-lss-dsc_1087.jpg",
-  "nasturtium-orchid-cream": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_purple_emperor_lss_dsc_6447_850x850.jpg",
-  "nasturtium-peach-melba": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_tangerine_whirlybird1.jpg",
-  "nasturtium-phoenix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nastutium_tip_top_alaska_salmon_lss_dsc_5804_850x850.jpg",
-  "nasturtium-purple-emperor": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_tip_top_mahogany_w_nasturtium_pesto_recipe_lss_dsc_4822_850x850.jpg",
-  "nasturtium-spitfire": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/n/a/nasturtium_tip_top_pink_blush.jpg",
-  "nasturtium-tall-trailing-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/a/nasturtium_tip_top_rose_lss_dsc_2786_850x850.jpg",
-  "nasturtium-tip-top-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/FL533-Whirly_Bird_Rose_Nasturtium_2_hurdur.jpg",
-  "nasturtium-vesuvius": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/n/a/nasturtium_whirlybird_gold.jpg",
-  "nicotiana-bronze-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/i/nicotiana_bronze_queen_lss_dsc_6380_850x850.jpg",
-  "nicotiana-crimson-bedder": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/i/nicotiana_crimson_bedder_lss_dsc_7382_850x850.jpg",
-  "nicotiana-marshmallow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/i/nicotiana_marshmallow_lss_dsc_1963_850x850.jpg",
-  "nicotiana-seeds-purple-perfume": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/i/nicotiana_purple_perfume.jpg",
-  "nicotiana-seeds-scentsation-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/n/i/nicotiana_scentsation_mix_lss_dsc_7416_850x850.jpg",
-  "pansy-clear-crystal-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/a/pansy_viola_antique_laeta_lss_dsc_5839_850x850.jpg",
-  "pansy-frizzle-sizzle-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/a/pansy_viola_arkwright_ruby_and_macaroons_lss_dsc_9586_850x850.jpg",
-  "pansy-moulin-rouge": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/a/pansy_viola_berna_velvet_blue_lss_dsc_5152_850x850.jpg",
-  "pansy-swiss-giant-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/a/pansy_blue_perfection_viola_zs009_850x850.jpg",
-  "pansy-tiger-eyes": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/a/pansy_viola_bowles_black_w_colored_sugar_on_cookies_lss_dsc_5483_850x850_1.jpg",
-  "petunia-balcony-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_balcony_mix_zs019_850x850.jpg",
-  "petunia-seeds-copper-spotted": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia-copper-spotted-lss-dsc_5847.jpg",
-  "petunia-greetings-from-jaromere": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_prozdrav_z_jeromere_or_greetings_from_jaromere_lss_dsc_7257_gradient_850x850.jpg",
-  "petunia-karkulka": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/_/_/__petunia_karkulka_zs063_850x850.jpg",
-  "petunia-lace-veil": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_krakovy_zavoj_or_lace_veil_lss_dsc_7233_850x850.jpg",
-  "petunia-seeds-peace": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia-peace--zs004.jpg",
-  "petunia-seeds-purple-dwarf": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia-purple-dwarf-czerny-_3_.jpg",
-  "petunia-seeds-rosa-bonheur": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia-rose-bonheur-lss-dsc_5798.jpg",
-  "petunia-sparklers": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_sparklers_or_sparkles_fl894_lss_dsc_2271_850x850.jpg",
-  "petunia-superbissima-cerny-s-triumph-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_superbissima_cernys_triumph_cherry_flavored_waffle_syrup_lss_dsc_4800_850x850.jpg",
-  "petunia-tidal-wave-purple": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_superbissima_cosmic_cherry_lss_dsc_6320_850x850.jpg",
-  "petunia-tidal-wave-red-velour": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_superbissima_giant_alba_zs007_850x850.jpg",
-  "petunia-tidal-wave-silver": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_superbissma_giant_rose_lss_dsc_4935_850x850.jpg",
-  "petunia-trailing-stars-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/p/e/petunia_white_double.jpg",
-  "petunia-vanilla-ice": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/e/petunia_violet_wild_lss_dsc_4416_850x850.jpg",
-  "phlox-beauty-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/h/phlox_blueberry_swirl.jpg",
-  "phlox-cherry-caramel": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/h/phlox_cherry_caramel_lss_dsc_5166_850x850.jpg",
-  "phlox-creme-brulee": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/h/phlox_sugar_stars_lss_dsc_5225_850x850.jpg",
-  "phlox-sugar-stars": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/h/phlox_twinkles_dwarf_mix_lss_dsc_5075_850x850.jpg",
-  "poppy-amazing-grey": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_amazing_grey_lss_dsc_6882_850x850.jpg",
-  "poppy-black-beauty": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_american_legion_zs007_850x850.jpg",
-  "poppy-bridal-silk": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_black_peony_petals_falling_lss_3567_850x850.jpg",
-  "poppy-burning-heart": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_black_swan_zs004_850x850.jpg",
-  "poppy-california-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_cream_peony_lss_dsc_3414_850x850.jpg",
-  "poppy-champagne-bubbles": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_crimson_feathers_lss_dsc_4950_850x850.jpg",
-  "poppy-danish-flag": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/_/p/_poppy_falling_in_love_zs018_850x850.jpg",
-  "poppy-drama-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_flemish_antique_lss_dsc_5491_850x850.jpg",
-  "poppy-flemish-antique": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_florist_pepperbox_lss_dsc_1259_850x850.jpg",
-  "poppy-frosted-salmon": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_frosted_salmon_kad_l1050318_850x850.jpg",
-  "poppy-hens-and-chicks": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_giant_rattle_breadseed_from_florets_lss_dsc_1512_850x850.jpg",
-  "poppy-hungarian-breadseed": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_hungarian_blue_breadseed_lss_dsc_0817_850x850.jpg",
-  "poppy-izmir-peony-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_hens_and_chickens_lss_dsc_8665_850x850.jpg",
-  "poppy-jelly-bean-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_california_jelly_beans_lss_dsc_8890_850x850.jpg",
-  "poppy-ladybird": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_laurens_grape_lss_dsc_6893_850x850.jpg",
-  "poppy-lauren-s-grape": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_lilac_pom_pom_or_pompom_lss_dsc_5431_850x850.jpg",
-  "poppy-mission-bells": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/_/p/_poppy_pandora_zs006_850x850.jpg",
-  "poppy-peony-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy-pizzicato-lss-dsc_1407.jpg",
-  "poppy-persian-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_purple_peony_lss_dsc_9613_850x850.jpg",
-  "poppy-red-corn": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_rose_feathers_lss_dsc_2755_850x850.jpg",
-  "poppy-shirley-single-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_scarlet_peony.jpg",
-  "poppy-swansdown": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_sissinghurst_white_lss_dsc_4189_850x850.jpg",
-  "poppy-thai-silk-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_strawberry_fields_california_zs003_850x850.jpg",
-  "poppy-venus": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/o/poppy_supreme_zs014_850x850.jpg",
-  "primrose-cowslip": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primrose2-pink-evening-lss-dsc_5421.jpg",
-  "primrose-drumstick": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primrose-primula-no-18-from-asahi-noen-lss-dsc_3209.jpg",
-  "primrose-evening-scented": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primrose-primula-no-6-from-asahi-noen-lss-dsc_3042.jpg",
-  "primrose-glacier-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primrose-primula-no-5-from-asahi-noen-lss-dsc_6882.jpg",
-  "primrose-pacific-giant-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primrose_pink_beauty.jpg",
-  "primrose-showy-evening": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primula2-cortusoides-lss-dsc_4062.jpg",
-  "primrose-sunshine": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/p/r/primula2-wanda-mixed-colors-zs019.jpg",
-  "rudbeckia-autumn-colors": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/r/u/rudbeckia2-caramel-lss-dsc_2404.jpg",
-  "rudbeckia-cherry-brandy": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/r/u/rudbeckia2-cherry-brandy-lss-dsc_5195.jpg",
-  "rudbeckia-goldilocks": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/r/u/rudbeckia2-chim-chiminee-lss-dsc_7557.jpg",
-  "rudbeckia-indian-summer": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/r/u/rudbeckia2-sahara-lss-dsc_5227.jpg",
-  "rudbeckia-marmalade": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/r/u/rudbeckia-viviani-lss-dsc_8688.jpg",
-  "salpiglossis-black-trumpets": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salpiglossis_black_trumpet_lss_dsc_4604_850x850.jpg",
-  "salpiglossis-bolero-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salpiglossis_cafe_au_lait_lss_dsc_9595_850x850.jpg",
-  "salpiglossis-kew-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salpiglossis_kew_blue_lss_dsc_7318-2_850x850.jpg",
-  "salpiglossis-royale-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salpiglossis_grandiflora_mix_lss_dsc_3645_850x850.jpg",
-  "salvia-blue-monday": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/sage_salvia_pink_sunday_and_blue_monday_lss_dsc_5347_850x850.jpg",
-  "salvia-coral-nymph": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salvia-nodding-sage-lss-dsc_3798.jpg",
-  "salvia-merleau-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salvia_rose_queen_and_violet_queen_mix_lss_000_6776_850x850.jpg",
-  "salvia-mystic-spires": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salvia_sage_rose_rhapsody_lss_dsc_6149_850x850.jpg",
-  "salvia-oxford-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salvia-amore-scarlet-bicolor-lss-dsc_5435.jpg",
-  "salvia-victoria-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/a/salvia_sirius_blue_lss_dsc_7594_850x850.jpg",
-  "scabiosa-ace-of-spades": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa-seeds-black-knight-lss-dsc_0064.jpg",
-  "scabiosa-seeds-black-knight": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa-seeds-blue-cockade-lss-dsc_0911.jpg",
-  "scabiosa-seeds-blue-cockade": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa2-fama-deep-blue-lssdsc_3076.jpg",
-  "scabiosa-fata-morgana": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa2-fama-white-lss-dsc_1115.jpg",
-  "scabiosa-seeds-fire-king": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa-fire-king-lss-dsc_0907.jpg",
-  "scabiosa-imperial-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa2-formula-mix-lss-dsc_4201.jpg",
-  "scabiosa-oxford-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa2-paper-moon-fl610-lss-000_7943.jpg",
-  "scabiosa-pincushion-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa_ritz_blue.jpg",
-  "scabiosa-qis-deep-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa_ritz_rose.jpg",
-  "scabiosa-qis-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa2-salmon-queen-lss-dsc_6739.jpg",
-  "scabiosa-starball": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/c/scabiosa2-summer-fruits-zs004.jpg",
-  "snapdragon-seeds-apple-blossom": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon_apple_blossom_1.jpg",
-  "snapdragon-black-prince": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon_black_prince_zs041_850x850.jpg",
-  "snapdragon-seeds-bronze-dragon": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed-packet-snapdragon-bronze-dragon-lss-dsc_6403.jpg",
-  "snapdragon-chantilly-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon_cherry_twist_lss_dsc_7328_850x850.jpg",
-  "snapdragon-madame-butterfly-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon_flames.jpg",
-  "snapdragon-night-and-day": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon2-orange-wonder-lss-dsc_8334.jpg",
-  "snapdragon-rocket-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon-rembrandt-w-ryan-lss-dsc_8683.jpg",
-  "snapdragon-snappy-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon_tall_deluxe_mix_lss_dsc_3849_850x850.jpg",
-  "snapdragon-seeds-tetra-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/s/n/snapdragon_tetra_mix_1_1.jpg",
-  "snapdragon-tom-thumb-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/n/snapdragon-bizarre-mix-w-andrew-m-lss-dsc_6448.jpg",
-  "stock-anytime-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_anytime_mix_zs041_850x850.jpg",
-  "stock-baby-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock-baby-blue-lss-dsc_8323.jpg",
-  "stock-baby-high-double-cream": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock-baby-high-double-cream-lss-dsc_8289.jpg",
-  "stock-baby-rainbow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock-baby-rainbow-lss-dsc_8316.jpg",
-  "stock-beauty-salmon-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_beauty_salmon_pink_zs007_850x850.jpg",
-  "stock-chanter-alto-light-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_chanter_alto_light_pink_lss_dsc_3558_850x850.jpg",
-  "stock-chanter-alto-red": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_chanter_alto_red_kad_l1080155_850x850.jpg",
-  "stock-chanter-cedo-apricot": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock2-chanter-cedo-apricot-zs004.jpg",
-  "stock-haru-no-kagayaki": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_haru_no_kagayaki_lss_dsc_2081_850x850.jpg",
-  "stock-infinity-snow": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock2-infinity-snow-lss-dsc_8587.jpg",
-  "stock-iron-blue": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock-iron-blue-lss-dsc_8341.jpg",
-  "stock-murasaki-no-uta": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_murasakino_no_uta_lss_dsc_0481_850x850.jpg",
-  "stock-nami-no-mai": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_nami_no_mai_zs015_850x850.jpg",
-  "stock-new-kabuki-light-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/e/seed_packet_stock_new_kobuki_or_kabuki_light_pink_lss_dsc_7694_850x850.jpg",
-  "stock-spray-antique-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_spray_antique_pink_lss_dsc_2018_850x850.jpg",
-  "stock-spray-apricot": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock2-venus-cherry-zs030.jpg",
-  "stock-spray-purple": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock2-venus-pink-zs042.jpg",
-  "stock-spray-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_vintage_brown_w_stock_colored_pink_rice_and_salad_lss_dsc_5100_850x850.jpg",
-  "stock-vintage-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/stock_white_surf_lss_dsc_0612_850x850.jpg",
-  "strawflower-apricot-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/strawflower2-king-size-orange-lss-dsc_1069.jpg",
-  "strawflower-bright-bikini-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/strawflower2-king-size-red-with-strawflower-tea-lss-dsc_6476.jpg",
-  "strawflower-double-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/strawflower2-king-sized-silvery-rose-lss-dsc_6537.jpg",
-  "strawflower-silvery-rose": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/strawflower2-king-size-silvery-white-lss-dsc_6514.jpg",
-  "strawflower-tom-thumb-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/t/strawflower2-tall-double-mix-fl640-lss-dsc_9488.jpg",
-  "sunflower-autumn-beauty": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-autumn-beauty-lss-dsc_6555_1x1-850x850.jpg",
-  "sunflower-evening-sun": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/e/v/evening-sun-sunflower-jere_1x1-850x850.jpg",
-  "sunflower-giant-grey-stripe": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-mammoth-grey-striped-lss-dsc_7598_1x1-850x850.jpg",
-  "sunflower-hopi-black-dye": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-hopi-black-dye-lss-dsc_2736_1x1-850x850.jpg",
-  "sunflower-italian-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-ice-cream-lss-dsc_3664_1x1-850x850.jpg",
-  "sunflower-lemon-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-lemon-queen-lss-dsc_9554-recovered_1x1-850x850.jpg",
-  "sunflower-mammoth": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-mongolian-giant-lss-dsc_7855_1x1-850x850.jpg",
-  "sunflower-music-box-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflowe2r-musicbox-mix-lss-dsc_3918.jpg",
-  "sunflower-pro-cut-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/FL758-Sunflower_Paquito_Yellow_and_Red_2_obyzhs.jpg",
-  "sunflower-red-sun": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-seeds-ring-of-fire.jpg",
-  "sunflower-seeds-ring-of-fire": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-short-stuff-lss-dsc_3605_1x1-850x850.jpg",
-  "sunflower-rostov-giant": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-taiyo-lss-dsc_0214_1x1-850x850.jpg",
-  "sunflower-schweintizs": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-henry-wilde-lss-dsc_6310_1x1-850x850.jpg",
-  "sunflower-soraya": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-astra-gold-lss-dsc_5101_1x1-850x850.jpg",
-  "sunflower-sunbright": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-astra-rose-cream-lss-dsc_8540_1x1-850x850_1.jpg",
-  "sunflower-sungold": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-carousel-lss-dsc_6670.jpg",
-  "sunflower-sunspot": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-chocolate-cherry-lss-dsc_6587_1x1-850x850.jpg",
-  "sunflower-tarahumara-white": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-double-sunking-lss-dsc_3584_1x1-850x850.jpg",
-  "sunflower-teddy-bear": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-teddy-bear-lss-dsc_5863_1x1-850x850.jpg",
-  "sunflower-titan": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower2-florenza-lss-dsc_1148.jpg",
-  "sunflower-valentine": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/FL760-Sunflower_Seeds_-_Floristan_1_mavwnt.jpg",
-  "sunflower-van-gogh": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-mexican-arcadian2-blend-or-aracdian-blend-lss-dsc_4423.jpg",
-  "sunflower-velvet-queen": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-mexican-red-torch-lss-dsc_0198_1x1-850x850.jpg",
-  "sunflower-zohar": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/u/sunflower-arikara-lss-dsc_2072_1x1-850x850.jpg",
-  "sweet-pea-bijou-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/s/w/sweet_pea_high_scent.jpg",
-  "sweet-pea-old-spice-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/f/l/flower-sweet-pea-old-spice-mix-lss-000_7567_1x1-850x850.jpg",
-  "verbena-seeds-ideal-florist-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/v/e/verbena_ideal_florist_mix.jpg",
-  "verbena-imagination": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/v/e/verbena-sweetheart-kisses-from-applewood-lss-dsc_1860.jpg",
-  "verbena-peaches-and-cream": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/v/e/seed-packet-verbena-vanity-fsn-lss-dsc_0223.jpg",
-  "vinca-mediterranean-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/v/i/vinca-heatwave-apricot-lss-dsc_9351_1x1-850x850.jpg",
-  "vinca-pacifica-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/v/i/vinca-heatwave-blue-eye-lss-dsc_0181_1x1-1200x1200.jpg",
-  "vinca-titan-mix": "https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/media/catalog/product/v/i/vinca-heatwave-raspberry-lss-dsc_047_1x1-850x8504.jpg",
-  "zinnia-aztec-burgundy-bicolor": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_aztec_burgundy_bicolor.jpg",
-  "zinnia-seeds-benary-s-giant-bright-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benarys_giant_bright_pink.jpg",
-  "zinnia-seeds-benary-s-giant-coral": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benary_s_giant_coral.jpg",
-  "zinnia-seeds-benary-s-giant-deep-red": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benary_s_giant_deep_red.jpg",
-  "zinnia-seeds-benary-s-giant-lime": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benary_s_giant_lime.jpg",
-  "zinnia-seeds-benary-s-giant-orange": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benary_s_giant_orange.jpg",
-  "zinnia-seeds-benary-s-giant-purple": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benary_s_giant_purple.jpg",
-  "zinnia-seeds-benary-s-giant-white": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_benarys_giant_white.jpg",
-  "zinnia-canary-bird": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_canary_bird.jpg",
-  "zinnia-seeds-dream-deep-rosy-lavender": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_dream_deep_rosy_lavender_1.jpg",
-  "zinnia-exquisite": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_exquisite.jpg",
-  "zinnia-lila-cactus": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_lila_cactus.jpg",
-  "zinnia-macarenia": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_macarenia_1_1.jpg",
-  "zinnia-mazurkia": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_mazurkia.jpg",
-  "zinnia-seeds-oklahoma-carmine": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_oklahoma_carmine.jpg",
-  "zinnia-seeds-oklahoma-golden-yellow": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_oklahoma_golden_yellow.jpg",
-  "zinnia-seeds-oklahoma-pink": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_oklahoma_pink.jpg",
-  "zinnia-seeds-oklahoma-scarlet": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_oklahoma_scarlet.jpg",
-  "zinnia-seeds-oklahoma-white": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_oklahoma_white.jpg",
-  "zinnia-orange-cactus": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_orange_cactus.jpg",
-  "zinnia-orange-king": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_orange_king.jpg",
-  "zinnia-peppermint-stick": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_peppermint_stick.jpg",
-  "zinnia-persian-carpet": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_persian_carpet.jpg",
-  "zinnia-peruviana": "https://res.cloudinary.com/rareseeds/image/upload/c_lpad,dpr_1.0,f_auto,h_359,q_auto,w_359/v1/media/catalog/product/z/i/zinnia_peruviana.jpg"
+  "agastache-anise-hyssop": "media/catalog/product/h/y/hyssop2-dark-purple-anise-lss-dsc_9247.jpg",
+  "agastache-apache-sunset": "media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg",
+  "agastache-apricot-sprite": "media/catalog/product/a/g/agastache-apricot-sprite-lss-dsc_2478.jpg",
+  "agastache-seeds-astello-indigo": "media/catalog/product/a/g/agastache-astello-indigo-lss-dsc_9403.jpg",
+  "agastache-fragrant-delight-mix": "media/catalog/product/a/g/agastache-fragrant-delight-mix-lss-dsc_6050.jpg",
+  "agastache-lavender-martini": "media/catalog/product/a/g/agastache2-lavender-martini-lss-dsc_0278_1_.jpg",
+  "agastache-seeds-liquorice-white": "media/catalog/product/a/g/agastache-licorice-white-w-butterfly-lss-dsc_3588.jpg",
+  "agastache-navajo-sunset": "media/catalog/product/a/g/agastache-navajo-sunset-lah-_dsf1400.jpg",
+  "agastache-raspberry-daiquiri": "media/catalog/product/a/g/agastache2-raspberry-daquiri-lss-dsc_8575.jpg",
+  "agastache-rose-mint": "media/catalog/product/a/g/agastache-rose-mint-lss-dsc_8500_1.jpg",
+  "agastache-sunset-yellow": "media/catalog/product/a/g/agastache-hyssop-sunset-yellow-lss-dsc_6368.jpg",
+  "agastache-texas-hummingbird-mint-heather-queen": "media/catalog/product/a/g/agastache-mosquito-plant-or-texas-hummingbird-mint2-heather-queen-hb272-lss-dsc_5175.jpg",
+  "ageratum-ball-mixed": "media/catalog/product/a/g/ageratum2-ball-mixed-lss-dsc_3405.jpg",
+  "ageratum-leda": "media/catalog/product/p/i/pix_1080x1080-ageratum-seeds-leda.jpg",
+  "ageratum-red-flint": "media/catalog/product/a/g/ageratum2-red-flint-lss-dsc_9996.jpg",
+  "armeria-maritima-morning-star-deep-rose": "media/catalog/product/a/m/ameria-morning-star-deep-rose-lss-dsc_2920.jpg",
+  "armeria-maritima-seeds-morning-star-white": "media/catalog/product/a/r/armeria-mantima-morning-star-white-lss-dsc_8714.jpg",
+  "baby-s-breath-seeds-covent-garden": "media/catalog/product/b/a/babys-breath-covent-garden-lss-dsc_4028.jpg",
+  "baby-s-breath-festival-star": "media/catalog/product/b/a/babys-breath-rosea-lss-dsc_3722.jpg",
+  "babys-breath-kermesina": "media/catalog/product/b/a/babys-breath-carmine-from-applewood-lss-dsc_6717.jpg",
+  "bachelor-s-button-seeds-black-ball": "media/catalog/product/b/a/bachelors3-button-black-boy-lss-dsc_4167.jpg",
+  "bachelor-s-button-blue-boy": "media/catalog/product/b/a/bachelor3-button-blue-boy-lss-dsc_5525.jpg",
+  "bachelor-s-button-classic-fantastic": "media/catalog/product/b/a/bachelor2-button-classic-fantastic-lss-dsc_5755.jpg",
+  "bachelor-s-button-classic-romantic": "media/catalog/product/b/a/bachelor2-button-classic-romantic-lss-dsc_6066.jpg",
+  "bachelor-s-button-double-blue": "media/catalog/product/b/a/bachelors3-button-classic-artistic-lss-dsc_1960.jpg",
+  "bachelor-s-button-dwarf-blue-midget": "media/catalog/product/b/a/bachelors-button-classic-magic-lss-dsc_7374.jpg",
+  "bachelors-button-emperor-william": "media/catalog/product/b/a/bachelors-button-fireworks-lss-dsc_7127.jpg",
+  "bachelor-s-button-pinkie": "media/catalog/product/b/a/bachelor-button-tall-double-pinkie-lss-dsc_6129.jpg",
+  "bachelor-s-button-polka-dot-mix": "media/catalog/product/b/a/bachelor-button-tall-double-lavender-lady-lss-dsc_5644.jpg",
+  "bachelor-s-button-red-ball": "media/catalog/product/b/a/bachelors-button-red-boy-lss-dsc_7376.jpg",
+  "balloon-flower-astra-blue": "media/catalog/product/b/a/balloon_flower_fuji_blue_lss_dsc_0327_1x1_1200x1200.jpg",
+  "balloon-flower-astra-mix": "media/catalog/product/b/a/balloon_flower_fairy_snow_spots_removed_retouched_lss_dsc_0286_1x1_1400x1400.jpg",
+  "balloon-flower-astra-pink": "media/catalog/product/b/a/balloon-flower-fuji-pink-lss-dsc_0181.jpg",
+  "balloon-flower-astra-white": "media/catalog/product/b/a/balloon-flower-fuji-white-lss-dsc_0363.jpg",
+  "balsam-peppermint-stick": "media/catalog/product/b/a/balsam-peppermint-stick-placeholder.jpg",
+  "black-eyed-susan-vine-seeds-african-sunset-mix": "media/catalog/product/b/l/black-eyed-susan-vine-african-sunset-mix-lss-000_6929.jpg",
+  "black-eyed-susan-vine-seeds-spanish-eyes": "media/catalog/product/b/l/black-eyed-susan-vine-spanish-eyes-lss-dsc_1360.jpg",
+  "butterfly-pea-blue-queen": "media/catalog/product/b/u/butterfly_pea_thai_double_blue_lss_dsc_7174_1x1_850x850.jpg",
+  "butterfly-pea-lavender-queen": "media/catalog/product/b/u/butterfly_pea_double_double_lavender_queen_lss_dsc_7743_1x1_850x850_1.jpg",
+  "butterfly-pea-seeds-thai-double-blue": "media/catalog/product/s/e/seed-packet-butterfly-pea-thai-blue-lss-dsc_5511.jpg",
+  "butterfly-pea-seeds-thai-double-sky-blue": "Butterfly_Pea_Thai_Double_Sky_Blue_mf3qk8.jpg",
+  "butterfly-pea-white-queen": "media/catalog/product/p/e/pea_white_butterfly_dsc07799__1x1_1200x1200.jpg",
+  "calendula-ball-s-improved-orange": "media/catalog/product/c/a/calendula_balls_improved_orange.jpg",
+  "calendula-orange-king": "media/catalog/product/c/a/calendula-orange-king-lss-dsc_7661.jpg",
+  "calendula-seeds-orange-porcupine": "media/catalog/product/c/a/calendula_orange_porcupine.jpg",
+  "calendula-pacific-beauty-mix": "media/catalog/product/c/a/calendula_pacific_mix_lss_dsc_2459_1x1_1200x1200.jpg",
+  "calendula-pink-surprise": "media/catalog/product/c/a/calendula_pink_surprise_lss_dsc_4738_1x1_1200x1200.jpg",
+  "calendula-playtime-mix": "media/catalog/product/c/a/calendula_playtime_mix_lss_dsc_3430_1x1_1200x1200.jpg",
+  "calendula-snow-princess": "media/catalog/product/c/a/calendula_snow_princess.jpg",
+  "calendula-touch-of-red": "media/catalog/product/c/a/calendula-strawberry-blonde-lss-dsc_4306.jpg",
+  "calendula-zeolights": "media/catalog/product/c/a/calendula_seeds_yellow_porcupine-lss-dsc_7628.jpg",
+  "cockscomb-seeds-asian-garden": "media/catalog/product/c/e/celosia_asian_garden.jpg",
+  "celosia-bombay-dark-red": "media/catalog/product/c/e/celosia-eternity-mix-lss-dsc_3010.jpg",
+  "celosia-bombay-fireball": "media/catalog/product/c/e/celosia_flamingo_feathers_lss_dsc_0933_1x1_1200x1200.jpg",
+  "celosia-bombay-mix": "media/catalog/product/c/e/celosia_higyoku_red_stem_lss_dsc_9450_1x1_1200x1200.jpg",
+  "celosia-bombay-orange": "media/catalog/product/c/e/celosia_cockscomb_indiana_giant_lss_dsc_5524_1x1_1200x1200.jpg",
+  "celosia-bombay-purple": "media/catalog/product/c/e/celosia_jessica_mix_cockscomb_zs016_1x1_1200x1200.jpg",
+  "celosia-bombay-yellow": "media/catalog/product/c/e/celosia_kurume_kumquat_lss_dsc_3658_1x1_1200x1200.jpg",
+  "celosia-celway-mix": "media/catalog/product/c/e/celosia-cockscomb-lightening-yellow-lss-file418.jpg",
+  "celosia-chief-gold": "media/catalog/product/c/e/celosia-cockscomb-mad-magenta-lss-dsc_7012.jpg",
+  "celosia-chief-mix": "media/catalog/product/c/e/celosia-cockscomb-orient-no-2-lss-dsc_8754.jpg",
+  "celosia-chief-persimmon": "media/catalog/product/c/e/celosia2-plumosa-glorious-mix-kad-dscf2700.jpg",
+  "celosia-chief-rose": "media/catalog/product/c/e/celosia-rainbow-sherbert-lss-dsc_3623_1.jpg",
+  "cockscomb-seeds-coral-garden-mix": "media/catalog/product/c/e/celosia-cockscomb-raven-red-brianiac-mix-lss-file313.jpg",
+  "cockscomb-cramers-burgundy": "media/catalog/product/c/e/celosia-cockscomb-think-pink-brianiac-lss-file360.jpg",
+  "cockscomb-seeds-cramers-mix": "media/catalog/product/c/e/celosia_tornado_red_cockcomb.jpg",
+  "celosia-dracula": "media/catalog/product/c/e/celosia-cockscomb-variegated-lss-dsc_5330.jpg",
+  "celosia-intenz": "media/catalog/product/c/e/celosia2-yachiyo-hiryu-lss-dsc_3716.jpg",
+  "celosia-kurume-new-red": "media/catalog/product/c/e/celosia2-yachiyo-karyu-lss-dsc_3766.jpg",
+  "cockscomb-seeds-orange-queen": "media/catalog/product/c/e/celosia2-yachiyo-kinpou-lss-dsc_3614.jpg",
+  "cockscomb-pampas-plume-mix": "media/catalog/product/c/e/celosia2-yellow-queen-lss-dsc_3648.jpg",
+  "celosia-sunday-gold": "media/catalog/product/c/e/celosia_chinese_wool_flower_lss_dsc_4716_1x1_1200x1200.jpg",
+  "celosia-sylphid": "media/catalog/product/c/e/celosia-green-sylphid-lss-dsc_3687.jpg",
+  "celosia-toreador": "media/catalog/product/s/c/scenic-celosia-in-restaurant-garden-lss-dsc_8121.jpg",
+  "crimson-clover-seeds": "media/catalog/product/g/r/grains-and-cover-crops-crimson-clover-lss-dsc_8134.jpg",
+  "red-clover-seeds": "media/catalog/product/c/l/clover-red-feathers-lss-dsc_9933.jpg",
+  "coleus-black-dragon": "media/catalog/product/c/o/coleus-seeds-colocha-chocolate-green-exp-lss-dsc_0024.jpg",
+  "coleus-carefree-mix": "media/catalog/product/c/o/coleus-colocha-red-exp-lss-dsc_6656.jpg",
+  "coleus-chocolate-mint": "media/catalog/product/c/o/coleus2-colocha-rose-zs004-_1_.jpg",
+  "coleus-fairway-mix": "media/catalog/product/c/o/coleus2-colocha-scarlet_sunset-zs018_1_.jpg",
+  "coleus-kong-mix": "media/catalog/product/c/o/coleus2-folia-mosaic-zs013.jpg",
+  "coleus-premium-sun-mix": "media/catalog/product/c/o/coleus2-folia-picasso-zs011.jpg",
+  "coleus-rainbow-mix": "media/catalog/product/c/o/coleus2-folia-sunset-zs004.jpg",
+  "coleus-wizard-mix": "media/catalog/product/c/o/coleus2-folia-velvet-zs040.jpg",
+  "coleus-wizard-velvet-red": "media/catalog/product/c/o/coleus2-pinto-mix-lss-dsc_8760.jpg",
+  "columbine-barlow-mix": "media/catalog/product/c/o/columbine-double-mixed-lss-dsc_6830.jpg",
+  "columbine-mckana-giant-mix": "media/catalog/product/c/o/columbine-leprechaun-gold-lss-dsc_1642_1.jpg",
+  "columbine-winky-mix": "media/catalog/product/c/o/columbine-rose-barlow-lss-dsc_3960.jpg",
+  "coreopsis-early-sunrise": "media/catalog/product/c/o/coreopsis-incredible-dwarf-mix-lss-dsc_5697.jpg",
+  "coreopsis-mardi-gras": "media/catalog/product/c/o/coreopsis-incredible-sea-shells-mix-lss-dsc_2569.jpg",
+  "coreopsis-plains": "media/catalog/product/c/o/coreopsis-incredible-swirl-lss-dsc_2018.jpg",
+  "coreopsis-tall-mix": "media/catalog/product/c/o/coreopsis2-yellow-fluffy-double-lss-dsc_9229.jpg",
+  "cosmos-apricot-lemonade": "media/catalog/product/c/o/cosmos-apricot-lemonade-lss-dsc_9223.jpg",
+  "cosmos-apricotta": "media/catalog/product/c/o/cosmos-apricotta-lss-dsc_8636.jpg",
+  "cosmos-black-magic-chocolate": "media/catalog/product/c/o/cosmos_black_magic.jpg",
+  "cosmos-bright-lights": "media/catalog/product/c/o/cosmos_bright_lights.jpg",
+  "cosmos-candyfloss-pink-sunrise": "media/catalog/product/c/o/cosmos_candyfloss_pink_sunrise.jpg",
+  "cosmos-candyfloss-red": "media/catalog/product/c/o/cosmos-candyfloss-red-lss-dsc_7669.jpg",
+  "cosmos-cosmic-orange": "media/catalog/product/c/o/cosmos2-cosmic-orange-zs002.jpg",
+  "cosmos-cosmic-red": "media/catalog/product/c/o/cosmos2-cosmic-red-lss-dsc_4490.jpg",
+  "cosmos-cosmic-yellow": "media/catalog/product/c/o/cosmos2-cosmic-yellow-lss-dsc_9030.jpg",
+  "cosmos-double-dutch-rose": "media/catalog/product/c/o/cosmos-double-dutch-rose-lss-dsc_8765.jpg",
+  "cosmos-fizzy-rose-picotee": "media/catalog/product/c/o/cosmos-fizzy-rose-picotee-op-lss--dsc_8544.jpg",
+  "cosmos-japanese-kiiro": "media/catalog/product/c/o/cosmos_japanese_kiiro.jpg",
+  "cosmos-rubenza": "media/catalog/product/c/o/cosmos--rubenza-zs026.jpg",
+  "cosmos-sensation-mix": "media/catalog/product/c/o/cosmos-sea-shells-or-seashells-hand-dyed-yarn-lss-dsc_7064.jpg",
+  "cosmos-xanthos": "media/catalog/product/c/o/cosmos-xanthos-lss-dsc_6980.jpg",
+  "dahlia-bishops-children": "media/catalog/product/d/a/dahlia-seeds-black-beauty-zs006.jpg",
+  "dahlia-cactus-hybrids-mix": "media/catalog/product/d/a/dahlia_cactus_flowered_mix_from_sahin_lss_dsc_8586_850x850.jpg",
+  "dahlia-dandy-mix": "media/catalog/product/d/a/dahlia_dandy_improved_lss_dsc_1990_850x850.jpg",
+  "dahlia-night-butterfly": "media/catalog/product/d/a/dahlia-seeds-black-forest-ruby-lss-dsc_9512.jpg",
+  "dahlia-opera-mix": "media/catalog/product/d/a/dahlia_mignon_single_mix_lss_dsc_1402_850x850.jpg",
+  "dahlia-unwins-dwarf-mix": "media/catalog/product/f/l/flower_dahlia_unwin_s_dsc05701_850x850.jpg",
+  "daisy-bellissima-mix": "media/catalog/product/d/a/daisy_white_or_blue_disc_lss_dsc_9989_850x850.jpg",
+  "daisy-crazy-daisy": "media/catalog/product/d/a/daisy_crazy_lss_dsc_7070_850x850.jpg",
+  "daisy-pomponette-mix": "media/catalog/product/d/a/daisy_chocolate_lss_dsc_9876_850x850.jpg",
+  "daisy-robinsons-mix": "media/catalog/product/d/a/daisy2-dahlberg-lss-dsc_5738.jpg",
+  "daisy-rominette-mix": "media/catalog/product/s/e/seed-packet-chamomile-kelway-golden-lss-dsc_9847.jpg",
+  "daisy-snow-lady": "media/catalog/product/d/a/daisy_livingstone_pastel_mixed_lss_dsc_7201_850x850.jpg",
+  "daisy-super-enorma-mix": "media/catalog/product/d/a/daisy-hero2-paper-from-applewood-kad-l1040871.jpg",
+  "daisy-tasso-mix": "media/catalog/product/d/a/daisy_swan_river_mix_lss_dsc_0327_850x850.jpg",
+  "dandelion-ameliore": "media/catalog/product/s/e/seed-packet-chicory-imero-dandelion-zs006.jpg",
+  "dandelion-clio": "media/catalog/product/c/h/chichory_dandelion_italiko_rosso_lss_dsc_0589-850x850.jpg",
+  "dandelion-vert-de-montmagny": "media/catalog/product/d/a/dandelion_japanese_white_lss_dsc_3332_850x850.jpg",
+  "dandelion-wild": "media/catalog/product/d/a/dandelion_pink_lss_dsc_5360_850x850.jpg",
+  "dianthus-seeds-black-adder": "media/catalog/product/d/i/dianthus_black_adder.jpg",
+  "dianthus-seeds-flora-mix": "FL647-Dianthus_Flora_Mix_2_vhf4s2.jpg",
+  "dianthus-seeds-flora-pearl-appleblossom": "media/catalog/product/d/i/dianthus_floral_pearl_appleblossom.jpg",
+  "dianthus-seeds-flora-pearl-salmon": "media/catalog/product/d/i/dianthus_floral_pearl_salmon.jpg",
+  "dianthus-hollandia-purple-crown": "media/catalog/product/p/h/phlox_hollandia_purple_crown_lss_dsc_5305_850x850.jpg",
+  "dianthus-raspberry-ripple": "media/catalog/product/d/i/dianthus_raspberry_ripple_lss_dsc_8586_850x850.jpg",
+  "dianthus-spooky-mix": "media/catalog/product/d/i/dianthus_spooky_mix_lss_dsc_8297_850x850.jpg",
+  "dianthus-zebra-crossing": "media/catalog/product/d/i/dianthus-zebra-crossing-lss-dsc_9550.jpg",
+  "forget-me-not-seeds-bellamy-blue": "media/catalog/product/f/o/forget-me-not_bellamy_blue.jpg",
+  "forget-me-not-seeds-bellamy-pink": "media/catalog/product/f/o/forget-me-not_bellamy_pink.jpg",
+  "forget-me-not-seeds-bellamy-white": "media/catalog/product/s/e/seed-packet-forget-me-not-bellamy-white-lss-dsc_6667.jpg",
+  "forget-me-not-seeds-blue-bird": "media/catalog/product/f/o/forget-me-not_blue_bird.jpg",
+  "forget-me-not-seeds-sylva-rosylva": "media/catalog/product/f/o/forget-me-not-sylva-rosylva-lss-dsc_7812.jpg",
+  "gaillardia-arizona-mix": "media/catalog/product/g/a/gaillardia-arizona-apricot-lss-dsc_0709.jpg",
+  "gaillardia-lorenziana-double-mix": "media/catalog/product/g/a/gaillardia-seeds-arizona-red-shades-lss-dsc_5431.jpg",
+  "gaillardia-sundance-bicolor": "media/catalog/product/g/a/galardia_double_sunset_lss_dsc_8689_850x850.jpg",
+  "gaillardia-sundance-mix": "media/catalog/product/g/a/gaillardia-sundance-bicolor-placeholder.jpg",
+  "gomphrena-atomic-purple": "media/catalog/product/g/o/gomphrena_atomic_purple_zs022_850x850.jpg",
+  "gomphrena-buddy-mix": "media/catalog/product/g/o/gomphrena2-buddy-purple-zs012.jpg",
+  "gomphrena-fireworks": "media/catalog/product/g/l/globosa_mixed_gomphrena_fl189_lss_000_6963_850x850.jpg",
+  "gomphrena-qis-mix": "media/catalog/product/g/o/gomphrena2-lavender-lady-lss-dsc_7553.jpg",
+  "gomphrena-qis-rose": "media/catalog/product/g/o/gomphrena_salmon_pastel_lss_dsc_8893_850x850.jpg",
+  "gomphrena-strawberry-fields": "media/catalog/product/g/o/gomphrena_snow_white_zs006_850x850_1.jpg",
+  "grass-frosted-explosion": "media/catalog/product/g/r/grass2-blue-buddy-zs001_1_.jpg",
+  "grass-pampas": "media/catalog/product/g/r/grass2-bunny-tail-zs037.jpg",
+  "grass-ruby-silk": "media/catalog/product/s/a/savannah2-melinis-nerviglumis-lss-dsc_5564.jpg",
+  "hollyhock-halo-mix": "media/catalog/product/h/o/hollyhock_creme_de_cassis_lss_dsc_7983_850x850.jpg",
+  "hollyhock-indian-spring": "media/catalog/product/h/o/hollyhock_jet_black_or_nigra_lss_dsc_6860_850x850.jpg",
+  "hollyhock-the-watchman": "media/catalog/product/h/o/hollyhock_majorette_double_champagne_lss_dsc_0427_850x850.jpg",
+  "iceplant-harlequin-mix": "media/catalog/product/i/c/iceplant_purple_stardust_zs005_850x850.jpg",
+  "iceplant-sparkles-mix": "media/catalog/product/s/u/succulent_iceplant_fl919_lss_000_5351_850x850.jpg",
+  "lace-flower-blue": "media/catalog/product/l/a/lace2-flower-blue-lss-dsc_0727.jpg",
+  "lace-flower-dara": "media/catalog/product/l/a/lace2-flower-pink-lss-dsc_9464.jpg",
+  "lace-flower-white": "media/catalog/product/l/a/lace2-flower-white-lss-dsc_9347.jpg",
+  "lewisia-ashwood-carousel-mix": "media/catalog/product/l/e/lewisia-golden-yellow-lss-dsc_9566_1.jpg",
+  "lewisia-seeds-elise-mix": "media/catalog/product/l/e/lewisia-mix-fs-goldmedal-lss-dsc_9827.jpg",
+  "lewisia-little-peach": "media/catalog/product/l/e/lewisia-rosy-pink-lss-dsc_9536.jpg",
+  "lewisia-little-plum": "media/catalog/product/l/e/lewisia-ruby-red-lss-dsc_9803.jpg",
+  "lewisia-little-tutti-frutti": "media/catalog/product/l/e/lewisia-ultra-violet-or-ultraviolet-lss-dsc_9786.jpg",
+  "love-in-a-mist-miss-jekyll-blue": "media/catalog/product/l/o/love-in-a-mist2-midnight-nigella-lss-dsc_7861.jpg",
+  "love-in-a-mist-miss-jekyll-rose": "media/catalog/product/l/o/love-in-a-mist2-miss-jekyll-mix-lss-dsc_4484.jpg",
+  "love-in-a-mist-persian-jewels": "media/catalog/product/l/o/love-in-a-mist-nigella-damascena2-mulberry-rose-lss-dsc_3716.jpg",
+  "marigold-brocade-mix": "media/catalog/product/m/a/marigold_bambino.jpg",
+  "marigold-crackerjack-mix": "media/catalog/product/m/a/marigold_crackerjack_mix_dsc03499_850x850.jpg",
+  "marigold-french-vanilla": "media/catalog/product/m/a/marigold-disco-mix-zs019.jpg",
+  "marigold-giant-orange": "media/catalog/product/m/a/marigold_colossus_red_gold_bicolor_lss_dsc_5324_850x850.jpg",
+  "marigold-honeycomb": "media/catalog/product/m/a/marigold2-chica-flame-lss-dsc_5249.jpg",
+  "marigold-jolly-jester": "FL669-Marigold_Dune_Yellow_3_huisue.jpg",
+  "marigold-lemon-drop": "media/catalog/product/m/a/marigold_gypsy_sunshine_lss_dsc_6866_850x850.jpg",
+  "marigold-sparky-mix": "media/catalog/product/m/a/marigold_kee_s_orange.jpg",
+  "marigold-strawberry-blonde": "media/catalog/product/m/a/marigold_kilimanjaro_white_lss_dsc_7191_850x850.jpg",
+  "marvel-of-peru-broken-colors-mix": "media/catalog/product/m/a/marvels-of-peru-four-o-clocks2-marbles-mixed-lss-dsc_8929.jpg",
+  "marvel-of-peru-limelight": "media/catalog/product/f/o/four2-o-clocks-salmon-sunset-lss-dsc_6672.jpg",
+  "marvel-of-peru-marvel-mix": "media/catalog/product/m/a/marigold_linnaeus_burning_embers_lss_dsc_6471_850x850.jpg",
+  "marvel-of-peru-tea-time-mix": "media/catalog/product/m/a/marigold-little-hero-fire-lss-dsc_5655.jpg",
+  "milkweed-common": "media/catalog/product/m/i/milkweed_butterfly_weed_zs002_850x850.jpg",
+  "milkweed-butterfly-flower": "media/catalog/product/m/i/milkweed_gay_butterflies_lss_dsc_1267_850x850.jpg",
+  "milkweed-gay-butterflies-mix": "media/catalog/product/m/i/milkweed_hello_yellow_lss_dsc_9723_850x850.jpg",
+  "milkweed-hello-yellow": "media/catalog/product/m/i/milkweed_ice_ballet_lss_dsc_9786_850x850.jpg",
+  "milkweed-oro": "media/catalog/product/m/i/milkweed_red_or_swamp.jpg",
+  "milkweed-rose": "media/catalog/product/m/i/milkweed_showy_w_pollinators_lss_dsc_7083_850x850.jpg",
+  "milkweed-showy": "media/catalog/product/m/i/milkweed_soul_mate_or_soulmate_lss_dsc_9713_850x850.jpg",
+  "milkweed-swamp": "media/catalog/product/t/w/tweedia_heavenly_blue_zs013_850x850.jpg",
+  "milkweed-tuberosa": "media/catalog/product/t/w/tweedia-seeds-white-lss-dsc_1087.jpg",
+  "morning-glory-carnevale-di-venezia": "media/catalog/product/m/o/morning_glory_carnevale_di_venezia_lss_000_0416_850x850.jpg",
+  "morning-glory-grandpa-ott": "media/catalog/product/f/l/flowers_morning_glory_moon_flower_img_0460_850x850.jpg",
+  "morning-glory-heavenly-blue": "media/catalog/product/m/o/morning_glory_kanoko_red_speckled.jpg",
+  "morning-glory-scarlett-ohara": "media/catalog/product/m/o/morning_glory_kikyozaki_mixed_lss_dsc_5463_850x850.jpg",
+  "morning-glory-sunrise-serenade": "media/catalog/product/f/l/flower_morning_glory_split_second_1523_850x850.jpg",
+  "nasturtium-alaska-mix": "media/catalog/product/n/a/nasturtium_alaska_mix_zs005_850x850.jpg",
+  "nasturtium-black-velvet": "media/catalog/product/l/e/lettuce-ice-queen-with-nasturtium2-black-velvet-lss-dsc_9103.jpg",
+  "nasturtium-bloody-mary": "media/catalog/product/n/a/nasturtium_bloody_mary_zs026_850x850.jpg",
+  "nasturtium-cherry-rose-jewel": "media/catalog/product/n/a/nasturtium_cherry_rose_jewel_lss_dsc_5706_850x850.jpg",
+  "nasturtium-cobra": "media/catalog/product/n/a/nasturtium_alaska_red_shades_lss_dsc_0286_850x850.jpg",
+  "nasturtium-empress-of-india": "media/catalog/product/s/e/seed-packet-nasturtium-baby-orange-lss-dsc_5092.jpg",
+  "nasturtium-fiesta-blend": "media/catalog/product/n/a/nasturtium_golden_jewel.jpg",
+  "nasturtium-jewel-mix": "media/catalog/product/n/a/nasturtium_orchid_cream_lss_dsc_7219-2_850x850.jpg",
+  "nasturtium-ladybird": "media/catalog/product/n/a/nasturtium2-orchid-flame-zs010.jpg",
+  "nasturtium-moonlight": "media/catalog/product/n/a/nasturtium2-phoenix-lss-dsc_1087.jpg",
+  "nasturtium-orchid-cream": "media/catalog/product/n/a/nasturtium_purple_emperor_lss_dsc_6447_850x850.jpg",
+  "nasturtium-peach-melba": "media/catalog/product/n/a/nasturtium_tangerine_whirlybird1.jpg",
+  "nasturtium-phoenix": "media/catalog/product/n/a/nastutium_tip_top_alaska_salmon_lss_dsc_5804_850x850.jpg",
+  "nasturtium-purple-emperor": "media/catalog/product/n/a/nasturtium_tip_top_mahogany_w_nasturtium_pesto_recipe_lss_dsc_4822_850x850.jpg",
+  "nasturtium-spitfire": "media/catalog/product/n/a/nasturtium_tip_top_pink_blush.jpg",
+  "nasturtium-tall-trailing-mix": "media/catalog/product/n/a/nasturtium_tip_top_rose_lss_dsc_2786_850x850.jpg",
+  "nasturtium-tip-top-mix": "FL533-Whirly_Bird_Rose_Nasturtium_2_hurdur.jpg",
+  "nasturtium-vesuvius": "media/catalog/product/n/a/nasturtium_whirlybird_gold.jpg",
+  "nicotiana-bronze-queen": "media/catalog/product/n/i/nicotiana_bronze_queen_lss_dsc_6380_850x850.jpg",
+  "nicotiana-crimson-bedder": "media/catalog/product/n/i/nicotiana_crimson_bedder_lss_dsc_7382_850x850.jpg",
+  "nicotiana-marshmallow": "media/catalog/product/n/i/nicotiana_marshmallow_lss_dsc_1963_850x850.jpg",
+  "nicotiana-seeds-purple-perfume": "media/catalog/product/n/i/nicotiana_purple_perfume.jpg",
+  "nicotiana-seeds-scentsation-mix": "media/catalog/product/n/i/nicotiana_scentsation_mix_lss_dsc_7416_850x850.jpg",
+  "pansy-clear-crystal-mix": "media/catalog/product/p/a/pansy_viola_antique_laeta_lss_dsc_5839_850x850.jpg",
+  "pansy-frizzle-sizzle-mix": "media/catalog/product/p/a/pansy_viola_arkwright_ruby_and_macaroons_lss_dsc_9586_850x850.jpg",
+  "pansy-moulin-rouge": "media/catalog/product/p/a/pansy_viola_berna_velvet_blue_lss_dsc_5152_850x850.jpg",
+  "pansy-swiss-giant-mix": "media/catalog/product/p/a/pansy_blue_perfection_viola_zs009_850x850.jpg",
+  "pansy-tiger-eyes": "media/catalog/product/p/a/pansy_viola_bowles_black_w_colored_sugar_on_cookies_lss_dsc_5483_850x850_1.jpg",
+  "petunia-balcony-mix": "media/catalog/product/p/e/petunia_balcony_mix_zs019_850x850.jpg",
+  "petunia-seeds-copper-spotted": "media/catalog/product/p/e/petunia-copper-spotted-lss-dsc_5847.jpg",
+  "petunia-greetings-from-jaromere": "media/catalog/product/p/e/petunia_prozdrav_z_jeromere_or_greetings_from_jaromere_lss_dsc_7257_gradient_850x850.jpg",
+  "petunia-karkulka": "media/catalog/product/_/_/__petunia_karkulka_zs063_850x850.jpg",
+  "petunia-lace-veil": "media/catalog/product/p/e/petunia_krakovy_zavoj_or_lace_veil_lss_dsc_7233_850x850.jpg",
+  "petunia-seeds-peace": "media/catalog/product/p/e/petunia-peace--zs004.jpg",
+  "petunia-seeds-purple-dwarf": "media/catalog/product/p/e/petunia-purple-dwarf-czerny-_3_.jpg",
+  "petunia-seeds-rosa-bonheur": "media/catalog/product/p/e/petunia-rose-bonheur-lss-dsc_5798.jpg",
+  "petunia-sparklers": "media/catalog/product/p/e/petunia_sparklers_or_sparkles_fl894_lss_dsc_2271_850x850.jpg",
+  "petunia-superbissima-cerny-s-triumph-mix": "media/catalog/product/p/e/petunia_superbissima_cernys_triumph_cherry_flavored_waffle_syrup_lss_dsc_4800_850x850.jpg",
+  "petunia-tidal-wave-purple": "media/catalog/product/p/e/petunia_superbissima_cosmic_cherry_lss_dsc_6320_850x850.jpg",
+  "petunia-tidal-wave-red-velour": "media/catalog/product/p/e/petunia_superbissima_giant_alba_zs007_850x850.jpg",
+  "petunia-tidal-wave-silver": "media/catalog/product/p/e/petunia_superbissma_giant_rose_lss_dsc_4935_850x850.jpg",
+  "petunia-trailing-stars-mix": "media/catalog/product/p/e/petunia_white_double.jpg",
+  "petunia-vanilla-ice": "media/catalog/product/p/e/petunia_violet_wild_lss_dsc_4416_850x850.jpg",
+  "phlox-beauty-mix": "media/catalog/product/p/h/phlox_blueberry_swirl.jpg",
+  "phlox-cherry-caramel": "media/catalog/product/p/h/phlox_cherry_caramel_lss_dsc_5166_850x850.jpg",
+  "phlox-creme-brulee": "media/catalog/product/p/h/phlox_sugar_stars_lss_dsc_5225_850x850.jpg",
+  "phlox-sugar-stars": "media/catalog/product/p/h/phlox_twinkles_dwarf_mix_lss_dsc_5075_850x850.jpg",
+  "poppy-amazing-grey": "media/catalog/product/p/o/poppy_amazing_grey_lss_dsc_6882_850x850.jpg",
+  "poppy-black-beauty": "media/catalog/product/p/o/poppy_american_legion_zs007_850x850.jpg",
+  "poppy-bridal-silk": "media/catalog/product/p/o/poppy_black_peony_petals_falling_lss_3567_850x850.jpg",
+  "poppy-burning-heart": "media/catalog/product/p/o/poppy_black_swan_zs004_850x850.jpg",
+  "poppy-california-orange": "media/catalog/product/p/o/poppy_cream_peony_lss_dsc_3414_850x850.jpg",
+  "poppy-champagne-bubbles": "media/catalog/product/p/o/poppy_crimson_feathers_lss_dsc_4950_850x850.jpg",
+  "poppy-danish-flag": "media/catalog/product/_/p/_poppy_falling_in_love_zs018_850x850.jpg",
+  "poppy-drama-queen": "media/catalog/product/p/o/poppy_flemish_antique_lss_dsc_5491_850x850.jpg",
+  "poppy-flemish-antique": "media/catalog/product/p/o/poppy_florist_pepperbox_lss_dsc_1259_850x850.jpg",
+  "poppy-frosted-salmon": "media/catalog/product/p/o/poppy_frosted_salmon_kad_l1050318_850x850.jpg",
+  "poppy-hens-and-chicks": "media/catalog/product/p/o/poppy_giant_rattle_breadseed_from_florets_lss_dsc_1512_850x850.jpg",
+  "poppy-hungarian-breadseed": "media/catalog/product/p/o/poppy_hungarian_blue_breadseed_lss_dsc_0817_850x850.jpg",
+  "poppy-izmir-peony-mix": "media/catalog/product/p/o/poppy_hens_and_chickens_lss_dsc_8665_850x850.jpg",
+  "poppy-jelly-bean-mix": "media/catalog/product/p/o/poppy_california_jelly_beans_lss_dsc_8890_850x850.jpg",
+  "poppy-ladybird": "media/catalog/product/p/o/poppy_laurens_grape_lss_dsc_6893_850x850.jpg",
+  "poppy-lauren-s-grape": "media/catalog/product/p/o/poppy_lilac_pom_pom_or_pompom_lss_dsc_5431_850x850.jpg",
+  "poppy-mission-bells": "media/catalog/product/_/p/_poppy_pandora_zs006_850x850.jpg",
+  "poppy-peony-mix": "media/catalog/product/p/o/poppy-pizzicato-lss-dsc_1407.jpg",
+  "poppy-persian-blue": "media/catalog/product/p/o/poppy_purple_peony_lss_dsc_9613_850x850.jpg",
+  "poppy-red-corn": "media/catalog/product/p/o/poppy_rose_feathers_lss_dsc_2755_850x850.jpg",
+  "poppy-shirley-single-mix": "media/catalog/product/p/o/poppy_scarlet_peony.jpg",
+  "poppy-swansdown": "media/catalog/product/p/o/poppy_sissinghurst_white_lss_dsc_4189_850x850.jpg",
+  "poppy-thai-silk-mix": "media/catalog/product/p/o/poppy_strawberry_fields_california_zs003_850x850.jpg",
+  "poppy-venus": "media/catalog/product/p/o/poppy_supreme_zs014_850x850.jpg",
+  "primrose-cowslip": "media/catalog/product/p/r/primrose2-pink-evening-lss-dsc_5421.jpg",
+  "primrose-drumstick": "media/catalog/product/p/r/primrose-primula-no-18-from-asahi-noen-lss-dsc_3209.jpg",
+  "primrose-evening-scented": "media/catalog/product/p/r/primrose-primula-no-6-from-asahi-noen-lss-dsc_3042.jpg",
+  "primrose-glacier-blue": "media/catalog/product/p/r/primrose-primula-no-5-from-asahi-noen-lss-dsc_6882.jpg",
+  "primrose-pacific-giant-mix": "media/catalog/product/p/r/primrose_pink_beauty.jpg",
+  "primrose-showy-evening": "media/catalog/product/p/r/primula2-cortusoides-lss-dsc_4062.jpg",
+  "primrose-sunshine": "media/catalog/product/p/r/primula2-wanda-mixed-colors-zs019.jpg",
+  "rudbeckia-autumn-colors": "media/catalog/product/r/u/rudbeckia2-caramel-lss-dsc_2404.jpg",
+  "rudbeckia-cherry-brandy": "media/catalog/product/r/u/rudbeckia2-cherry-brandy-lss-dsc_5195.jpg",
+  "rudbeckia-goldilocks": "media/catalog/product/r/u/rudbeckia2-chim-chiminee-lss-dsc_7557.jpg",
+  "rudbeckia-indian-summer": "media/catalog/product/r/u/rudbeckia2-sahara-lss-dsc_5227.jpg",
+  "rudbeckia-marmalade": "media/catalog/product/r/u/rudbeckia-viviani-lss-dsc_8688.jpg",
+  "salpiglossis-black-trumpets": "media/catalog/product/s/a/salpiglossis_black_trumpet_lss_dsc_4604_850x850.jpg",
+  "salpiglossis-bolero-mix": "media/catalog/product/s/a/salpiglossis_cafe_au_lait_lss_dsc_9595_850x850.jpg",
+  "salpiglossis-kew-blue": "media/catalog/product/s/a/salpiglossis_kew_blue_lss_dsc_7318-2_850x850.jpg",
+  "salpiglossis-royale-mix": "media/catalog/product/s/a/salpiglossis_grandiflora_mix_lss_dsc_3645_850x850.jpg",
+  "salvia-blue-monday": "media/catalog/product/s/a/sage_salvia_pink_sunday_and_blue_monday_lss_dsc_5347_850x850.jpg",
+  "salvia-coral-nymph": "media/catalog/product/s/a/salvia-nodding-sage-lss-dsc_3798.jpg",
+  "salvia-merleau-blue": "media/catalog/product/s/a/salvia_rose_queen_and_violet_queen_mix_lss_000_6776_850x850.jpg",
+  "salvia-mystic-spires": "media/catalog/product/s/a/salvia_sage_rose_rhapsody_lss_dsc_6149_850x850.jpg",
+  "salvia-oxford-blue": "media/catalog/product/s/a/salvia-amore-scarlet-bicolor-lss-dsc_5435.jpg",
+  "salvia-victoria-blue": "media/catalog/product/s/a/salvia_sirius_blue_lss_dsc_7594_850x850.jpg",
+  "scabiosa-ace-of-spades": "media/catalog/product/s/c/scabiosa-seeds-black-knight-lss-dsc_0064.jpg",
+  "scabiosa-seeds-black-knight": "media/catalog/product/s/c/scabiosa-seeds-blue-cockade-lss-dsc_0911.jpg",
+  "scabiosa-seeds-blue-cockade": "media/catalog/product/s/c/scabiosa2-fama-deep-blue-lssdsc_3076.jpg",
+  "scabiosa-fata-morgana": "media/catalog/product/s/c/scabiosa2-fama-white-lss-dsc_1115.jpg",
+  "scabiosa-seeds-fire-king": "media/catalog/product/s/c/scabiosa-fire-king-lss-dsc_0907.jpg",
+  "scabiosa-imperial-mix": "media/catalog/product/s/c/scabiosa2-formula-mix-lss-dsc_4201.jpg",
+  "scabiosa-oxford-blue": "media/catalog/product/s/c/scabiosa2-paper-moon-fl610-lss-000_7943.jpg",
+  "scabiosa-pincushion-mix": "media/catalog/product/s/c/scabiosa_ritz_blue.jpg",
+  "scabiosa-qis-deep-red": "media/catalog/product/s/c/scabiosa_ritz_rose.jpg",
+  "scabiosa-qis-mix": "media/catalog/product/s/c/scabiosa2-salmon-queen-lss-dsc_6739.jpg",
+  "scabiosa-starball": "media/catalog/product/s/c/scabiosa2-summer-fruits-zs004.jpg",
+  "snapdragon-seeds-apple-blossom": "media/catalog/product/s/n/snapdragon_apple_blossom_1.jpg",
+  "snapdragon-black-prince": "media/catalog/product/s/n/snapdragon_black_prince_zs041_850x850.jpg",
+  "snapdragon-seeds-bronze-dragon": "media/catalog/product/s/e/seed-packet-snapdragon-bronze-dragon-lss-dsc_6403.jpg",
+  "snapdragon-chantilly-mix": "media/catalog/product/s/n/snapdragon_cherry_twist_lss_dsc_7328_850x850.jpg",
+  "snapdragon-madame-butterfly-mix": "media/catalog/product/s/n/snapdragon_flames.jpg",
+  "snapdragon-night-and-day": "media/catalog/product/s/n/snapdragon2-orange-wonder-lss-dsc_8334.jpg",
+  "snapdragon-rocket-mix": "media/catalog/product/s/n/snapdragon-rembrandt-w-ryan-lss-dsc_8683.jpg",
+  "snapdragon-snappy-mix": "media/catalog/product/s/n/snapdragon_tall_deluxe_mix_lss_dsc_3849_850x850.jpg",
+  "snapdragon-seeds-tetra-mix": "media/catalog/product/s/n/snapdragon_tetra_mix_1_1.jpg",
+  "snapdragon-tom-thumb-mix": "media/catalog/product/s/n/snapdragon-bizarre-mix-w-andrew-m-lss-dsc_6448.jpg",
+  "stock-anytime-mix": "media/catalog/product/s/t/stock_anytime_mix_zs041_850x850.jpg",
+  "stock-baby-blue": "media/catalog/product/s/t/stock-baby-blue-lss-dsc_8323.jpg",
+  "stock-baby-high-double-cream": "media/catalog/product/s/t/stock-baby-high-double-cream-lss-dsc_8289.jpg",
+  "stock-baby-rainbow": "media/catalog/product/s/t/stock-baby-rainbow-lss-dsc_8316.jpg",
+  "stock-beauty-salmon-pink": "media/catalog/product/s/t/stock_beauty_salmon_pink_zs007_850x850.jpg",
+  "stock-chanter-alto-light-pink": "media/catalog/product/s/t/stock_chanter_alto_light_pink_lss_dsc_3558_850x850.jpg",
+  "stock-chanter-alto-red": "media/catalog/product/s/t/stock_chanter_alto_red_kad_l1080155_850x850.jpg",
+  "stock-chanter-cedo-apricot": "media/catalog/product/s/t/stock2-chanter-cedo-apricot-zs004.jpg",
+  "stock-haru-no-kagayaki": "media/catalog/product/s/t/stock_haru_no_kagayaki_lss_dsc_2081_850x850.jpg",
+  "stock-infinity-snow": "media/catalog/product/s/t/stock2-infinity-snow-lss-dsc_8587.jpg",
+  "stock-iron-blue": "media/catalog/product/s/t/stock-iron-blue-lss-dsc_8341.jpg",
+  "stock-murasaki-no-uta": "media/catalog/product/s/t/stock_murasakino_no_uta_lss_dsc_0481_850x850.jpg",
+  "stock-nami-no-mai": "media/catalog/product/s/t/stock_nami_no_mai_zs015_850x850.jpg",
+  "stock-new-kabuki-light-pink": "media/catalog/product/s/e/seed_packet_stock_new_kobuki_or_kabuki_light_pink_lss_dsc_7694_850x850.jpg",
+  "stock-spray-antique-pink": "media/catalog/product/s/t/stock_spray_antique_pink_lss_dsc_2018_850x850.jpg",
+  "stock-spray-apricot": "media/catalog/product/s/t/stock2-venus-cherry-zs030.jpg",
+  "stock-spray-purple": "media/catalog/product/s/t/stock2-venus-pink-zs042.jpg",
+  "stock-spray-white": "media/catalog/product/s/t/stock_vintage_brown_w_stock_colored_pink_rice_and_salad_lss_dsc_5100_850x850.jpg",
+  "stock-vintage-mix": "media/catalog/product/s/t/stock_white_surf_lss_dsc_0612_850x850.jpg",
+  "strawflower-apricot-mix": "media/catalog/product/s/t/strawflower2-king-size-orange-lss-dsc_1069.jpg",
+  "strawflower-bright-bikini-mix": "media/catalog/product/s/t/strawflower2-king-size-red-with-strawflower-tea-lss-dsc_6476.jpg",
+  "strawflower-double-mix": "media/catalog/product/s/t/strawflower2-king-sized-silvery-rose-lss-dsc_6537.jpg",
+  "strawflower-silvery-rose": "media/catalog/product/s/t/strawflower2-king-size-silvery-white-lss-dsc_6514.jpg",
+  "strawflower-tom-thumb-mix": "media/catalog/product/s/t/strawflower2-tall-double-mix-fl640-lss-dsc_9488.jpg",
+  "sunflower-autumn-beauty": "media/catalog/product/s/u/sunflower-autumn-beauty-lss-dsc_6555_1x1-850x850.jpg",
+  "sunflower-evening-sun": "media/catalog/product/e/v/evening-sun-sunflower-jere_1x1-850x850.jpg",
+  "sunflower-giant-grey-stripe": "media/catalog/product/s/u/sunflower-mammoth-grey-striped-lss-dsc_7598_1x1-850x850.jpg",
+  "sunflower-hopi-black-dye": "media/catalog/product/s/u/sunflower-hopi-black-dye-lss-dsc_2736_1x1-850x850.jpg",
+  "sunflower-italian-white": "media/catalog/product/s/u/sunflower-ice-cream-lss-dsc_3664_1x1-850x850.jpg",
+  "sunflower-lemon-queen": "media/catalog/product/s/u/sunflower-lemon-queen-lss-dsc_9554-recovered_1x1-850x850.jpg",
+  "sunflower-mammoth": "media/catalog/product/s/u/sunflower-mongolian-giant-lss-dsc_7855_1x1-850x850.jpg",
+  "sunflower-music-box-mix": "media/catalog/product/s/u/sunflowe2r-musicbox-mix-lss-dsc_3918.jpg",
+  "sunflower-pro-cut-orange": "FL758-Sunflower_Paquito_Yellow_and_Red_2_obyzhs.jpg",
+  "sunflower-red-sun": "media/catalog/product/s/u/sunflower-seeds-ring-of-fire.jpg",
+  "sunflower-seeds-ring-of-fire": "media/catalog/product/s/u/sunflower-short-stuff-lss-dsc_3605_1x1-850x850.jpg",
+  "sunflower-rostov-giant": "media/catalog/product/s/u/sunflower-taiyo-lss-dsc_0214_1x1-850x850.jpg",
+  "sunflower-schweintizs": "media/catalog/product/s/u/sunflower-henry-wilde-lss-dsc_6310_1x1-850x850.jpg",
+  "sunflower-soraya": "media/catalog/product/s/u/sunflower-astra-gold-lss-dsc_5101_1x1-850x850.jpg",
+  "sunflower-sunbright": "media/catalog/product/s/u/sunflower-astra-rose-cream-lss-dsc_8540_1x1-850x850_1.jpg",
+  "sunflower-sungold": "media/catalog/product/s/u/sunflower-carousel-lss-dsc_6670.jpg",
+  "sunflower-sunspot": "media/catalog/product/s/u/sunflower-chocolate-cherry-lss-dsc_6587_1x1-850x850.jpg",
+  "sunflower-tarahumara-white": "media/catalog/product/s/u/sunflower-double-sunking-lss-dsc_3584_1x1-850x850.jpg",
+  "sunflower-teddy-bear": "media/catalog/product/s/u/sunflower-teddy-bear-lss-dsc_5863_1x1-850x850.jpg",
+  "sunflower-titan": "media/catalog/product/s/u/sunflower2-florenza-lss-dsc_1148.jpg",
+  "sunflower-valentine": "FL760-Sunflower_Seeds_-_Floristan_1_mavwnt.jpg",
+  "sunflower-van-gogh": "media/catalog/product/s/u/sunflower-mexican-arcadian2-blend-or-aracdian-blend-lss-dsc_4423.jpg",
+  "sunflower-velvet-queen": "media/catalog/product/s/u/sunflower-mexican-red-torch-lss-dsc_0198_1x1-850x850.jpg",
+  "sunflower-zohar": "media/catalog/product/s/u/sunflower-arikara-lss-dsc_2072_1x1-850x850.jpg",
+  "sweet-pea-bijou-mix": "media/catalog/product/s/w/sweet_pea_high_scent.jpg",
+  "sweet-pea-old-spice-mix": "media/catalog/product/f/l/flower-sweet-pea-old-spice-mix-lss-000_7567_1x1-850x850.jpg",
+  "verbena-seeds-ideal-florist-mix": "media/catalog/product/v/e/verbena_ideal_florist_mix.jpg",
+  "verbena-imagination": "media/catalog/product/v/e/verbena-sweetheart-kisses-from-applewood-lss-dsc_1860.jpg",
+  "verbena-peaches-and-cream": "media/catalog/product/v/e/seed-packet-verbena-vanity-fsn-lss-dsc_0223.jpg",
+  "vinca-mediterranean-mix": "media/catalog/product/v/i/vinca-heatwave-apricot-lss-dsc_9351_1x1-850x850.jpg",
+  "vinca-pacifica-mix": "media/catalog/product/v/i/vinca-heatwave-blue-eye-lss-dsc_0181_1x1-1200x1200.jpg",
+  "vinca-titan-mix": "media/catalog/product/v/i/vinca-heatwave-raspberry-lss-dsc_047_1x1-850x8504.jpg",
+  "zinnia-aztec-burgundy-bicolor": "media/catalog/product/z/i/zinnia_aztec_burgundy_bicolor.jpg",
+  "zinnia-seeds-benary-s-giant-bright-pink": "media/catalog/product/z/i/zinnia_benarys_giant_bright_pink.jpg",
+  "zinnia-seeds-benary-s-giant-coral": "media/catalog/product/z/i/zinnia_benary_s_giant_coral.jpg",
+  "zinnia-seeds-benary-s-giant-deep-red": "media/catalog/product/z/i/zinnia_benary_s_giant_deep_red.jpg",
+  "zinnia-seeds-benary-s-giant-lime": "media/catalog/product/z/i/zinnia_benary_s_giant_lime.jpg",
+  "zinnia-seeds-benary-s-giant-orange": "media/catalog/product/z/i/zinnia_benary_s_giant_orange.jpg",
+  "zinnia-seeds-benary-s-giant-purple": "media/catalog/product/z/i/zinnia_benary_s_giant_purple.jpg",
+  "zinnia-seeds-benary-s-giant-white": "media/catalog/product/z/i/zinnia_benarys_giant_white.jpg",
+  "zinnia-canary-bird": "media/catalog/product/z/i/zinnia_canary_bird.jpg",
+  "zinnia-seeds-dream-deep-rosy-lavender": "media/catalog/product/z/i/zinnia_dream_deep_rosy_lavender_1.jpg",
+  "zinnia-exquisite": "media/catalog/product/z/i/zinnia_exquisite.jpg",
+  "zinnia-lila-cactus": "media/catalog/product/z/i/zinnia_lila_cactus.jpg",
+  "zinnia-macarenia": "media/catalog/product/z/i/zinnia_macarenia_1_1.jpg",
+  "zinnia-mazurkia": "media/catalog/product/z/i/zinnia_mazurkia.jpg",
+  "zinnia-seeds-oklahoma-carmine": "media/catalog/product/z/i/zinnia_oklahoma_carmine.jpg",
+  "zinnia-seeds-oklahoma-golden-yellow": "media/catalog/product/z/i/zinnia_oklahoma_golden_yellow.jpg",
+  "zinnia-seeds-oklahoma-pink": "media/catalog/product/z/i/zinnia_oklahoma_pink.jpg",
+  "zinnia-seeds-oklahoma-scarlet": "media/catalog/product/z/i/zinnia_oklahoma_scarlet.jpg",
+  "zinnia-seeds-oklahoma-white": "media/catalog/product/z/i/zinnia_oklahoma_white.jpg",
+  "zinnia-orange-cactus": "media/catalog/product/z/i/zinnia_orange_cactus.jpg",
+  "zinnia-orange-king": "media/catalog/product/z/i/zinnia_orange_king.jpg",
+  "zinnia-peppermint-stick": "media/catalog/product/z/i/zinnia_peppermint_stick.jpg",
+  "zinnia-persian-carpet": "media/catalog/product/z/i/zinnia_persian_carpet.jpg",
+  "zinnia-peruviana": "media/catalog/product/z/i/zinnia_peruviana.jpg"
 };
 function getImageUrl(url) {
   const slug = url.replace('https://www.rareseeds.com/', '');
-  return IMAGE_MAP[slug] || '';
+  const suffix = IMAGE_MAP[slug];
+  return suffix ? IMG_BASE + suffix : null;
 }
 
         // SVG Icon Components
@@ -482,7 +493,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors', 'directSow'],
     sowTiming: 'Start 6-8 weeks before last frost or direct sow after',
-    bloomColor: '#8b6bb5', height: 'medium', companions: ['Rudbeckia', 'Zinnia'],
+    bloomColor: '#8b6bb5', height: 'medium', companions: ['Rudbeckia', 'Zinnia'], bloomDuration: 90, firstYearBloom: true,
     varieties: [
       { name: 'Anise Hyssop', url: 'https://www.rareseeds.com/agastache-anise-hyssop' },
       { name: 'Apache Sunset', url: 'https://www.rareseeds.com/agastache-apache-sunset' },
@@ -506,7 +517,7 @@ const FLOWER_DATABASE = {
     sun: [6, 8],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#4a7aad', height: 'short', companions: ['Calendula', 'Marigold', 'Zinnia'],
+    bloomColor: '#4a7aad', height: 'short', companions: ['Calendula', 'Marigold', 'Zinnia'], bloomDuration: 75,
     varieties: [
       { name: 'Ball Mixed', url: 'https://www.rareseeds.com/ageratum-ball-mixed' },
       { name: 'Leda', url: 'https://www.rareseeds.com/ageratum-leda' },
@@ -521,7 +532,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors', 'directSow'],
     sowTiming: 'Start indoors or direct sow',
-    bloomColor: '#d4647a', height: 'ground', companions: ['Dianthus', 'Phlox'], varieties: [
+    bloomColor: '#d4647a', height: 'ground', companions: ['Dianthus', 'Phlox'], bloomDuration: 45, firstYearBloom: false, varieties: [
       { name: 'Morning Star Deep Rose', url: 'https://www.rareseeds.com/armeria-maritima-morning-star-deep-rose' },
       { name: 'Morning Star White', url: 'https://www.rareseeds.com/armeria-maritima-seeds-morning-star-white' }
 ]
@@ -534,7 +545,7 @@ const FLOWER_DATABASE = {
     sun: [6, 8],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#e8e2d0', height: 'short', companions: ['Snapdragon', 'Stock', 'Sweet Pea'],
+    bloomColor: '#e8e2d0', height: 'short', companions: ['Snapdragon', 'Stock', 'Sweet Pea'], bloomDuration: 40,
     varieties: [
       { name: 'Covent Garden', url: 'https://www.rareseeds.com/baby-s-breath-seeds-covent-garden' }
 ]
@@ -547,7 +558,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in early spring',
-    bloomColor: '#4a7aad', height: 'medium', companions: ['Poppy', 'Calendula', 'Baby\'s Breath'],
+    bloomColor: '#4a7aad', height: 'medium', companions: ['Poppy', 'Calendula', 'Baby\'s Breath'], bloomDuration: 45,
     varieties: [
       { name: 'Blue Boy', url: 'https://www.rareseeds.com/bachelor-s-button-blue-boy' },
       { name: 'Classic Fantastic', url: 'https://www.rareseeds.com/bachelor-s-button-classic-fantastic' },
@@ -563,7 +574,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#f59e0b', height: 'vine', companions: ['Morning Glory', 'Nasturtium'], varieties: [
+    bloomColor: '#f59e0b', height: 'vine', companions: ['Morning Glory', 'Nasturtium'], bloomDuration: 75, varieties: [
       { name: 'African Sunset Mix', url: 'https://www.rareseeds.com/black-eyed-susan-vine-seeds-african-sunset-mix' },
       { name: 'Spanish Eyes', url: 'https://www.rareseeds.com/black-eyed-susan-vine-seeds-spanish-eyes' }
 ]
@@ -576,7 +587,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#3b82f6', height: 'vine', companions: ['Morning Glory', 'Sweet Pea'], varieties: [
+    bloomColor: '#3b82f6', height: 'vine', companions: ['Morning Glory', 'Sweet Pea'], bloomDuration: 70, varieties: [
       { name: 'Blue Queen', url: 'https://www.rareseeds.com/butterfly-pea-blue-queen' },
       { name: 'Lavender Queen', url: 'https://www.rareseeds.com/butterfly-pea-lavender-queen' },
       { name: 'Thai Blue', url: 'https://www.rareseeds.com/butterfly-pea-seeds-thai-double-blue' },
@@ -592,7 +603,7 @@ const FLOWER_DATABASE = {
     sun: [6, 8],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in spring or fall',
-    bloomColor: '#f97316', height: 'short', companions: ['Nasturtium', 'Marigold', 'Bachelor\'s Button'],
+    bloomColor: '#f97316', height: 'short', companions: ['Nasturtium', 'Marigold', 'Bachelor\'s Button'], bloomDuration: 90,
     varieties: [
       { name: "Ball's Improved Orange", url: 'https://www.rareseeds.com/calendula-ball-s-improved-orange' },
       { name: 'Orange King', url: 'https://www.rareseeds.com/calendula-orange-king' },
@@ -611,7 +622,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#ec4899', height: 'tall', companions: ['Zinnia', 'Sunflower', 'Marigold'],
+    bloomColor: '#ec4899', height: 'tall', companions: ['Zinnia', 'Sunflower', 'Marigold'], bloomDuration: 90,
     varieties: [
       { name: 'Apricot Lemonade', url: 'https://www.rareseeds.com/cosmos-apricot-lemonade' },
       { name: 'Apricotta', url: 'https://www.rareseeds.com/cosmos-apricotta' },
@@ -641,7 +652,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow', 'startIndoors'],
     sowTiming: 'Direct sow or start indoors',
-    bloomColor: '#f472b6', height: 'short', companions: ['Armeria Maritima', 'Phlox', 'Snapdragon'],
+    bloomColor: '#f472b6', height: 'short', companions: ['Armeria Maritima', 'Phlox', 'Snapdragon'], bloomDuration: 60, firstYearBloom: true,
     varieties: [
       { name: 'Black Adder', url: 'https://www.rareseeds.com/dianthus-seeds-black-adder' },
       { name: 'Flora Mix', url: 'https://www.rareseeds.com/dianthus-seeds-flora-mix' },
@@ -657,7 +668,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#e879f9', height: 'medium', companions: ['Zinnia', 'Marigold'],
+    bloomColor: '#e879f9', height: 'medium', companions: ['Zinnia', 'Marigold'], bloomDuration: 90,
     varieties: [
       { name: 'Atomic Purple', url: 'https://www.rareseeds.com/gomphrena-atomic-purple' }
 ]
@@ -670,7 +681,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#4a7aad', height: 'medium', companions: ['Cosmos', 'Snapdragon', 'Scabiosa'], varieties: [
+    bloomColor: '#4a7aad', height: 'medium', companions: ['Cosmos', 'Snapdragon', 'Scabiosa'], bloomDuration: 45, varieties: [
       { name: 'Blue Lace', url: 'https://www.rareseeds.com/lace-flower-blue' },
       { name: 'White Lace', url: 'https://www.rareseeds.com/lace-flower-white' }
 ]
@@ -683,7 +694,7 @@ const FLOWER_DATABASE = {
     sun: [6, 8],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors, requires well-drained soil',
-    bloomColor: '#f472b6', height: 'ground', companions: ['Armeria Maritima', 'Dianthus'],
+    bloomColor: '#f472b6', height: 'ground', companions: ['Armeria Maritima', 'Dianthus'], bloomDuration: 40, firstYearBloom: false,
     varieties: [
       { name: 'Elise Mix', url: 'https://www.rareseeds.com/lewisia-seeds-elise-mix' }
 ]
@@ -696,7 +707,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#f59e0b', height: 'medium', companions: ['Zinnia', 'Nasturtium', 'Calendula'],
+    bloomColor: '#f59e0b', height: 'medium', companions: ['Zinnia', 'Nasturtium', 'Calendula'], bloomDuration: 90,
     varieties: [
       { name: 'Crackerjack Mix', url: 'https://www.rareseeds.com/marigold-crackerjack-mix' }
 ]
@@ -709,7 +720,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#3b82f6', height: 'vine', companions: ['Black-Eyed Susan Vine', 'Butterfly Pea'], varieties: [
+    bloomColor: '#3b82f6', height: 'vine', companions: ['Black-Eyed Susan Vine', 'Butterfly Pea'], bloomDuration: 75, varieties: [
       { name: 'Carnevale di Venezia', url: 'https://www.rareseeds.com/morning-glory-carnevale-di-venezia' }
 ]
   },
@@ -721,7 +732,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#f97316', height: 'short', companions: ['Calendula', 'Marigold', 'Sunflower'],
+    bloomColor: '#f97316', height: 'short', companions: ['Calendula', 'Marigold', 'Sunflower'], bloomDuration: 75,
     varieties: [
       { name: 'Alaska Mix', url: 'https://www.rareseeds.com/nasturtium-alaska-mix' },
       { name: 'Black Velvet', url: 'https://www.rareseeds.com/nasturtium-black-velvet' },
@@ -740,7 +751,7 @@ const FLOWER_DATABASE = {
     sun: [8, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#a78bfa', height: 'tall', companions: ['Petunia', 'Snapdragon'],
+    bloomColor: '#a78bfa', height: 'tall', companions: ['Petunia', 'Snapdragon'], bloomDuration: 70,
     varieties: [
       { name: 'Bronze Queen', url: 'https://www.rareseeds.com/nicotiana-bronze-queen' },
       { name: 'Crimson Bedder', url: 'https://www.rareseeds.com/nicotiana-crimson-bedder' },
@@ -757,7 +768,7 @@ const FLOWER_DATABASE = {
     sun: [6, 8],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
-    bloomColor: '#ec4899', height: 'short', companions: ['Nicotiana', 'Verbena'],
+    bloomColor: '#ec4899', height: 'short', companions: ['Nicotiana', 'Verbena'], bloomDuration: 90,
     varieties: [
       { name: 'Balcony Mix', url: 'https://www.rareseeds.com/petunia-balcony-mix' },
       { name: 'Copper Spotted', url: 'https://www.rareseeds.com/petunia-seeds-copper-spotted' },
@@ -779,7 +790,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#f472b6', height: 'short', companions: ['Dianthus', 'Snapdragon', 'Sweet Pea'],
+    bloomColor: '#f472b6', height: 'short', companions: ['Dianthus', 'Snapdragon', 'Sweet Pea'], bloomDuration: 60, firstYearBloom: false,
     varieties: [
       { name: 'Cherry Caramel', url: 'https://www.rareseeds.com/phlox-cherry-caramel' },
       { name: 'Sugar Stars', url: 'https://www.rareseeds.com/phlox-sugar-stars' }
@@ -793,7 +804,7 @@ const FLOWER_DATABASE = {
     sun: [8, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in early spring',
-    bloomColor: '#ef4444', height: 'medium', companions: ['Bachelor\'s Button', 'Calendula', 'Baby\'s Breath'],
+    bloomColor: '#ef4444', height: 'medium', companions: ['Bachelor\'s Button', 'Calendula', 'Baby\'s Breath'], bloomDuration: 21,
     varieties: [
       { name: 'Amazing Grey', url: 'https://www.rareseeds.com/poppy-amazing-grey' },
       { name: 'Flemish Antique', url: 'https://www.rareseeds.com/poppy-flemish-antique' },
@@ -809,7 +820,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
-    bloomColor: '#fbbf24', height: 'medium', companions: ['Agastache', 'Sunflower'],
+    bloomColor: '#fbbf24', height: 'medium', companions: ['Agastache', 'Sunflower'], bloomDuration: 75, firstYearBloom: true,
     varieties: [
       { name: 'Cherry Brandy', url: 'https://www.rareseeds.com/rudbeckia-cherry-brandy' }
 ]
@@ -822,7 +833,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
-    bloomColor: '#7c3aed', height: 'medium', companions: ['Nicotiana', 'Petunia', 'Snapdragon'],
+    bloomColor: '#7c3aed', height: 'medium', companions: ['Nicotiana', 'Petunia', 'Snapdragon'], bloomDuration: 50,
     varieties: [
       { name: 'Kew Blue', url: 'https://www.rareseeds.com/salpiglossis-kew-blue' }
 ]
@@ -835,7 +846,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#4a7aad', height: 'medium', companions: ['Cosmos', 'Lace Flower', 'Sweet Pea'],
+    bloomColor: '#4a7aad', height: 'medium', companions: ['Cosmos', 'Lace Flower', 'Sweet Pea'], bloomDuration: 60, firstYearBloom: true,
     varieties: [
       { name: 'Black Knight', url: 'https://www.rareseeds.com/scabiosa-seeds-black-knight' },
       { name: 'Blue Cockade', url: 'https://www.rareseeds.com/scabiosa-seeds-blue-cockade' },
@@ -850,7 +861,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors early, 8-10 weeks before last frost',
-    bloomColor: '#f472b6', height: 'medium', companions: ['Dianthus', 'Phlox', 'Nicotiana'],
+    bloomColor: '#f472b6', height: 'medium', companions: ['Dianthus', 'Phlox', 'Nicotiana'], bloomDuration: 70,
     varieties: [
       { name: 'Apple Blossom', url: 'https://www.rareseeds.com/snapdragon-seeds-apple-blossom' },
       { name: 'Black Prince', url: 'https://www.rareseeds.com/snapdragon-black-prince' },
@@ -866,7 +877,7 @@ const FLOWER_DATABASE = {
     sun: [8, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    bloomColor: '#a78bfa', height: 'short', companions: ['Snapdragon', 'Sweet Pea', 'Baby\'s Breath'],
+    bloomColor: '#a78bfa', height: 'short', companions: ['Snapdragon', 'Sweet Pea', 'Baby\'s Breath'], bloomDuration: 40,
     varieties: [
       { name: 'Anytime Mix', url: 'https://www.rareseeds.com/stock-anytime-mix' },
       { name: 'Baby Blue', url: 'https://www.rareseeds.com/stock-baby-blue' },
@@ -893,7 +904,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#fbbf24', height: 'tall', companions: ['Cosmos', 'Zinnia', 'Nasturtium'],
+    bloomColor: '#fbbf24', height: 'tall', companions: ['Cosmos', 'Zinnia', 'Nasturtium'], bloomDuration: 30,
     varieties: [
       { name: 'Autumn Beauty', url: 'https://www.rareseeds.com/sunflower-autumn-beauty' },
       { name: 'Evening Sun', url: 'https://www.rareseeds.com/sunflower-evening-sun' },
@@ -911,7 +922,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in early spring',
-    bloomColor: '#ec4899', height: 'vine', companions: ['Phlox', 'Stock', 'Baby\'s Breath'], varieties: [
+    bloomColor: '#ec4899', height: 'vine', companions: ['Phlox', 'Stock', 'Baby\'s Breath'], bloomDuration: 45, varieties: [
       { name: 'Old Spice Mix', url: 'https://www.rareseeds.com/sweet-pea-old-spice-mix' }
 ]
   },
@@ -923,7 +934,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
-    bloomColor: '#a855f7', height: 'short', companions: ['Petunia', 'Zinnia'],
+    bloomColor: '#a855f7', height: 'short', companions: ['Petunia', 'Zinnia'], bloomDuration: 75,
     varieties: [
       { name: 'Ideal Florist Mix', url: 'https://www.rareseeds.com/verbena-seeds-ideal-florist-mix' }
 ]
@@ -936,7 +947,7 @@ const FLOWER_DATABASE = {
     sun: [6, 12],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost',
-    bloomColor: '#ef4444', height: 'medium', companions: ['Cosmos', 'Marigold', 'Sunflower'],
+    bloomColor: '#ef4444', height: 'medium', companions: ['Cosmos', 'Marigold', 'Sunflower'], bloomDuration: 90,
     varieties: [
       { name: 'Aztec Burgundy Bicolor', url: 'https://www.rareseeds.com/zinnia-aztec-burgundy-bicolor' },
       { name: "Benary's Giant Bright Pink", url: 'https://www.rareseeds.com/zinnia-seeds-benary-s-giant-bright-pink' },
@@ -1006,7 +1017,8 @@ function calcTimeline(sd, midcoast) {
   t.germStart = effectiveSow;
   t.germEnd = effectiveSow + germDays;
   t.bloomStart = effectiveSow + bloomDays;
-  t.bloomEnd = Math.min(effectiveSow + bloomDays + 60, sd.type === 'annual' ? midcoast.firstFrost : midcoast.firstFrost + 14);
+  const duration = sd.bloomDuration || 60;
+  t.bloomEnd = Math.min(effectiveSow + bloomDays + duration, sd.type === 'annual' ? midcoast.firstFrost : midcoast.firstFrost + 14);
   t.seasonEnd = sd.type === 'annual' ? midcoast.firstFrost : 334;
   return t;
 }
@@ -1072,6 +1084,7 @@ function PlantingCalendar() {
   const [myGarden, setMyGarden] = useState(() => {
     try { return JSON.parse(localStorage.getItem('myGarden') || '{}'); } catch { return {}; }
   });
+  const [copiedList, setCopiedList] = useState(false);
   const [filterMyGarden, setFilterMyGarden] = useState(false);
   const [bloomColorMode, setBloomColorMode] = useState(false);
   const [sortBy, setSortBy] = useState('alpha');
@@ -1136,7 +1149,7 @@ function PlantingCalendar() {
           ? (currentIdx - 1 + sd.varieties.length) % sd.varieties.length
           : (currentIdx + 1) % sd.varieties.length;
         const v = sd.varieties[newIdx];
-        setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, companions: sd.companions, flag: sd.flag, zoneRange: sd.zoneRange, tl: sd.tl });
+        setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, companions: sd.companions, flag: sd.flag, zoneRange: sd.zoneRange, bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl: sd.tl });
       }
     };
     if (selectedVariety) {
@@ -1154,6 +1167,25 @@ function PlantingCalendar() {
       return next;
     });
   }, []);
+
+  const copyShoppingList = useCallback(() => {
+    const items = [];
+    Object.keys(myGarden).forEach(key => {
+      const [species, variety] = key.split('||');
+      const sd = Object.entries(FLOWER_DATABASE).find(([s]) => s === species);
+      if (!sd) return;
+      const v = sd[1].varieties.find(vr => vr.name === variety);
+      if (!v) return;
+      items.push({ species, variety, url: v.url });
+    });
+    items.sort((a, b) => a.species.localeCompare(b.species) || a.variety.localeCompare(b.variety));
+    const text = items.map(i => `${i.species} - ${i.variety}\n  ${i.url}`).join('\n\n');
+    const header = `Midcoast Maine Garden Plan (${items.length} varieties)\n${'='.repeat(45)}\n\n`;
+    navigator.clipboard.writeText(header + text).then(() => {
+      setCopiedList(true);
+      setTimeout(() => setCopiedList(false), 2000);
+    });
+  }, [myGarden]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSow, setFilterSow] = useState('all');
@@ -1177,7 +1209,7 @@ function PlantingCalendar() {
         species, type: sd.type, germination: sd.germination,
         bloomDays: sd.bloomDays || [60, 90], frostHardy: sd.frostHardy,
         sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height,
-        flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions || [], tl, varieties
+        flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions || [], bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl, varieties
       });
     });
     return result;
@@ -1407,32 +1439,36 @@ function PlantingCalendar() {
                   </span>
                 )}
               </div>
-              {/* Dashboard summary line */}
-              <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1" style={{ fontSize: '11px' }}>
+              {/* Dashboard summary */}
+              <div className="mt-2 flex flex-wrap gap-2" style={{ fontSize: '11px' }}>
                 {dashboardItems.indoors.length > 0 && (
-                  <span style={{ color: '#7c3aed' }}>
-                    <strong>Start indoors:</strong> {dashboardItems.indoors.map(i => i.species).join(', ')}
-                  </span>
+                  <div style={{ borderLeft: '3px solid ' + PHASE_COLORS.indoor.bg, backgroundColor: '#faf5ff', padding: '4px 10px', borderRadius: '0 4px 4px 0' }}>
+                    <span style={{ fontWeight: 700, color: PHASE_COLORS.indoor.bg, textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.5px' }}>Start indoors</span>
+                    <span style={{ color: '#475569', marginLeft: '6px' }}>{dashboardItems.indoors.map(i => i.species).join(', ')}</span>
+                  </div>
                 )}
                 {dashboardItems.transplant.length > 0 && (
-                  <span style={{ color: '#2563eb' }}>
-                    <strong>Transplant:</strong> {dashboardItems.transplant.map(i => i.species).join(', ')}
-                  </span>
+                  <div style={{ borderLeft: '3px solid ' + PHASE_COLORS.transplant.bg, backgroundColor: '#eff6ff', padding: '4px 10px', borderRadius: '0 4px 4px 0' }}>
+                    <span style={{ fontWeight: 700, color: PHASE_COLORS.transplant.bg, textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.5px' }}>Transplant</span>
+                    <span style={{ color: '#475569', marginLeft: '6px' }}>{dashboardItems.transplant.map(i => i.species).join(', ')}</span>
+                  </div>
                 )}
                 {dashboardItems.directSow.length > 0 && (
-                  <span style={{ color: '#16a34a' }}>
-                    <strong>Direct sow:</strong> {dashboardItems.directSow.map(i => i.species).join(', ')}
-                  </span>
+                  <div style={{ borderLeft: '3px solid ' + PHASE_COLORS.sow.bg, backgroundColor: '#f0fdf4', padding: '4px 10px', borderRadius: '0 4px 4px 0' }}>
+                    <span style={{ fontWeight: 700, color: PHASE_COLORS.sow.bg, textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.5px' }}>Direct sow</span>
+                    <span style={{ color: '#475569', marginLeft: '6px' }}>{dashboardItems.directSow.map(i => i.species).join(', ')}</span>
+                  </div>
                 )}
                 {dashboardItems.blooming.length > 0 && (
-                  <span style={{ color: '#ec4899' }}>
-                    <strong>Blooming:</strong> {dashboardItems.blooming.map(i => i.species).join(', ')}
-                  </span>
+                  <div style={{ borderLeft: '3px solid ' + PHASE_COLORS.bloom.bg, backgroundColor: '#fdf2f8', padding: '4px 10px', borderRadius: '0 4px 4px 0' }}>
+                    <span style={{ fontWeight: 700, color: PHASE_COLORS.bloom.bg, textTransform: 'uppercase', fontSize: '9px', letterSpacing: '0.5px' }}>Blooming</span>
+                    <span style={{ color: '#475569', marginLeft: '6px' }}>{dashboardItems.blooming.map(i => i.species).join(', ')}</span>
+                  </div>
                 )}
                 {dashboardItems.indoors.length === 0 && dashboardItems.transplant.length === 0 && dashboardItems.directSow.length === 0 && dashboardItems.blooming.length === 0 && dashboardItems.nextUp && (
-                  <span style={{ color: '#64748b' }}>
-                    Next: <strong>{dashboardItems.nextUp.label}</strong> ({dashboardItems.nextUp.daysAway}d)
-                  </span>
+                  <div style={{ borderLeft: '3px solid #e2e8f0', backgroundColor: '#f8fafc', padding: '4px 10px', borderRadius: '0 4px 4px 0' }}>
+                    <span style={{ color: '#64748b' }}>Next: <strong>{dashboardItems.nextUp.label}</strong> ({dashboardItems.nextUp.daysAway}d)</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -1510,6 +1546,13 @@ function PlantingCalendar() {
                 style={filterMyGarden ? { backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderLeft: '3px solid #16a34a', fontWeight: 700 } : { backgroundColor: '#fff', color: '#94a3b8', border: '1px solid #e2e8f0' }}>
                 My Garden{Object.keys(myGarden).length > 0 ? ` (${Object.keys(myGarden).length})` : ''}
               </button>
+              {Object.keys(myGarden).length > 0 && (
+                <button onClick={copyShoppingList}
+                  className="filter-btn px-2.5 py-2 text-sm font-bold whitespace-nowrap"
+                  style={{ backgroundColor: copiedList ? '#16a34a' : '#fff', color: copiedList ? '#fff' : '#94a3b8', border: '1px solid #e2e8f0', borderRadius: '4px', fontSize: '11px' }}>
+                  {copiedList ? '✓ Copied!' : '📋 Copy List'}
+                </button>
+              )}
             </div>
 
             {/* Separator */}
@@ -1532,6 +1575,11 @@ function PlantingCalendar() {
                   className="filter-btn px-3.5 py-2 text-sm font-bold whitespace-nowrap"
                   style={viewMode === 'planting' ? { backgroundColor: '#1e293b', color: '#fff' } : { backgroundColor: '#fff', color: '#64748b' }}>
                   Planting Chart
+                </button>
+                <button onClick={() => setViewMode(viewMode === 'weekly' ? 'list' : 'weekly')}
+                  className="filter-btn px-3.5 py-2 text-sm font-bold whitespace-nowrap"
+                  style={viewMode === 'weekly' ? { backgroundColor: '#1e293b', color: '#fff' } : { backgroundColor: '#fff', color: '#64748b' }}>
+                  Weekly
                 </button>
               </div>
             </div>
@@ -1577,7 +1625,12 @@ function PlantingCalendar() {
                   const color = bloomColorMode && sd.bloomColor ? sd.bloomColor : PHASE_COLORS.bloom.bg;
                   return (
                     <div key={sd.species} className="gantt-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: rowIdx % 2 === 0 ? 'transparent' : '#f8fafc', padding: '1px 4px', borderRadius: '2px' }}>
-                      <span className="truncate" style={{ width: '140px', flexShrink: 0, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>{sd.species}</span>
+                      <button onClick={() => { setViewMode('list'); setExpandedSpecies(prev => ({ ...prev, [sd.species]: true })); }}
+                        className="truncate text-left"
+                        style={{ width: '140px', flexShrink: 0, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        title={'View ' + sd.species}>
+                        {sd.species}
+                      </button>
                       <div style={{ flex: 1, height: '16px', position: 'relative', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
                         {/* Month gridlines */}
                         {MONTH_START_DOY.slice(1).map((md, i) => (
@@ -1651,7 +1704,12 @@ function PlantingCalendar() {
                 if (tl.germStart && tl.germEnd) phases.push({ start: tl.germStart, end: tl.germEnd, color: PHASE_COLORS.germination.bg, label: 'Germination' });
                 return (
                   <div key={sd.species} className="gantt-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: rowIdx % 2 === 0 ? 'transparent' : '#f8fafc', padding: '1px 4px', borderRadius: '2px' }}>
-                    <span className="truncate" style={{ width: '140px', flexShrink: 0, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569' }}>{sd.species}</span>
+                    <button onClick={() => { setViewMode('list'); setExpandedSpecies(prev => ({ ...prev, [sd.species]: true })); }}
+                      className="truncate text-left"
+                      style={{ width: '140px', flexShrink: 0, fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      title={'View ' + sd.species}>
+                      {sd.species}
+                    </button>
                     <div style={{ flex: 1, height: '16px', position: 'relative', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
                       {MONTH_START_DOY.slice(1).map((md, i) => (
                         <div key={i} className="absolute top-0 bottom-0" style={{ left: (md / 365 * 100) + '%', width: '1px', backgroundColor: 'rgba(0,0,0,0.06)' }} />
@@ -1674,6 +1732,57 @@ function PlantingCalendar() {
               <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: PHASE_COLORS.germination.bg }} /> Germination</span>
               <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '2px', height: '10px', backgroundColor: '#c00' }} /> Today</span>
             </div>
+          </div>
+        ) : viewMode === 'weekly' ? (
+          <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '8px' }}>
+            <h3 style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px', color: '#1e293b' }}>Weekly Planting Schedule</h3>
+            {(() => {
+              const weeks = {};
+              sortedFiltered.forEach(sd => {
+                const tl = sd.tl;
+                const actions = [
+                  tl.indoorStart && { doy: tl.indoorStart, action: 'Start indoors', phase: 'indoor' },
+                  tl.transplant && { doy: tl.transplant, action: 'Transplant outdoors', phase: 'transplant' },
+                  tl.sowStart && { doy: tl.sowStart, action: 'Direct sow', phase: 'sow' },
+                ].filter(Boolean);
+                actions.forEach(a => {
+                  const weekKey = Math.floor(a.doy / 7);
+                  if (!weeks[weekKey]) weeks[weekKey] = { doy: a.doy - ((a.doy + 5) % 7), items: [] };
+                  weeks[weekKey].items.push({ species: sd.species, action: a.action, phase: a.phase, doy: a.doy, varieties: sd.varieties.length });
+                });
+              });
+              const sortedWeeks = Object.values(weeks).sort((a, b) => a.doy - b.doy);
+              if (sortedWeeks.length === 0) return <p style={{ color: '#94a3b8', fontSize: '12px' }}>No planting actions for filtered species.</p>;
+              return (
+                <div className="space-y-4">
+                  {sortedWeeks.map((week, wi) => {
+                    const weekLabel = formatDoy(week.doy);
+                    const isPast = week.doy + 7 < todayDoy;
+                    const isCurrent = todayDoy >= week.doy && todayDoy < week.doy + 7;
+                    return (
+                      <div key={wi} style={{ opacity: isPast ? 0.5 : 1, borderLeft: isCurrent ? '3px solid #6366f1' : '3px solid #e2e8f0', paddingLeft: '12px' }}>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: isCurrent ? '#6366f1' : '#1e293b' }}>Week of {weekLabel}</span>
+                          {isCurrent && <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', backgroundColor: '#6366f1', padding: '1px 6px', borderRadius: '3px', textTransform: 'uppercase' }}>This week</span>}
+                          {isPast && <span style={{ fontSize: '9px', color: '#94a3b8' }}>past</span>}
+                        </div>
+                        <div className="space-y-1">
+                          {week.items.sort((a, b) => a.doy - b.doy).map((item, ii) => (
+                            <div key={ii} className="flex items-center gap-2" style={{ fontSize: '12px' }}>
+                              <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: PHASE_COLORS[item.phase].bg, flexShrink: 0 }} />
+                              <span style={{ color: '#475569' }}>{item.action}</span>
+                              <span style={{ fontWeight: 700, color: '#1e293b' }}>{item.species}</span>
+                              <span style={{ color: '#94a3b8', fontSize: '11px' }}>({item.varieties} var)</span>
+                              <span style={{ color: '#94a3b8', fontSize: '10px' }}>{formatDoy(item.doy)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         ) : (
           <div className="space-y-2">
@@ -1713,9 +1822,13 @@ function PlantingCalendar() {
                   const withImg = sd.varieties.filter(v => v.img);
                   const pick = withImg.length > 1 ? withImg[1] : withImg[0];
                   return pick ? (
-                    <img src={pick.img} alt={sd.species} className="shrink-0 hidden sm:block"
-                      style={{ width: '80px', height: '80px', objectFit: 'cover', border: '1px solid #e2e8f0' }}
-                      loading="lazy" onError={(e) => { e.target.style.display='none'; }} />
+                    <div className="img-skeleton shrink-0 hidden sm:block" style={{ width: '80px', height: '80px' }}>
+                      <img src={pick.img} alt={sd.species}
+                        style={{ width: '80px', height: '80px', objectFit: 'cover', border: '1px solid #e2e8f0', position: 'relative', zIndex: 1 }}
+                        loading="lazy"
+                        onLoad={(e) => { e.target.parentElement.classList.remove('img-skeleton'); }}
+                        onError={(e) => { e.target.style.display='none'; e.target.parentElement.classList.remove('img-skeleton'); }} />
+                    </div>
                   ) : (
                     <div className="shrink-0 hidden sm:flex items-center justify-center" style={{ width: '80px', height: '80px', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
                       <span style={{ fontSize: '24px', color: '#cbd5e1' }}>&#10047;</span>
@@ -1793,6 +1906,12 @@ function PlantingCalendar() {
                 <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Height</span>
                 <span className="font-bold" style={{ color: '#475569' }}>{HEIGHT_LABELS[sd.height] || '?'}</span>
               </div>
+                      {sd.type === 'perennial' && sd.firstYearBloom === false && (
+                        <div className="flex gap-2 items-center">
+                          <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Note</span>
+                          <span style={{ color: '#f59e0b', fontSize: '10px', fontWeight: 600 }}>May not bloom first year from seed</span>
+                        </div>
+                      )}
                       <div className="flex gap-2">
                         <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Key dates</span>
                         <span className="font-bold" style={{ color: '#475569' }}>
@@ -1821,8 +1940,8 @@ function PlantingCalendar() {
                       const inGarden = myGarden[sd.species + '||' + v.name];
                       return (
                       <div key={i}
-                        onClick={() => setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions, tl: sd.tl })}
-                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions, tl: sd.tl }); }}}
+                        onClick={() => setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions, bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl: sd.tl })}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, flag: sd.flag, zoneRange: sd.zoneRange, companions: sd.companions, bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl: sd.tl }); }}}
                         tabIndex={0}
                         role="button"
                         className="variety-chip cursor-pointer overflow-hidden relative"
@@ -1834,9 +1953,13 @@ function PlantingCalendar() {
                           {inGarden ? '★' : '☆'}
                         </button>
                         {v.img ? (
-                          <img src={v.img} alt={v.name}
-                            style={{ width: '100%', height: '100px', objectFit: 'cover', display: 'block' }}
-                            loading="lazy" onError={(e) => { e.target.style.display='none'; }} />
+                          <div className="img-skeleton" style={{ width: '100%', height: '100px', position: 'relative' }}>
+                            <img src={v.img} alt={v.name}
+                              style={{ width: '100%', height: '100px', objectFit: 'cover', display: 'block', position: 'relative', zIndex: 1 }}
+                              loading="lazy"
+                              onLoad={(e) => { e.target.parentElement.classList.remove('img-skeleton'); }}
+                              onError={(e) => { e.target.style.display='none'; e.target.parentElement.classList.remove('img-skeleton'); }} />
+                          </div>
                         ) : (
                           <div className="flex items-center justify-center" style={{ width: '100%', height: '100px', backgroundColor: '#f1f5f9' }}>
                             <span style={{ fontSize: '28px', color: '#cbd5e1' }}>&#10047;</span>
@@ -1879,7 +2002,7 @@ function PlantingCalendar() {
                       e.stopPropagation();
                       const ni = (idx - 1 + sd.varieties.length) % sd.varieties.length;
                       const v = sd.varieties[ni];
-                      setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, companions: sd.companions, flag: sd.flag, zoneRange: sd.zoneRange, tl: sd.tl });
+                      setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, companions: sd.companions, flag: sd.flag, zoneRange: sd.zoneRange, bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl: sd.tl });
                     }}
                     className="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center"
                     style={{ left: '-40px', backgroundColor: 'rgba(255,255,255,0.9)', border: '1px solid #e2e8f0', borderRadius: '50%', cursor: 'pointer', fontSize: '16px', color: '#64748b', zIndex: 51 }}>
@@ -1889,7 +2012,7 @@ function PlantingCalendar() {
                       e.stopPropagation();
                       const ni = (idx + 1) % sd.varieties.length;
                       const v = sd.varieties[ni];
-                      setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, companions: sd.companions, flag: sd.flag, zoneRange: sd.zoneRange, tl: sd.tl });
+                      setSelectedVariety({ ...v, species: sd.species, type: sd.type, germination: sd.germination, bloomDays: sd.bloomDays || [60,90], frostHardy: sd.frostHardy, sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun, bloomColor: sd.bloomColor, height: sd.height, companions: sd.companions, flag: sd.flag, zoneRange: sd.zoneRange, bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom, tl: sd.tl });
                     }}
                     className="absolute top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center"
                     style={{ right: '-40px', backgroundColor: 'rgba(255,255,255,0.9)', border: '1px solid #e2e8f0', borderRadius: '50%', cursor: 'pointer', fontSize: '16px', color: '#64748b', zIndex: 51 }}>
@@ -1902,9 +2025,13 @@ function PlantingCalendar() {
             <div className="relative">
               {selectedVariety.img ? (
                 <div>
-                  <img src={selectedVariety.img} alt={selectedVariety.name}
-                    style={{ width: '100%', height: '220px', objectFit: 'cover' }}
-                    loading="lazy" onError={(e) => { e.target.parentElement.style.display='none'; }} />
+                  <div className="img-skeleton" style={{ width: '100%', height: '220px' }}>
+                    <img src={selectedVariety.img} alt={selectedVariety.name}
+                      style={{ width: '100%', height: '220px', objectFit: 'cover', position: 'relative', zIndex: 1 }}
+                      loading="lazy"
+                      onLoad={(e) => { e.target.parentElement.classList.remove('img-skeleton'); }}
+                      onError={(e) => { e.target.parentElement.style.display='none'; }} />
+                  </div>
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 50%, transparent 100%)' }} />
                 </div>
               ) : (
@@ -1948,6 +2075,12 @@ function PlantingCalendar() {
               <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
                 <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>{selectedVariety.sowTiming}</p>
               </div>
+
+              {selectedVariety.type === 'perennial' && selectedVariety.firstYearBloom === false && (
+                <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#92400e' }}>
+                  Perennial — may not bloom first year from seed. Plan for establishment.
+                </div>
+              )}
 
               {selectedVariety.companions && selectedVariety.companions.length > 0 && (
                 <div style={{ fontSize: '12px', color: '#475569' }}>
@@ -2008,7 +2141,7 @@ function PlantingCalendar() {
                 style={{ backgroundColor: '#1e293b', color: '#fff', padding: '12px', fontSize: '12px', transition: 'all 0.15s', textDecoration: 'none', letterSpacing: '2px', border: '2px solid #1e293b' }}
                 onMouseEnter={(e) => { e.target.style.backgroundColor='#334155'; }}
                 onMouseLeave={(e) => { e.target.style.backgroundColor='#1e293b'; }}>
-                View on rareseeds.com <ExternalLink size={14} />
+                Buy on rareseeds.com <ExternalLink size={14} />
               </a>
             </div>
           </div>
