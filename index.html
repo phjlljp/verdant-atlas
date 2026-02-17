@@ -46,6 +46,10 @@
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       .year-bar-seg { transition: opacity 0.15s ease; }
       .year-bar-seg:hover { opacity: 0.75; }
+      .year-bar-tooltip { position: absolute; bottom: calc(100% + 8px); transform: translateX(-50%); background: #1e293b; color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 11px; line-height: 1.4; white-space: nowrap; pointer-events: none; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+      .year-bar-tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1e293b; }
+      .card-expand-enter { animation: cardExpand 0.25s ease-out; overflow: hidden; }
+      @keyframes cardExpand { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 2000px; } }
       @keyframes shimmer {
         0% { background-position: -200px 0; }
         100% { background-position: 200px 0; }
@@ -1252,6 +1256,17 @@ function PlantingCalendar() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     try { return localStorage.getItem('notificationsEnabled') === '1'; } catch { return false; }
   });
+  const [focusedCardIndex, setFocusedCardIndex] = useState(-1);
+  const [modalTab, setModalTab] = useState('details');
+  const [showPresets, setShowPresets] = useState(false);
+  const [footerDismissed, setFooterDismissed] = useState(false);
+  const [filterHintDismissed, setFilterHintDismissed] = useState(() => {
+    try { return !!localStorage.getItem('filterHintDismissed'); } catch { return false; }
+  });
+  const [toastMsg, setToastMsg] = useState(null);
+  const [walkStep, setWalkStep] = useState(() => {
+    try { return localStorage.getItem('onboardingDismissed') ? null : 0; } catch { return 0; }
+  });
 
   React.useEffect(() => {
     localStorage.setItem('myGarden', JSON.stringify(myGarden));
@@ -1304,17 +1319,57 @@ function PlantingCalendar() {
   // Modal body scroll lock
   React.useEffect(() => {
     document.body.style.overflow = selectedVariety ? 'hidden' : '';
+    if (selectedVariety) setModalTab('details');
     return () => { document.body.style.overflow = ''; };
   }, [selectedVariety]);
+
+  // Reset focused card when filters change
+  React.useEffect(() => { setFocusedCardIndex(-1); }, [searchTerm, filterType, filterHeight, filterColorFamily, filterMyGarden, filterPlantNow, filterBloomNow, sortBy]);
 
   React.useEffect(() => {
     const handleGlobal = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-      if (e.key === '?') { setShowShortcuts(prev => !prev); e.preventDefault(); }
+      if (e.key === '?') { setShowShortcuts(prev => !prev); e.preventDefault(); return; }
+      if (selectedVariety || showShortcuts || showPresets) return;
+      if (viewMode !== 'list') return;
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedCardIndex(prev => {
+          const next = Math.min(prev + 1, (document.querySelectorAll('[data-species]').length || 1) - 1);
+          requestAnimationFrame(() => {
+            const cards = document.querySelectorAll('[data-species]');
+            if (cards[next]) cards[next].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+          return next;
+        });
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedCardIndex(prev => {
+          const next = Math.max(prev - 1, 0);
+          requestAnimationFrame(() => {
+            const cards = document.querySelectorAll('[data-species]');
+            if (cards[next]) cards[next].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          });
+          return next;
+        });
+      } else if (e.key === 'Enter') {
+        setFocusedCardIndex(prev => {
+          if (prev >= 0) {
+            const cards = document.querySelectorAll('[data-species]');
+            if (cards[prev]) {
+              const sp = cards[prev].getAttribute('data-species');
+              toggleSpecies(sp);
+            }
+          }
+          return prev;
+        });
+      } else if (e.key === 'Escape') {
+        setFocusedCardIndex(-1);
+      }
     };
     document.addEventListener('keydown', handleGlobal);
     return () => document.removeEventListener('keydown', handleGlobal);
-  }, []);
+  }, [selectedVariety, showShortcuts, showPresets, viewMode, toggleSpecies]);
 
   // Read initial state from URL hash
   React.useEffect(() => {
@@ -1736,12 +1791,22 @@ function PlantingCalendar() {
     return items;
   }, [speciesData, todayDoy]);
 
-  const toggleSpecies = useCallback(sp => {
-    setExpandedSpecies(prev => ({ ...prev, [sp]: !prev[sp] }));
+  const toggleSpecies = useCallback((sp, shouldScroll) => {
+    setExpandedSpecies(prev => {
+      const wasExpanded = prev[sp];
+      if (!wasExpanded && shouldScroll !== false) {
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`[data-species="${sp}"]`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+      }
+      return { ...prev, [sp]: !wasExpanded };
+    });
   }, []);
 
   const dismissOnboarding = useCallback(() => {
     setShowOnboarding(false);
+    setWalkStep(null);
     localStorage.setItem('onboardingDismissed', '1');
   }, []);
 
@@ -1759,6 +1824,8 @@ function PlantingCalendar() {
 
   // Full-year timeline bar with month gridlines
   const YearBar = ({ tl, height = 20, showGridlines = true, bloomColor = null }) => {
+    const [tooltip, setTooltip] = React.useState(null);
+    const barRef = React.useRef(null);
     const segments = [];
     let prevPhase = null;
     let segStart = 1;
@@ -1778,8 +1845,18 @@ function PlantingCalendar() {
         prevPhase = phase;
       }
     }
+    const PHASE_TIPS = {
+      indoor: 'Sow seeds in trays under grow lights.',
+      harden: 'Gradually expose seedlings outdoors.',
+      transplant: 'Move seedlings outdoors after frost.',
+      sow: 'Plant seeds directly in garden soil.',
+      germination: 'Seeds sprouting. Keep soil moist.',
+      growing: 'Plants establishing. Water & feed.',
+      bloom: 'Flowers open. Deadhead to extend.',
+      decline: 'Season ending. Collect seeds.'
+    };
     return (
-      <div>
+      <div style={{ position: 'relative' }}>
         {/* Month labels above bar */}
         {showGridlines && (
           <div className="relative" style={{ height: '14px' }}>
@@ -1790,7 +1867,7 @@ function PlantingCalendar() {
             })}
           </div>
         )}
-        <div className="relative overflow-hidden" style={{ height: height + 'px', backgroundColor: '#e8e2d0', borderRadius: 0, border: '1px solid #ccc' }}>
+        <div ref={barRef} className="relative overflow-visible" style={{ height: height + 'px', backgroundColor: '#e8e2d0', borderRadius: 0, border: '1px solid #ccc' }}>
           {/* Month gridlines */}
           {showGridlines && MONTH_START_DOY.slice(1).map((md, i) => (
             <div key={i} className="absolute top-0 bottom-0" style={{ left: (md / 365 * 100) + '%', width: '1px', backgroundColor: 'rgba(0,0,0,0.08)' }} />
@@ -1798,24 +1875,25 @@ function PlantingCalendar() {
           {/* Phase segments */}
           {segments.map((seg, i) => (
             <div key={i} className="absolute top-0 bottom-0 year-bar-seg"
-              title={(() => {
-                const base = `${PHASE_COLORS[seg.phase].label}: ${formatDoy(seg.startDoy)} – ${formatDoy(seg.endDoy)}`;
-                const tips = {
-                  indoor: 'Sow seeds in trays under grow lights or on a sunny windowsill.',
-                  harden: 'Move seedlings to a sheltered outdoor location for a few hours daily, gradually increasing exposure.',
-                  transplant: 'Move hardened-off seedlings outdoors after frost danger passes.',
-                  sow: 'Plant seeds directly into prepared garden soil.',
-                  germination: 'Seeds are sprouting. Keep soil moist.',
-                  growing: 'Plants are establishing. Water, weed, and feed.',
-                  bloom: 'Flowers are open. Deadhead to extend blooming.',
-                  decline: 'Season is ending. Collect seeds, pull spent annuals.'
-                };
-                return base + (tips[seg.phase] ? '. ' + tips[seg.phase] : '');
-              })()}
-              style={{ left: seg.left + '%', width: Math.max(seg.width, 0.3) + '%', backgroundColor: seg.phase === 'bloom' && bloomColorMode && bloomColor ? bloomColor : PHASE_COLORS[seg.phase].bg }} />
+              onMouseEnter={(e) => {
+                const rect = barRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                setTooltip({ text: PHASE_COLORS[seg.phase].label, dates: `${formatDoy(seg.startDoy)} – ${formatDoy(seg.endDoy)}`, tip: PHASE_TIPS[seg.phase] || '', left: (x / rect.width) * 100 });
+              }}
+              onMouseLeave={() => setTooltip(null)}
+              onClick={() => setTooltip(prev => prev ? null : { text: PHASE_COLORS[seg.phase].label, dates: `${formatDoy(seg.startDoy)} – ${formatDoy(seg.endDoy)}`, tip: PHASE_TIPS[seg.phase] || '', left: seg.left + seg.width / 2 })}
+              style={{ left: seg.left + '%', width: Math.max(seg.width, 0.3) + '%', backgroundColor: seg.phase === 'bloom' && bloomColorMode && bloomColor ? bloomColor : PHASE_COLORS[seg.phase].bg, cursor: 'pointer' }} />
           ))}
           {/* Today marker */}
           <div className="absolute" style={{ left: 'calc(' + todayPct + '% - 1px)', top: '-2px', bottom: '-2px', width: '2px', backgroundColor: '#c00', zIndex: 2 }} />
+          {/* Styled tooltip */}
+          {tooltip && (
+            <div className="year-bar-tooltip" style={{ left: tooltip.left + '%' }}>
+              <div style={{ fontWeight: 700 }}>{tooltip.text}</div>
+              <div style={{ opacity: 0.85, fontSize: '10px' }}>{tooltip.dates}</div>
+              {tooltip.tip && <div style={{ opacity: 0.7, fontSize: '10px', marginTop: '2px' }}>{tooltip.tip}</div>}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -2038,21 +2116,51 @@ function PlantingCalendar() {
         </div>
       </div>
 
-      {showOnboarding && (() => {
-        const tips = [
-          { icon: '👆', text: 'Tap any species card to expand it and see varieties, dates, and growing details.' },
-          { icon: '⭐', text: 'Star varieties you want to grow. Click "My Garden" to see only your picks.' },
-          { icon: '📊', text: 'Use Filters to narrow by height, color, deer resistance, and more.' },
-          { icon: '📅', text: 'Try Bloom Chart or Planting Chart views for a timeline perspective.' },
-          { icon: '🔔', text: 'Star varieties, then enable Reminders to get notified before planting dates.' },
+      {/* Guided walkthrough overlay */}
+      {walkStep !== null && walkStep >= 0 && walkStep <= 3 && (() => {
+        const WALK_STEPS = [
+          { selector: 'input[placeholder*="Search"]', title: 'Search Varieties', text: 'Search 147 flower varieties by name. Try "sun" or "purple".' },
+          { selector: '[data-species]', title: 'Explore Species', text: 'Tap any card to expand it and see varieties, dates, and growing details.' },
+          { selector: '.variety-chip', title: 'Star Your Favorites', text: 'Click the star on any variety to add it to your garden plan.' },
+          { selector: '[title="Show only your starred varieties"]', title: 'View My Garden', text: 'See all your starred varieties in one place. Your selections save automatically.' },
         ];
-        const tip = tips[tipIndex % tips.length];
+        const step = WALK_STEPS[walkStep];
+        const el = document.querySelector(step.selector);
+        const rect = el ? el.getBoundingClientRect() : { top: 200, left: 100, width: 200, height: 40 };
+        const pad = 8;
         return (
-          <div style={{ backgroundColor: darkMode ? '#1e293b' : '#eef2ff', borderBottom: '1px solid ' + (darkMode ? '#334155' : '#c7d2fe'), padding: '6px 20px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-            <span style={{ fontSize: '14px' }}>{tip.icon}</span>
-            <span style={{ color: darkMode ? '#94a3b8' : '#4338ca', flex: 1 }}>{tip.text}</span>
-            <button onClick={() => setTipIndex(i => i + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: darkMode ? '#64748b' : '#6366f1', fontSize: '11px', fontWeight: 600, padding: '4px 8px', minHeight: '32px' }}>Next tip</button>
-            <button onClick={dismissOnboarding} style={{ background: 'none', border: 'none', cursor: 'pointer', color: darkMode ? '#475569' : '#a5b4fc', fontSize: '14px', lineHeight: 1, padding: '4px 8px', minHeight: '32px' }}>&times;</button>
+          <div className="fixed inset-0 z-50" style={{ pointerEvents: 'auto' }}>
+            <svg className="absolute inset-0" width="100%" height="100%" style={{ pointerEvents: 'none' }}>
+              <defs>
+                <mask id="walk-mask">
+                  <rect width="100%" height="100%" fill="white" />
+                  <rect x={rect.left - pad} y={rect.top - pad} width={rect.width + pad * 2} height={rect.height + pad * 2} rx="8" fill="black" />
+                </mask>
+              </defs>
+              <rect width="100%" height="100%" fill="rgba(0,0,0,0.5)" mask="url(#walk-mask)" />
+            </svg>
+            <div style={{
+              position: 'absolute',
+              top: Math.min(rect.top + rect.height + pad + 12, window.innerHeight - 160),
+              left: Math.max(16, Math.min(rect.left, window.innerWidth - 300)),
+              width: '280px',
+              backgroundColor: '#fff',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+              zIndex: 51
+            }}>
+              <p style={{ fontSize: '10px', color: '#6366f1', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>Step {walkStep + 1} of 4</p>
+              <p style={{ fontSize: '15px', fontWeight: 700, color: '#1e293b', marginBottom: '6px' }}>{step.title}</p>
+              <p style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5, marginBottom: '14px' }}>{step.text}</p>
+              <div className="flex gap-2 justify-end">
+                <button onClick={dismissOnboarding} style={{ fontSize: '12px', color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 12px' }}>Skip</button>
+                <button onClick={() => { if (walkStep >= 3) { dismissOnboarding(); } else { setWalkStep(walkStep + 1); } }}
+                  style={{ fontSize: '12px', fontWeight: 700, color: '#fff', backgroundColor: '#6366f1', border: 'none', borderRadius: '6px', cursor: 'pointer', padding: '6px 16px' }}>
+                  {walkStep >= 3 ? 'Done' : 'Next'}
+                </button>
+              </div>
+            </div>
           </div>
         );
       })()}
@@ -2282,6 +2390,12 @@ function PlantingCalendar() {
                 className="filter-btn px-3.5 py-2 text-sm font-bold whitespace-nowrap"
                 style={filterMyGarden ? { backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderLeft: '3px solid #16a34a', fontWeight: 700 } : { backgroundColor: dm.chipBg, color: dm.textMuted, border: '1px solid ' + dm.border }}>
                 My Garden{Object.keys(myGarden).length > 0 ? ` (${Object.keys(myGarden).length})` : ''}
+              </button>
+              <button onClick={() => setShowPresets(true)}
+                title="Browse curated garden collections"
+                className="filter-btn px-3 py-2 text-sm font-bold whitespace-nowrap"
+                style={{ backgroundColor: dm.chipBg, color: '#6366f1', border: '1px solid #c7d2fe', fontSize: '11px' }}>
+                Garden Ideas
               </button>
               {Object.keys(myGarden).length > 0 && (
                 <>
@@ -2846,7 +2960,30 @@ function PlantingCalendar() {
               );
             })()}
 
-            {sortedFiltered.map(sd => (
+            {/* Progressive filter hint */}
+            {!filterHintDismissed && sortedFiltered.length > 20 && !hasActiveFilters && !searchTerm && (() => {
+              const hasPlantable = speciesData.some(sd => {
+                const tl = sd.tl;
+                return (tl.indoorStart && todayDoy >= tl.indoorStart - 7 && todayDoy <= tl.indoorStart + 14) ||
+                       (tl.sowStart && todayDoy >= tl.sowStart - 7 && todayDoy <= tl.sowStart + 14);
+              });
+              const hasBlooming = speciesData.some(sd => todayDoy >= sd.tl.bloomStart && todayDoy <= sd.tl.bloomEnd);
+              const tip = hasPlantable
+                ? { text: 'Try "Plant Now" to see species you can start this week.', action: () => setFilterPlantNow(true) }
+                : hasBlooming
+                ? { text: 'Try "Blooming" to see what\'s flowering right now.', action: () => setFilterBloomNow(true) }
+                : { text: 'Try sorting by "Next action" to see your most urgent tasks.', action: () => setSortBy('nextAction') };
+              return (
+                <div style={{ borderLeft: '3px solid #6366f1', backgroundColor: darkMode ? '#1e1b4b' : '#eef2ff', padding: '8px 14px', borderRadius: '0 6px 6px 0', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
+                  <span style={{ color: '#6366f1', fontWeight: 700, fontSize: '11px' }}>TIP</span>
+                  <button onClick={tip.action} style={{ background: 'none', border: 'none', cursor: 'pointer', color: darkMode ? '#a5b4fc' : '#4338ca', fontWeight: 500, padding: 0, textAlign: 'left', flex: 1 }}>{tip.text}</button>
+                  <button onClick={() => { setFilterHintDismissed(true); localStorage.setItem('filterHintDismissed', '1'); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '14px', padding: '2px 6px' }}>&times;</button>
+                </div>
+              );
+            })()}
+
+            {sortedFiltered.map((sd, cardIdx) => (
             <LazyCard key={sd.species}>
             <div role="article" aria-label={sd.species + ' planting card'} data-species={sd.species}
               draggable={filterMyGarden}
@@ -2866,7 +3003,7 @@ function PlantingCalendar() {
               } : undefined}
               onDragEnd={() => setDraggedSpecies(null)}
               className={'species-card overflow-hidden ' + (expandedSpecies[sd.species] ? 'species-card-expanded' : 'species-card-collapsed')}
-              style={{ border: '1px solid ' + dm.border, borderLeft: '4px solid ' + (sd.bloomColor || '#94a3b8'), backgroundColor: dm.cardBg, borderRadius: '8px', opacity: draggedSpecies === sd.species ? 0.5 : 1, cursor: filterMyGarden ? 'grab' : 'default' }}>
+              style={{ border: '1px solid ' + dm.border, borderLeft: '4px solid ' + (sd.bloomColor || '#94a3b8'), backgroundColor: dm.cardBg, borderRadius: '8px', opacity: draggedSpecies === sd.species ? 0.5 : 1, cursor: filterMyGarden ? 'grab' : 'default', outline: focusedCardIndex === cardIdx ? '2px solid #6366f1' : 'none', outlineOffset: '2px' }}>
               <div className="flex gap-4 px-5 py-4 flex-col sm:flex-row">
                 {/* Species thumbnail */}
                 {(() => {
@@ -2916,7 +3053,7 @@ function PlantingCalendar() {
                         return <span>{selCount > 0 ? `${selCount}/` : ''}{searchTerm ? (() => {
   const matchCount = sd.varieties.filter(v => v.name.toLowerCase().includes(searchTerm.toLowerCase())).length;
   return matchCount < sd.varieties.length ? <span><span style={{color: '#16a34a', fontWeight: 700}}>{matchCount}</span> of {sd.varieties.length} var</span> : <span>{sd.varieties.length} var</span>;
-})() : <span>{sd.varieties.length} var</span>}</span>;
+})() : <span>{sd.varieties.length} var</span>}{sd.bloomColor && <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: sd.bloomColor, border: '1px solid rgba(0,0,0,0.15)', marginLeft: 4, verticalAlign: 'middle' }} />}</span>;
                       })()}
                     </span>
                     <PhaseBadge tl={sd.tl} bloomColor={sd.bloomColor} />
@@ -2941,7 +3078,7 @@ function PlantingCalendar() {
                     </div>
                   )}
                   {/* Detail rows - visible when expanded */}
-                  {expandedSpecies[sd.species] && <div style={{ fontSize: '11px', lineHeight: '20px', color: '#64748b' }}>
+                  {expandedSpecies[sd.species] && <div className="card-expand-enter" style={{ fontSize: '11px', lineHeight: '20px', color: '#64748b' }}>
                       <div className="flex gap-2">
                         <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Type</span>
                         <span className="capitalize font-bold" style={{ color: '#475569' }}>{sd.type}</span>
@@ -3167,24 +3304,74 @@ function PlantingCalendar() {
         )}
 
         {filtered.length === 0 && (
-          <div className="p-16 text-center" style={{ border: '1px solid #e2e8f0', backgroundColor: '#fff', color: '#94a3b8' }}>
+          <div className="p-12 text-center" style={{ border: '1px solid ' + dm.border, backgroundColor: dm.cardBg, color: '#94a3b8' }}>
             {filterMyGarden && Object.keys(myGarden).length === 0 ? (
               <>
-                <p className="text-lg font-medium mb-2" style={{ color: '#64748b' }}>Your garden is empty</p>
-                <p className="text-sm mb-3">Star (☆) varieties from any species to start building your garden plan.</p>
-                <p className="text-sm">Your selections save automatically between visits.</p>
+                <p style={{ fontSize: '32px', marginBottom: '8px' }}>&#9734;</p>
+                <p className="text-lg font-medium mb-2" style={{ color: dm.text }}>Your garden is empty</p>
+                <p className="text-sm mb-4" style={{ color: dm.textMuted }}>Star varieties to build your garden plan, or start with a preset:</p>
+                <div className="flex flex-wrap gap-2 justify-center mb-4">
+                  {[
+                    { name: 'Pollinator Garden', species: ['Agastache', 'Bee Balm', 'Echinacea', 'Cosmos', 'Zinnia', 'Calendula'], icon: '🐝' },
+                    { name: 'Cut Flower Garden', species: ['Zinnia', 'Cosmos', 'Snapdragon', 'Stock', 'Bachelor\'s Button'], icon: '💐' },
+                    { name: 'Deer-Proof Garden', species: ['Lavender', 'Agastache', 'Yarrow', 'Foxglove', 'Salvia'], icon: '🛡' },
+                  ].map(preset => (
+                    <button key={preset.name} onClick={() => {
+                      const newGarden = { ...myGarden };
+                      preset.species.forEach(sp => {
+                        const sd = speciesData.find(s => s.species === sp);
+                        if (sd && sd.varieties.length > 0) newGarden[sp + '||' + sd.varieties[0].name] = true;
+                      });
+                      setMyGarden(newGarden);
+                      setToastMsg(`Added ${preset.species.length} varieties from ${preset.name}`);
+                      setTimeout(() => setToastMsg(null), 3000);
+                    }}
+                      style={{ fontSize: '12px', padding: '8px 16px', backgroundColor: dm.altRow, border: '1px solid ' + dm.border, borderRadius: '8px', cursor: 'pointer', color: dm.text, fontWeight: 600 }}>
+                      <span style={{ marginRight: '4px' }}>{preset.icon}</span> {preset.name}
+                    </button>
+                  ))}
+                </div>
                 <button onClick={() => setFilterMyGarden(false)}
-                  style={{ marginTop: '12px', fontSize: '12px', color: '#6366f1', background: 'none', border: '1px solid #c7d2fe', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>
+                  style={{ fontSize: '12px', color: '#6366f1', background: 'none', border: '1px solid #c7d2fe', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>
                   Browse all species
                 </button>
               </>
             ) : (
               <>
-                <p className="text-lg font-medium mb-1">No matches</p>
-                <p className="text-sm">Try adjusting your search or filters.</p>
+                <p style={{ fontSize: '32px', marginBottom: '8px' }}>&#128270;</p>
+                <p className="text-lg font-medium mb-1" style={{ color: dm.text }}>No matches</p>
+                <p className="text-sm mb-3" style={{ color: dm.textMuted }}>Try adjusting your search or filters.</p>
+                {searchTerm && (() => {
+                  const term = searchTerm.toLowerCase();
+                  const suggestions = speciesData
+                    .map(sd => ({ name: sd.species, score: sd.species.toLowerCase().includes(term.slice(0, 3)) ? 1 : 0 }))
+                    .filter(s => s.score > 0)
+                    .slice(0, 3);
+                  const varSuggestions = suggestions.length === 0
+                    ? speciesData.flatMap(sd => sd.varieties.map(v => ({ name: v.name, species: sd.species })))
+                        .filter(v => v.name.toLowerCase().includes(term.slice(0, 3)))
+                        .slice(0, 3)
+                    : [];
+                  const allSugs = suggestions.length > 0
+                    ? suggestions.map(s => ({ label: s.name, action: () => { setSearchTerm(s.name); } }))
+                    : varSuggestions.map(v => ({ label: `${v.name} (${v.species})`, action: () => { setSearchTerm(v.species); } }));
+                  return allSugs.length > 0 ? (
+                    <div style={{ marginBottom: '12px' }}>
+                      <p style={{ fontSize: '11px', color: dm.textFaint, marginBottom: '6px' }}>Did you mean:</p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {allSugs.map((s, i) => (
+                          <button key={i} onClick={s.action}
+                            style={{ fontSize: '12px', padding: '4px 12px', backgroundColor: darkMode ? '#312e81' : '#eef2ff', color: '#6366f1', border: '1px solid #c7d2fe', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null;
+                })()}
                 {hasActiveFilters && (
                   <button onClick={clearAllFilters}
-                    style={{ marginTop: '12px', fontSize: '12px', color: '#ef4444', background: 'none', border: '1px solid #fecaca', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>
+                    style={{ fontSize: '12px', color: '#ef4444', background: 'none', border: '1px solid #fecaca', padding: '6px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600 }}>
                     Clear all filters
                   </button>
                 )}
@@ -3260,6 +3447,19 @@ function PlantingCalendar() {
                 onMouseLeave={(e) => e.target.style.backgroundColor=dm.cardBg}>&times;</button>
             </div>
 
+            {/* Tab bar */}
+            <div className="segment-group flex" style={{ margin: '0 20px', marginTop: '12px', border: '1px solid ' + dm.border }}>
+              {['details', 'timeline', 'companions'].map(tab => (
+                <button key={tab} onClick={() => setModalTab(tab)}
+                  style={{ flex: 1, padding: '8px 0', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer',
+                    backgroundColor: modalTab === tab ? '#6366f1' : dm.chipBg,
+                    color: modalTab === tab ? '#fff' : dm.textMuted,
+                    border: 'none' }}>
+                  {tab === 'details' ? 'Details' : tab === 'timeline' ? 'Timeline' : 'Companions'}
+                </button>
+              ))}
+            </div>
+
             <div className="p-5 space-y-4">
               {/* Navigation hint */}
               {(() => {
@@ -3269,129 +3469,153 @@ function PlantingCalendar() {
                 return (
                   <div style={{ textAlign: 'center', paddingBottom: '4px' }}>
                     <span style={{ fontSize: '11px', color: '#94a3b8' }}>{idx + 1} of {sd.varieties.length} varieties</span>
-                    <span style={{ fontSize: '10px', color: darkMode ? '#818cf8' : '#c7d2fe', marginLeft: '8px', backgroundColor: darkMode ? '#312e81' : '#eef2ff', padding: '2px 8px', borderRadius: '4px' }}>← → keys to browse</span>
+                    <span style={{ fontSize: '10px', color: darkMode ? '#818cf8' : '#c7d2fe', marginLeft: '8px', backgroundColor: darkMode ? '#312e81' : '#eef2ff', padding: '2px 8px', borderRadius: '4px' }}>keys to browse</span>
                   </div>
                 );
               })()}
 
-              {/* Properties grid */}
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { label: 'Type', value: selectedVariety.type, capitalize: true },
-                  { label: 'Frost Hardy', value: selectedVariety.frostHardy ? 'Yes' : 'No' },
-                  { label: 'Sun', value: selectedVariety.sun ? `${selectedVariety.sun[0]}–${selectedVariety.sun[1]}hr` : 'Full' },
-                  { label: 'Height', value: HEIGHT_LABELS[selectedVariety.height] || '?' },
-                  { label: 'Spacing', value: SPACING_DATA[selectedVariety.height]?.label || '?' },
-                  { label: 'Germination', value: `${selectedVariety.germination[0]}–${selectedVariety.germination[1]}d` },
-                  { label: 'Days to Bloom', value: `${selectedVariety.bloomDays[0]}–${selectedVariety.bloomDays[1]}d` },
-                  { label: 'Sowing', value: selectedVariety.sowMethod.map(m => m === 'startIndoors' ? 'Indoor' : 'Direct').join(' / ') }
-                ].map((item, idx) => (
-                  <div key={idx} className="text-center" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px 8px', borderRadius: '6px' }}>
-                    <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, letterSpacing: '0.1em', marginBottom: '2px', textTransform: 'uppercase' }}>{item.label}</p>
-                    <p className={`font-bold tabular-nums ${item.capitalize ? 'capitalize' : ''}`} style={{ fontSize: '12px', color: '#1e293b' }}>{item.value}</p>
+              {/* DETAILS TAB */}
+              {modalTab === 'details' && (
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: 'Type', value: selectedVariety.type, capitalize: true },
+                      { label: 'Frost Hardy', value: selectedVariety.frostHardy ? 'Yes' : 'No' },
+                      { label: 'Sun', value: selectedVariety.sun ? `${selectedVariety.sun[0]}–${selectedVariety.sun[1]}hr` : 'Full' },
+                      { label: 'Height', value: HEIGHT_LABELS[selectedVariety.height] || '?' },
+                      { label: 'Spacing', value: SPACING_DATA[selectedVariety.height]?.label || '?' },
+                      { label: 'Germination', value: `${selectedVariety.germination[0]}–${selectedVariety.germination[1]}d` },
+                      { label: 'Days to Bloom', value: `${selectedVariety.bloomDays[0]}–${selectedVariety.bloomDays[1]}d` },
+                      { label: 'Sowing', value: selectedVariety.sowMethod.map(m => m === 'startIndoors' ? 'Indoor' : 'Direct').join(' / ') }
+                    ].map((item, idx) => (
+                      <div key={idx} className="text-center" style={{ backgroundColor: dm.altRow, border: '1px solid ' + dm.border, padding: '12px 8px', borderRadius: '6px' }}>
+                        <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, letterSpacing: '0.1em', marginBottom: '2px', textTransform: 'uppercase' }}>{item.label}</p>
+                        <p className={`font-bold tabular-nums ${item.capitalize ? 'capitalize' : ''}`} style={{ fontSize: '12px', color: dm.text }}>{item.value}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              {/* Sowing tip */}
-              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>{selectedVariety.sowTiming}</p>
-              </div>
+                  <div style={{ backgroundColor: dm.altRow, padding: '12px 14px', border: '1px solid ' + dm.border, borderRadius: '6px' }}>
+                    <p style={{ fontSize: '12px', color: dm.textMuted, lineHeight: 1.5 }}>{selectedVariety.sowTiming}</p>
+                  </div>
 
-              {selectedVariety.type === 'perennial' && selectedVariety.firstYearBloom === false && (
-                <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#92400e' }}>
-                  Perennial — may not bloom first year from seed. Plan for establishment.
-                </div>
+                  {selectedVariety.type === 'perennial' && selectedVariety.firstYearBloom === false && (
+                    <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#92400e' }}>
+                      Perennial may not bloom first year from seed. Plan for establishment.
+                    </div>
+                  )}
+
+                  {selectedVariety.type === 'annual' && selectedVariety.sowMethod.includes('directSow') && selectedVariety.bloomDuration && selectedVariety.bloomDuration <= 45 && (
+                    <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#15803d', fontWeight: 600 }}>
+                      <span>Succession sow every 2-3 weeks:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(() => {
+                          const dates = [];
+                          const start = selectedVariety.tl.sowStart;
+                          const end = selectedVariety.tl.sowEnd || (start + 42);
+                          for (let d = start; d <= end; d += 14) dates.push(d);
+                          return dates.map((d, i) => (
+                            <span key={i} style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', padding: '1px 6px', borderRadius: '3px', fontSize: '10px' }}>{formatDoy(d)}</span>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedVariety.flag && (
+                    <div style={{ backgroundColor: dm.altRow, padding: '12px 14px', border: '1px solid ' + dm.border, borderRadius: '6px' }}>
+                      <p style={{ fontSize: '12px', color: dm.textMuted }}>&#9888; {selectedVariety.flag}</p>
+                    </div>
+                  )}
+
+                  {myGarden[selectedVariety.species + '||' + selectedVariety.name] && (
+                    <div>
+                      <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Notes</p>
+                      <textarea
+                        value={gardenNotes[selectedVariety.species + '||' + selectedVariety.name] || ''}
+                        onChange={(e) => setGardenNotes(prev => ({ ...prev, [selectedVariety.species + '||' + selectedVariety.name]: e.target.value }))}
+                        placeholder="Add planting notes, location, quantity..."
+                        rows={3}
+                        style={{ width: '100%', fontSize: '12px', padding: '8px 10px', border: '1px solid ' + dm.border, borderRadius: '6px', resize: 'vertical', fontFamily: 'Inter, sans-serif', color: dm.text, backgroundColor: dm.altRow }}
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
-              {selectedVariety.type === 'annual' && selectedVariety.sowMethod.includes('directSow') && selectedVariety.bloomDuration && selectedVariety.bloomDuration <= 45 && (
-                <div className="flex gap-2 items-start" style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '6px', padding: '8px 12px' }}>
-                  <div style={{ fontSize: '12px', color: '#15803d', fontWeight: 600 }}>
-                    <span>Sow every 2–3 weeks for continuous bloom:</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {(() => {
-                        const dates = [];
-                        const interval = 14;
-                        const start = selectedVariety.tl.sowStart;
-                        const end = selectedVariety.tl.sowEnd || (selectedVariety.tl.sowStart + 42);
-                        for (let d = start; d <= end; d += interval) {
-                          dates.push(d);
-                        }
-                        return dates.map((d, i) => (
-                          <span key={i} style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', padding: '1px 6px', borderRadius: '3px', fontSize: '10px' }}>
-                            {formatDoy(d)}
-                          </span>
-                        ));
-                      })()}
+              {/* TIMELINE TAB */}
+              {modalTab === 'timeline' && (
+                <>
+                  <div>
+                    <p className="font-bold mb-2.5" style={{ fontSize: '12px', color: dm.text, letterSpacing: '2px', textTransform: 'uppercase' }}>Midcoast Maine Timeline</p>
+                    <div className="space-y-2">
+                      {[
+                        selectedVariety.tl.indoorStart && { phase: 'indoor', label: 'Start indoors', date: formatDoy(selectedVariety.tl.indoorStart) },
+                        selectedVariety.tl.hardenStart && { phase: 'harden', label: 'Harden off', date: formatDoy(selectedVariety.tl.hardenStart) },
+                        selectedVariety.tl.transplant && { phase: 'transplant', label: 'Transplant', date: formatDoy(selectedVariety.tl.transplant) },
+                        selectedVariety.tl.sowStart && { phase: 'sow', label: 'Direct sow', date: `${formatDoy(selectedVariety.tl.sowStart)} – ${formatDoy(selectedVariety.tl.sowEnd)}` },
+                        { phase: 'germination', label: 'Germination', date: formatDoy(selectedVariety.tl.germEnd) },
+                        { phase: 'bloom', label: 'First bloom', date: formatDoy(selectedVariety.tl.bloomStart) },
+                        { phase: 'decline', label: selectedVariety.type === 'annual' ? 'Frost kill' : 'Dormancy', date: formatDoy(selectedVariety.tl.seasonEnd) }
+                      ].filter(Boolean).map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2.5" style={{ fontSize: '13px' }}>
+                          <span className="inline-block w-2 h-2 shrink-0" style={{ backgroundColor: PHASE_COLORS[item.phase].bg }} />
+                          <span style={{ color: '#94a3b8', width: '110px' }}>{item.label}</span>
+                          <span className="font-bold tabular-nums" style={{ color: dm.text }}>{item.date}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              )}
-
-              {myGarden[selectedVariety.species + '||' + selectedVariety.name] && (
-                <div>
-                  <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Notes</p>
-                  <textarea
-                    value={gardenNotes[selectedVariety.species + '||' + selectedVariety.name] || ''}
-                    onChange={(e) => setGardenNotes(prev => ({ ...prev, [selectedVariety.species + '||' + selectedVariety.name]: e.target.value }))}
-                    placeholder="Add planting notes, location, quantity..."
-                    rows={3}
-                    style={{ width: '100%', fontSize: '12px', padding: '8px 10px', border: '1px solid #e2e8f0', borderRadius: '6px', resize: 'vertical', fontFamily: 'Inter, sans-serif', color: '#1e293b', backgroundColor: '#f8fafc' }}
-                  />
-                </div>
-              )}
-
-              {selectedVariety.companions && selectedVariety.companions.length > 0 && (
-                <div style={{ fontSize: '12px', color: '#475569' }}>
-                  <span style={{ color: '#94a3b8' }}>Pairs well with: </span>
-                  {selectedVariety.companions.map((comp, i) => (
-                    <React.Fragment key={i}>
-                      {i > 0 && ', '}
-                      <button
-                        onClick={() => { setSelectedVariety(null); setSearchTerm(comp); window.scrollTo(0, 0); }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6366f1', fontWeight: 700, textDecoration: 'underline', padding: 0 }}>
-                        {comp}
-                      </button>
-                    </React.Fragment>
-                  ))}
-                </div>
-              )}
-
-              {/* Timeline milestones */}
-              <div>
-                <p className="font-bold mb-2.5" style={{ fontSize: '12px', color: '#1e293b', letterSpacing: '2px', textTransform: 'uppercase' }}>Midcoast Maine Timeline</p>
-                <div className="space-y-2">
-                  {[
-                    selectedVariety.tl.indoorStart && { phase: 'indoor', label: 'Start indoors', date: formatDoy(selectedVariety.tl.indoorStart) },
-                    selectedVariety.tl.hardenStart && { phase: 'harden', label: 'Harden off', date: formatDoy(selectedVariety.tl.hardenStart) },
-                    selectedVariety.tl.transplant && { phase: 'transplant', label: 'Transplant', date: formatDoy(selectedVariety.tl.transplant) },
-                    selectedVariety.tl.sowStart && { phase: 'sow', label: 'Direct sow', date: `${formatDoy(selectedVariety.tl.sowStart)} – ${formatDoy(selectedVariety.tl.sowEnd)}` },
-                    { phase: 'germination', label: 'Germination', date: formatDoy(selectedVariety.tl.germEnd) },
-                    { phase: 'bloom', label: 'First bloom', date: formatDoy(selectedVariety.tl.bloomStart) },
-                    { phase: 'decline', label: selectedVariety.type === 'annual' ? 'Frost kill' : 'Dormancy', date: formatDoy(selectedVariety.tl.seasonEnd) }
-                  ].filter(Boolean).map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2.5" style={{ fontSize: '13px' }}>
-                      <span className="inline-block w-2 h-2 shrink-0" style={{ backgroundColor: PHASE_COLORS[item.phase].bg }} />
-                      <span style={{ color: '#94a3b8', width: '110px' }}>{item.label}</span>
-                      <span className="font-bold tabular-nums" style={{ color: '#1e293b' }}>{item.date}</span>
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, marginBottom: '6px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Full year</p>
+                    <YearBar tl={selectedVariety.tl} height={16} showGridlines={false} bloomColor={selectedVariety.bloomColor} />
+                    <div className="flex justify-between mt-1" style={{ fontSize: '10px', color: '#94a3b8' }}>
+                      {MONTHS.map(m => <span key={m}>{m[0]}</span>)}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                </>
+              )}
 
-              {/* Full year bar */}
-              <div>
-                <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, marginBottom: '6px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Full year</p>
-                <YearBar tl={selectedVariety.tl} height={16} showGridlines={false} bloomColor={selectedVariety.bloomColor} />
-                <div className="flex justify-between mt-1" style={{ fontSize: '10px', color: '#94a3b8' }}>
-                  {MONTHS.map(m => <span key={m}>{m[0]}</span>)}
-                </div>
-              </div>
-
-              {selectedVariety.flag && (
-                <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                  <p style={{ fontSize: '12px', color: '#64748b' }}>&#9888; {selectedVariety.flag}</p>
-                </div>
+              {/* COMPANIONS TAB */}
+              {modalTab === 'companions' && (
+                <>
+                  {selectedVariety.companions && selectedVariety.companions.length > 0 ? (
+                    <div>
+                      <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Companion Plants</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedVariety.companions.map((comp, i) => {
+                          const compSd = speciesData.find(s => s.species === comp);
+                          return (
+                            <button key={i} onClick={() => { setSelectedVariety(null); setSearchTerm(comp); window.scrollTo(0, 0); }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', backgroundColor: dm.altRow, border: '1px solid ' + dm.border, borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 700, color: '#6366f1' }}>
+                              {compSd && compSd.bloomColor && <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: compSd.bloomColor, border: '1px solid rgba(0,0,0,0.1)' }} />}
+                              {comp}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '13px', color: dm.textMuted, textAlign: 'center', padding: '20px 0' }}>No companion data available for this species.</p>
+                  )}
+                  {/* Related species with similar bloom times */}
+                  <div>
+                    <p style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px', marginTop: '8px' }}>Blooms at the Same Time</p>
+                    <div className="flex flex-wrap gap-2">
+                      {speciesData
+                        .filter(sd => sd.species !== selectedVariety.species && Math.abs(sd.tl.bloomStart - selectedVariety.tl.bloomStart) < 21)
+                        .slice(0, 5)
+                        .map(sd => (
+                          <button key={sd.species} onClick={() => { setSelectedVariety(null); setSearchTerm(sd.species); window.scrollTo(0, 0); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', backgroundColor: dm.altRow, border: '1px solid ' + dm.border, borderRadius: '6px', cursor: 'pointer', fontSize: '11px', fontWeight: 600, color: dm.text }}>
+                            {sd.bloomColor && <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: sd.bloomColor }} />}
+                            {sd.species}
+                            <span style={{ fontSize: '10px', color: '#94a3b8' }}>Bloom {formatDoy(sd.tl.bloomStart)}</span>
+                          </button>
+                        ))}
+                    </div>
+                  </div>
+                </>
               )}
 
               <a href={selectedVariety.url} target="_blank" rel="noopener noreferrer"
@@ -3407,7 +3631,7 @@ function PlantingCalendar() {
       )}
 
       {viewMode === 'list' && sortedFiltered.length > 5 && (
-        <div className="fixed z-30" style={{ bottom: '20px', right: '20px' }}>
+        <div className="fixed z-30" style={{ bottom: Object.keys(myGarden).length > 0 && !footerDismissed && !filterMyGarden ? '60px' : '20px', right: '20px', transition: 'bottom 0.2s ease' }}>
           <select
             onChange={(e) => {
               if (!e.target.value) return;
@@ -3426,7 +3650,7 @@ function PlantingCalendar() {
       )}
 
       <button onClick={() => setShowShortcuts(!showShortcuts)}
-        style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: 30, width: '32px', height: '32px', borderRadius: '50%', backgroundColor: dm.text, color: dm.cardBg, border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+        style={{ position: 'fixed', bottom: Object.keys(myGarden).length > 0 && !footerDismissed && viewMode === 'list' && !filterMyGarden ? '60px' : '20px', left: '20px', zIndex: 30, width: '32px', height: '32px', borderRadius: '50%', backgroundColor: dm.text, color: dm.cardBg, border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'bottom 0.2s ease' }}>
         ?
       </button>
 
@@ -3436,6 +3660,9 @@ function PlantingCalendar() {
             <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '16px', color: dm.text, textTransform: 'uppercase', letterSpacing: '2px' }}>Keyboard Shortcuts</h3>
             <div style={{ fontSize: '13px', lineHeight: 2, color: dm.textMuted }}>
               {[
+                ['j / ↓', 'Next species card'],
+                ['k / ↑', 'Previous species card'],
+                ['Enter', 'Expand/collapse focused card'],
                 ['?', 'Toggle this help'],
                 ['← →', 'Browse varieties in modal'],
                 ['Esc', 'Close modal or overlay'],
@@ -3451,8 +3678,84 @@ function PlantingCalendar() {
         </div>
       )}
 
+      {/* Sticky Garden Summary Footer Bar */}
+      {Object.keys(myGarden).length > 0 && !footerDismissed && viewMode === 'list' && !filterMyGarden && (
+        <div className="fixed bottom-0 left-0 right-0 z-20" style={{ backgroundColor: dm.headerBg, borderTop: '2px solid #6366f1', padding: '8px 20px', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', boxShadow: '0 -4px 12px rgba(0,0,0,0.1)' }}>
+          <span style={{ fontWeight: 700, color: '#6366f1' }}>{Object.keys(myGarden).length} saved</span>
+          {(() => {
+            const gardenSpecies = [...new Set(Object.keys(myGarden).map(k => k.split('||')[0]))];
+            const nextAction = gardenSpecies.map(sp => {
+              const sd = speciesData.find(s => s.species === sp);
+              if (!sd) return null;
+              const cd = getCountdown(sd.tl, todayDoy);
+              return cd ? { species: sp, ...cd } : null;
+            }).filter(Boolean).sort((a, b) => a.days - b.days)[0];
+            return nextAction ? (
+              <span style={{ color: dm.textMuted }}>Next: <strong style={{ color: '#f59e0b' }}>{nextAction.label}</strong> {nextAction.species} in {nextAction.days}d</span>
+            ) : null;
+          })()}
+          <span style={{ flex: 1 }} />
+          <button onClick={() => { setFilterMyGarden(true); window.scrollTo(0, 0); }}
+            style={{ fontSize: '11px', fontWeight: 700, color: '#fff', backgroundColor: '#6366f1', border: 'none', borderRadius: '6px', padding: '6px 14px', cursor: 'pointer' }}>
+            View Garden
+          </button>
+          <button onClick={() => setFooterDismissed(true)}
+            style={{ background: 'none', border: 'none', color: dm.textFaint, cursor: 'pointer', fontSize: '14px', padding: '4px' }}>&times;</button>
+        </div>
+      )}
+
+      {/* Garden Presets Popover */}
+      {showPresets && (
+        <div className="fixed inset-0 z-50" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }} onClick={() => setShowPresets(false)}>
+          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '340px', backgroundColor: dm.cardBg, borderRadius: '12px', padding: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', border: '1px solid ' + dm.border }} onClick={e => e.stopPropagation()}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, color: dm.text, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '16px' }}>Garden Ideas</h3>
+            <div className="space-y-3">
+              {[
+                { name: 'Pollinator Paradise', icon: '🐝', species: ['Agastache', 'Bee Balm', 'Echinacea', 'Cosmos', 'Zinnia', 'Calendula'] },
+                { name: 'Cut Flower Bouquets', icon: '💐', species: ['Zinnia', 'Cosmos', 'Snapdragon', 'Stock', 'Bachelor\'s Button'] },
+                { name: 'Shade Tolerant', icon: '🌿', species: ['Foxglove', 'Columbine', 'Bleeding Heart', 'Forget-Me-Not'] },
+                { name: 'Continuous Bloom', icon: '🌸', species: ['Calendula', 'Cosmos', 'Zinnia', 'Marigold', 'Snapdragon', 'Aster'] },
+              ].map(preset => (
+                <div key={preset.name} style={{ padding: '12px', backgroundColor: dm.altRow, borderRadius: '8px', border: '1px solid ' + dm.border }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span style={{ fontWeight: 700, fontSize: '13px', color: dm.text }}><span style={{ marginRight: '6px' }}>{preset.icon}</span>{preset.name}</span>
+                    <button onClick={() => {
+                      const newGarden = { ...myGarden };
+                      let added = 0;
+                      preset.species.forEach(sp => {
+                        const sd = speciesData.find(s => s.species === sp);
+                        if (sd && sd.varieties.length > 0 && !newGarden[sp + '||' + sd.varieties[0].name]) {
+                          newGarden[sp + '||' + sd.varieties[0].name] = true;
+                          added++;
+                        }
+                      });
+                      setMyGarden(newGarden);
+                      setShowPresets(false);
+                      setToastMsg(`Added ${added} varieties from ${preset.name}`);
+                      setTimeout(() => setToastMsg(null), 3000);
+                    }}
+                      style={{ fontSize: '11px', fontWeight: 700, color: '#fff', backgroundColor: '#6366f1', border: 'none', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer' }}>
+                      Add all
+                    </button>
+                  </div>
+                  <p style={{ fontSize: '11px', color: dm.textMuted }}>{preset.species.join(', ')}</p>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowPresets(false)} style={{ marginTop: '12px', fontSize: '12px', color: dm.textFaint, background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'center' }}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* Toast notification */}
+      {toastMsg && (
+        <div className="fixed z-50" style={{ bottom: '80px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#1e293b', color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, boxShadow: '0 8px 24px rgba(0,0,0,0.2)', animation: 'modalIn 0.2s ease-out' }}>
+          {toastMsg}
+        </div>
+      )}
+
       {/* Footer */}
-      <footer style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 20px', marginTop: '40px', textAlign: 'center', fontSize: '12px', lineHeight: '1.8' }}>
+      <footer style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 20px', marginTop: '40px', textAlign: 'center', fontSize: '12px', lineHeight: '1.8', marginBottom: Object.keys(myGarden).length > 0 && !footerDismissed && viewMode === 'list' && !filterMyGarden ? '44px' : 0 }}>
         <p style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: '4px' }}>Midcoast Maine Planting Calendar</p>
         <p>USDA Zone 5b · Last frost ~May 15 · First frost ~Oct 1</p>
         <p style={{ marginTop: '8px' }}>Seed data sourced from <a href="https://www.rareseeds.com" target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'underline' }}>Baker Creek Heirloom Seeds</a>. Dates are estimates for the Midcoast Maine region.</p>
