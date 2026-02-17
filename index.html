@@ -3053,7 +3053,7 @@ function PlantingCalendar() {
                         return <span>{selCount > 0 ? `${selCount}/` : ''}{searchTerm ? (() => {
   const matchCount = sd.varieties.filter(v => v.name.toLowerCase().includes(searchTerm.toLowerCase())).length;
   return matchCount < sd.varieties.length ? <span><span style={{color: '#16a34a', fontWeight: 700}}>{matchCount}</span> of {sd.varieties.length} var</span> : <span>{sd.varieties.length} var</span>;
-})() : <span>{sd.varieties.length} var</span>}{sd.bloomColor && <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', backgroundColor: sd.bloomColor, border: '1px solid rgba(0,0,0,0.15)', marginLeft: 4, verticalAlign: 'middle' }} />}</span>;
+})() : <span>{sd.varieties.length} var</span>}</span>;
                       })()}
                     </span>
                     <PhaseBadge tl={sd.tl} bloomColor={sd.bloomColor} />
