@@ -1855,6 +1855,15 @@ function PlantingCalendar() {
     return () => document.removeEventListener('keydown', handleGlobal);
   }, []);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [filterSow, setFilterSow] = useState('all');
+  const [filterType, setFilterType] = useState('all');
+  const [filterPlantNow, setFilterPlantNow] = useState(false);
+  const [filterBloomNow, setFilterBloomNow] = useState(false);
+  const [filterDeer, setFilterDeer] = useState('all');
+  const [filterPollinator, setFilterPollinator] = useState('all');
+
   // Read initial state from URL hash
   React.useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -2048,14 +2057,6 @@ function PlantingCalendar() {
     a.click();
     URL.revokeObjectURL(url);
   }, [myGarden, speciesData]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [filterSow, setFilterSow] = useState('all');
-  const [filterType, setFilterType] = useState('all');
-  const [filterPlantNow, setFilterPlantNow] = useState(false);
-  const [filterBloomNow, setFilterBloomNow] = useState(false);
-  const [filterDeer, setFilterDeer] = useState('all');
-  const [filterPollinator, setFilterPollinator] = useState('all');
   const today = new Date();
   const todayDoy = doy(today.getMonth() + 1, today.getDate());
   const todayPct = (todayDoy - 1) / 365 * 100;
