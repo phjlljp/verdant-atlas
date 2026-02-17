@@ -18,7 +18,7 @@
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
       ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       .species-card { transition: all 0.15s ease; }
-      .species-card-collapsed { border-left: 3px solid; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+      .species-card-collapsed { border-left: 3px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
       .species-card-expanded { border-left: 3px solid #6366f1; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
       .species-name-btn { border-radius: 4px; transition: background-color 0.1s ease; }
       .species-name-btn:hover { background-color: #f1f5f9; }
@@ -70,13 +70,13 @@
     <div id="root"></div>
 
     <script>
-const {
+var {
   useState,
   useMemo,
   useCallback
 } = React;
-const IMG_BASE = 'https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/';
-const IMAGE_MAP = {
+var IMG_BASE = 'https://res.cloudinary.com/rareseeds/image/upload/c_fit,w_400,h_400/f_auto,q_auto,dpr_auto/v1/';
+var IMAGE_MAP = {
   "agastache-anise-hyssop": "media/catalog/product/h/y/hyssop2-dark-purple-anise-lss-dsc_9247.jpg",
   "agastache-apache-sunset": "media/catalog/product/a/g/agastache-apache-sunset-lss-dsc_3459.jpg",
   "agastache-apricot-sprite": "media/catalog/product/a/g/agastache-apricot-sprite-lss-dsc_2478.jpg",
@@ -467,20 +467,20 @@ const IMAGE_MAP = {
   "zinnia-peruviana": "media/catalog/product/z/i/zinnia_peruviana.jpg"
 };
 function getImageUrl(url, size = 'modal') {
-  const slug = url.replace('https://www.rareseeds.com/', '');
-  const suffix = IMAGE_MAP[slug];
+  var slug = url.replace('https://www.rareseeds.com/', '');
+  var suffix = IMAGE_MAP[slug];
   if (!suffix) return null;
-  const sizes = {
+  var sizes = {
     thumb: 'c_fill,w_80,h_80',
     chip: 'c_fill,w_160,h_120',
     modal: 'c_fit,w_400,h_400'
   };
-  const transform = sizes[size] || sizes.modal;
+  var transform = sizes[size] || sizes.modal;
   return `https://res.cloudinary.com/rareseeds/image/upload/${transform}/f_auto,q_auto,dpr_auto/v1/${suffix}`;
 }
 
 // SVG Icon Components
-const ChevronDown = ({
+var ChevronDown = ({
   size = 24,
   className = ''
 }) => /*#__PURE__*/React.createElement("svg", {
@@ -496,7 +496,7 @@ const ChevronDown = ({
 }, /*#__PURE__*/React.createElement("path", {
   d: "m6 9 6 6 6-6"
 }));
-const ChevronUp = ({
+var ChevronUp = ({
   size = 24,
   className = ''
 }) => /*#__PURE__*/React.createElement("svg", {
@@ -512,7 +512,7 @@ const ChevronUp = ({
 }, /*#__PURE__*/React.createElement("path", {
   d: "m18 15-6-6-6 6"
 }));
-const Search = ({
+var Search = ({
   size = 24,
   className = ''
 }) => /*#__PURE__*/React.createElement("svg", {
@@ -532,7 +532,7 @@ const Search = ({
 }), /*#__PURE__*/React.createElement("path", {
   d: "m21 21-4.3-4.3"
 }));
-const ExternalLink = ({
+var ExternalLink = ({
   size = 24,
   className = ''
 }) => /*#__PURE__*/React.createElement("svg", {
@@ -554,7 +554,7 @@ const ExternalLink = ({
 }));
 
 // All 377 varieties from rareseeds.com organized by 48 species
-const FLOWER_DATABASE = {
+var FLOWER_DATABASE = {
   Agastache: {
     type: 'perennial',
     germination: [7, 16],
@@ -1488,19 +1488,19 @@ const FLOWER_DATABASE = {
 };
 
 // Midcoast Maine (Zone 5b) growing parameters
-const MIDCOAST = {
+var MIDCOAST = {
   lastFrost: 135,
   firstFrost: 274
 }; // Day of year: May 15 = 135, Oct 1 = 274
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-const MONTH_START_DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-const TOTAL_DAYS = 365;
+var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+var MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+var MONTH_START_DOY = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+var TOTAL_DAYS = 365;
 function doy(month, day) {
   return MONTH_START_DOY[month - 1] + day;
 }
 function doyToDate(d) {
-  let m = 0;
+  var m = 0;
   while (m < 11 && d > MONTH_START_DOY[m + 1]) m++;
   return {
     month: m,
@@ -1508,13 +1508,13 @@ function doyToDate(d) {
   };
 }
 function formatDoy(d) {
-  const dt = doyToDate(Math.max(1, Math.min(365, d)));
+  var dt = doyToDate(Math.max(1, Math.min(365, d)));
   return `${MONTHS[dt.month]} ${dt.day}`;
 }
 function calcTimeline(sd, midcoast) {
-  const germDays = Math.round((sd.germination[0] + sd.germination[1]) / 2);
-  const bloomDays = sd.bloomDays ? Math.round((sd.bloomDays[0] + sd.bloomDays[1]) / 2) : 75;
-  const t = {};
+  var germDays = Math.round((sd.germination[0] + sd.germination[1]) / 2);
+  var bloomDays = sd.bloomDays ? Math.round((sd.bloomDays[0] + sd.bloomDays[1]) / 2) : 75;
+  var t = {};
   if (sd.sowMethod.includes('startIndoors')) {
     t.indoorStart = midcoast.lastFrost - 56; // 8 weeks before
     t.indoorEnd = midcoast.lastFrost - 14;
@@ -1531,11 +1531,11 @@ function calcTimeline(sd, midcoast) {
       t.sowEnd = midcoast.lastFrost + 42;
     }
   }
-  const effectiveSow = t.transplant || t.sowStart || midcoast.lastFrost;
+  var effectiveSow = t.transplant || t.sowStart || midcoast.lastFrost;
   t.germStart = effectiveSow;
   t.germEnd = effectiveSow + germDays;
   t.bloomStart = effectiveSow + bloomDays;
-  const duration = sd.bloomDuration || 60;
+  var duration = sd.bloomDuration || 60;
   t.bloomEnd = Math.min(effectiveSow + bloomDays + duration, sd.type === 'annual' ? midcoast.firstFrost : midcoast.firstFrost + 14);
   t.seasonEnd = sd.type === 'annual' ? midcoast.firstFrost : 334;
   return t;
@@ -1562,7 +1562,7 @@ function getPhaseAtDoy(tl, dayOfYear) {
   if (dayOfYear > tl.bloomEnd && dayOfYear <= tl.seasonEnd) return 'decline';
   return 'dormant';
 }
-const PHASE_COLORS = {
+var PHASE_COLORS = {
   indoor: {
     bg: '#7c3aed',
     label: 'Start Indoors'
@@ -1600,14 +1600,14 @@ const PHASE_COLORS = {
     label: 'Dormant'
   }
 };
-const HEIGHT_LABELS = {
+var HEIGHT_LABELS = {
   ground: '0–6" groundcover',
   short: '6–18"',
   medium: '18–36"',
   tall: '36–60"',
   vine: 'Climbing/Trailing'
 };
-const SPACING_DATA = {
+var SPACING_DATA = {
   ground: {
     spacing: 6,
     label: '6" apart'
@@ -1629,8 +1629,8 @@ const SPACING_DATA = {
     label: '36" apart'
   }
 };
-const getCountdown = (tl, todayDoy) => {
-  const actions = [tl.indoorStart && {
+var getCountdown = (tl, todayDoy) => {
+  var actions = [tl.indoorStart && {
     doy: tl.indoorStart,
     label: 'Start indoors'
   }, tl.transplant && {
@@ -1644,10 +1644,10 @@ const getCountdown = (tl, todayDoy) => {
     label: 'Bloom'
   }].filter(Boolean);
   // Find the nearest future action
-  const future = actions.filter(a => a.doy > todayDoy).sort((a, b) => a.doy - b.doy);
+  var future = actions.filter(a => a.doy > todayDoy).sort((a, b) => a.doy - b.doy);
   if (future.length === 0) return null;
-  const next = future[0];
-  const days = next.doy - todayDoy;
+  var next = future[0];
+  var days = next.doy - todayDoy;
   if (days > 60) return null;
   return {
     label: next.label,
@@ -1655,13 +1655,13 @@ const getCountdown = (tl, todayDoy) => {
   };
 };
 function doyToICSDate(dayOfYear) {
-  const d = new Date(2026, 0, dayOfYear);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  var d = new Date(2026, 0, dayOfYear);
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
   return `${y}${m}${day}`;
 }
-const ZIP_FROST_DATA = {
+var ZIP_FROST_DATA = {
   '04101': {
     lastFrost: 125,
     firstFrost: 284
@@ -1705,15 +1705,15 @@ const ZIP_FROST_DATA = {
 };
 function getColorFamily(hex) {
   if (!hex) return 'other';
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  const max = Math.max(r, g, b),
+  var r = parseInt(hex.slice(1, 3), 16) / 255;
+  var g = parseInt(hex.slice(3, 5), 16) / 255;
+  var b = parseInt(hex.slice(5, 7), 16) / 255;
+  var max = Math.max(r, g, b),
     min = Math.min(r, g, b);
-  const l = (max + min) / 2;
+  var l = (max + min) / 2;
   if (max - min < 0.1) return 'white';
-  let h = 0;
-  const d = max - min;
+  var h = 0;
+  var d = max - min;
   if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;else if (max === g) h = ((b - r) / d + 2) * 60;else h = ((r - g) / d + 4) * 60;
   if (h >= 330 || h < 15) return 'red';
   if (h >= 15 && h < 45) return 'orange';
@@ -1723,7 +1723,7 @@ function getColorFamily(hex) {
   if (h >= 260 && h < 330) return 'purple';
   return 'other';
 }
-const COLOR_FAMILIES = {
+var COLOR_FAMILIES = {
   all: 'All colors',
   'red': 'Red / Pink',
   'orange': 'Orange',
@@ -1735,11 +1735,11 @@ const COLOR_FAMILIES = {
 function LazyCard({
   children
 }) {
-  const ref = React.useRef(null);
-  const [visible, setVisible] = React.useState(false);
+  var ref = React.useRef(null);
+  var [visible, setVisible] = React.useState(false);
   React.useEffect(() => {
     if (!ref.current) return;
-    const obs = new IntersectionObserver(([entry]) => {
+    var obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setVisible(true);
         obs.disconnect();
@@ -1758,65 +1758,65 @@ function LazyCard({
   }, visible ? children : null);
 }
 function PlantingCalendar() {
-  const [selectedVariety, setSelectedVariety] = useState(null);
-  const [expandedSpecies, setExpandedSpecies] = useState({});
-  const [myGarden, setMyGarden] = useState(() => {
+  var [selectedVariety, setSelectedVariety] = useState(null);
+  var [expandedSpecies, setExpandedSpecies] = useState({});
+  var [myGarden, setMyGarden] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('myGarden') || '{}');
     } catch {
       return {};
     }
   });
-  const [gardenNotes, setGardenNotes] = useState(() => {
+  var [gardenNotes, setGardenNotes] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('gardenNotes') || '{}');
     } catch {
       return {};
     }
   });
-  const [copiedList, setCopiedList] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [filterMyGarden, setFilterMyGarden] = useState(false);
-  const [gardenOrder, setGardenOrder] = useState(() => {
+  var [copiedList, setCopiedList] = useState(false);
+  var [copiedLink, setCopiedLink] = useState(false);
+  var [filterMyGarden, setFilterMyGarden] = useState(false);
+  var [gardenOrder, setGardenOrder] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('gardenOrder') || '[]');
     } catch {
       return [];
     }
   });
-  const [draggedSpecies, setDraggedSpecies] = useState(null);
-  const [bloomColorMode, setBloomColorMode] = useState(false);
-  const [sortBy, setSortBy] = useState('alpha');
-  const [filterHeight, setFilterHeight] = useState('all');
-  const [filterColorFamily, setFilterColorFamily] = useState('all');
-  const [viewMode, setViewMode] = useState('list');
-  const [allExpanded, setAllExpanded] = useState(false);
-  const [lastFrostOffset, setLastFrostOffset] = useState(0);
-  const [firstFrostOffset, setFirstFrostOffset] = useState(0);
-  const [customMidcoast, setCustomMidcoast] = useState(MIDCOAST);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(() => {
+  var [draggedSpecies, setDraggedSpecies] = useState(null);
+  var [bloomColorMode, setBloomColorMode] = useState(false);
+  var [sortBy, setSortBy] = useState('alpha');
+  var [filterHeight, setFilterHeight] = useState('all');
+  var [filterColorFamily, setFilterColorFamily] = useState('all');
+  var [viewMode, setViewMode] = useState('list');
+  var [allExpanded, setAllExpanded] = useState(false);
+  var [lastFrostOffset, setLastFrostOffset] = useState(0);
+  var [firstFrostOffset, setFirstFrostOffset] = useState(0);
+  var [customMidcoast, setCustomMidcoast] = useState(MIDCOAST);
+  var [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  var [filtersOpen, setFiltersOpen] = useState(false);
+  var [showOnboarding, setShowOnboarding] = useState(() => {
     try {
       return !localStorage.getItem('onboardingDismissed');
     } catch {
       return true;
     }
   });
-  const [showZipInput, setShowZipInput] = useState(false);
-  const [zipCode, setZipCode] = useState('');
-  const [zipResult, setZipResult] = useState(null);
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareSpecies, setCompareSpecies] = useState([]);
-  const [darkMode, setDarkMode] = useState(() => {
+  var [showZipInput, setShowZipInput] = useState(false);
+  var [zipCode, setZipCode] = useState('');
+  var [zipResult, setZipResult] = useState(null);
+  var [compareMode, setCompareMode] = useState(false);
+  var [compareSpecies, setCompareSpecies] = useState([]);
+  var [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('darkMode') === '1';
     } catch {
       return false;
     }
   });
-  const [showShortcuts, setShowShortcuts] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+  var [showShortcuts, setShowShortcuts] = useState(false);
+  var [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     try {
       return localStorage.getItem('notificationsEnabled') === '1';
     } catch {
@@ -1844,7 +1844,7 @@ function PlantingCalendar() {
     document.body.style.color = darkMode ? '#e2e8f0' : '#1e293b';
   }, [darkMode]);
   React.useEffect(() => {
-    const handleGlobal = e => {
+    var handleGlobal = e => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       if (e.key === '?') {
         setShowShortcuts(prev => !prev);
@@ -1855,20 +1855,11 @@ function PlantingCalendar() {
     return () => document.removeEventListener('keydown', handleGlobal);
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [filterSow, setFilterSow] = useState('all');
-  const [filterType, setFilterType] = useState('all');
-  const [filterPlantNow, setFilterPlantNow] = useState(false);
-  const [filterBloomNow, setFilterBloomNow] = useState(false);
-  const [filterDeer, setFilterDeer] = useState('all');
-  const [filterPollinator, setFilterPollinator] = useState('all');
-
   // Read initial state from URL hash
   React.useEffect(() => {
-    const hash = window.location.hash.slice(1);
+    var hash = window.location.hash.slice(1);
     if (!hash) return;
-    const params = new URLSearchParams(hash);
+    var params = new URLSearchParams(hash);
     if (params.get('view')) setViewMode(params.get('view'));
     if (params.get('sow')) setFilterSow(params.get('sow'));
     if (params.get('type')) setFilterType(params.get('type'));
@@ -1886,7 +1877,7 @@ function PlantingCalendar() {
 
   // Write state to URL hash
   React.useEffect(() => {
-    const params = new URLSearchParams();
+    var params = new URLSearchParams();
     if (viewMode !== 'list') params.set('view', viewMode);
     if (filterSow !== 'all') params.set('sow', filterSow);
     if (filterType !== 'all') params.set('type', filterType);
@@ -1900,40 +1891,40 @@ function PlantingCalendar() {
     if (firstFrostOffset !== 0) params.set('frostF', String(firstFrostOffset));
     if (filterDeer !== 'all') params.set('deer', filterDeer);
     if (filterPollinator !== 'all') params.set('poll', filterPollinator);
-    const hash = params.toString();
+    var hash = params.toString();
     window.history.replaceState(null, '', hash ? '#' + hash : window.location.pathname);
   }, [viewMode, filterSow, filterType, filterHeight, filterColorFamily, sortBy, searchTerm, bloomColorMode, filterMyGarden, lastFrostOffset, firstFrostOffset, filterDeer, filterPollinator]);
   React.useEffect(() => {
-    const handleKey = e => {
+    var handleKey = e => {
       if (e.key === 'Escape') {
         setSelectedVariety(null);
         return;
       }
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        const sd = speciesData.find(s => s.species === selectedVariety.species);
-        if (!sd) return;
-        const currentIdx = sd.varieties.findIndex(v => v.name === selectedVariety.name);
+        var _sd = speciesData.find(s => s.species === selectedVariety.species);
+        if (!_sd) return;
+        var currentIdx = _sd.varieties.findIndex(v => v.name === selectedVariety.name);
         if (currentIdx === -1) return;
-        const newIdx = e.key === 'ArrowLeft' ? (currentIdx - 1 + sd.varieties.length) % sd.varieties.length : (currentIdx + 1) % sd.varieties.length;
-        const v = sd.varieties[newIdx];
+        var newIdx = e.key === 'ArrowLeft' ? (currentIdx - 1 + _sd.varieties.length) % _sd.varieties.length : (currentIdx + 1) % _sd.varieties.length;
+        var v = _sd.varieties[newIdx];
         setSelectedVariety({
           ...v,
-          species: sd.species,
-          type: sd.type,
-          germination: sd.germination,
-          bloomDays: sd.bloomDays || [60, 90],
-          frostHardy: sd.frostHardy,
-          sowMethod: sd.sowMethod,
-          sowTiming: sd.sowTiming,
-          sun: sd.sun,
-          bloomColor: sd.bloomColor,
-          height: sd.height,
-          companions: sd.companions,
-          flag: sd.flag,
-          zoneRange: sd.zoneRange,
-          bloomDuration: sd.bloomDuration,
-          firstYearBloom: sd.firstYearBloom,
-          tl: sd.tl
+          species: _sd.species,
+          type: _sd.type,
+          germination: _sd.germination,
+          bloomDays: _sd.bloomDays || [60, 90],
+          frostHardy: _sd.frostHardy,
+          sowMethod: _sd.sowMethod,
+          sowTiming: _sd.sowTiming,
+          sun: _sd.sun,
+          bloomColor: _sd.bloomColor,
+          height: _sd.height,
+          companions: _sd.companions,
+          flag: _sd.flag,
+          zoneRange: _sd.zoneRange,
+          bloomDuration: _sd.bloomDuration,
+          firstYearBloom: _sd.firstYearBloom,
+          tl: _sd.tl
         });
       }
     };
@@ -1942,27 +1933,27 @@ function PlantingCalendar() {
       return () => document.removeEventListener('keydown', handleKey);
     }
   }, [selectedVariety, speciesData]);
-  const toggleGarden = useCallback((species, varietyName, e) => {
+  var toggleGarden = useCallback((species, varietyName, e) => {
     if (e) {
       e.stopPropagation();
       e.preventDefault();
     }
     setMyGarden(prev => {
-      const key = species + '||' + varietyName;
-      const next = {
+      var key = species + '||' + varietyName;
+      var next = {
         ...prev
       };
       if (next[key]) delete next[key];else next[key] = true;
       return next;
     });
   }, []);
-  const copyShoppingList = useCallback(() => {
-    const items = [];
+  var copyShoppingList = useCallback(() => {
+    var items = [];
     Object.keys(myGarden).forEach(key => {
-      const [species, variety] = key.split('||');
-      const sd = Object.entries(FLOWER_DATABASE).find(([s]) => s === species);
+      var [species, variety] = key.split('||');
+      var sd = Object.entries(FLOWER_DATABASE).find(([s]) => s === species);
       if (!sd) return;
-      const v = sd[1].varieties.find(vr => vr.name === variety);
+      var v = sd[1].varieties.find(vr => vr.name === variety);
       if (!v) return;
       items.push({
         species,
@@ -1971,45 +1962,45 @@ function PlantingCalendar() {
       });
     });
     items.sort((a, b) => a.species.localeCompare(b.species) || a.variety.localeCompare(b.variety));
-    const text = items.map(i => `${i.species} - ${i.variety}\n  ${i.url}`).join('\n\n');
-    const header = `Midcoast Maine Garden Plan (${items.length} varieties)\n${'='.repeat(45)}\n\n`;
+    var text = items.map(i => `${i.species} - ${i.variety}\n  ${i.url}`).join('\n\n');
+    var header = `Midcoast Maine Garden Plan (${items.length} varieties)\n${'='.repeat(45)}\n\n`;
     navigator.clipboard.writeText(header + text).then(() => {
       setCopiedList(true);
       setTimeout(() => setCopiedList(false), 2000);
     });
   }, [myGarden]);
-  const exportCSV = useCallback(() => {
-    const headers = ['Species', 'Variety', 'Type', 'Height', 'Indoor Start', 'Transplant', 'Direct Sow', 'Bloom Start', 'Bloom End', 'Deer Resistant', 'Pollinators', 'URL'];
-    const rows = [];
+  var exportCSV = useCallback(() => {
+    var headers = ['Species', 'Variety', 'Type', 'Height', 'Indoor Start', 'Transplant', 'Direct Sow', 'Bloom Start', 'Bloom End', 'Deer Resistant', 'Pollinators', 'URL'];
+    var rows = [];
     Object.keys(myGarden).sort().forEach(key => {
-      const [species, variety] = key.split('||');
-      const dbEntry = Object.entries(FLOWER_DATABASE).find(([s]) => s === species);
+      var [species, variety] = key.split('||');
+      var dbEntry = Object.entries(FLOWER_DATABASE).find(([s]) => s === species);
       if (!dbEntry) return;
-      const sd = dbEntry[1];
-      const v = sd.varieties.find(vr => vr.name === variety);
+      var sd = dbEntry[1];
+      var v = sd.varieties.find(vr => vr.name === variety);
       if (!v) return;
-      const tl = calcTimeline(sd, customMidcoast);
+      var tl = calcTimeline(sd, customMidcoast);
       rows.push([species, variety, sd.type, HEIGHT_LABELS[sd.height] || '', tl.indoorStart ? formatDoy(tl.indoorStart) : '', tl.transplant ? formatDoy(tl.transplant) : '', tl.sowStart ? formatDoy(tl.sowStart) : '', formatDoy(tl.bloomStart), formatDoy(tl.bloomEnd), sd.deerResistant ? 'Yes' : 'No', (sd.pollinators || []).join('; '), v.url]);
     });
-    const csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csvContent], {
+    var csvContent = [headers, ...rows].map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    var blob = new Blob([csvContent], {
       type: 'text/csv;charset=utf-8;'
     });
-    const link = document.createElement('a');
+    var link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'midcoast-maine-garden-plan.csv';
     link.click();
     URL.revokeObjectURL(link.href);
   }, [myGarden, customMidcoast]);
-  const downloadICSCalendar = useCallback(() => {
-    const events = [];
+  var downloadICSCalendar = useCallback(() => {
+    var events = [];
     Object.keys(myGarden).forEach(key => {
-      const [species, variety] = key.split('||');
-      const sd = speciesData.find(s => s.species === species);
+      var [species, variety] = key.split('||');
+      var sd = speciesData.find(s => s.species === species);
       if (!sd) return;
-      const tl = sd.tl;
+      var tl = sd.tl;
       if (tl.indoorStart) {
-        const date = doyToICSDate(tl.indoorStart);
+        var date = doyToICSDate(tl.indoorStart);
         events.push({
           summary: `Start Indoors: ${species}`,
           description: `Start ${species} seeds indoors in trays`,
@@ -2017,52 +2008,60 @@ function PlantingCalendar() {
         });
       }
       if (tl.transplant) {
-        const date = doyToICSDate(tl.transplant);
+        var _date = doyToICSDate(tl.transplant);
         events.push({
           summary: `Transplant: ${species}`,
           description: `Transplant ${species} seedlings outdoors`,
-          date: date
+          date: _date
         });
       }
       if (tl.sowStart) {
-        const date = doyToICSDate(tl.sowStart);
+        var _date2 = doyToICSDate(tl.sowStart);
         events.push({
           summary: `Direct Sow: ${species}`,
           description: `Direct sow ${species} seeds outdoors`,
-          date: date
+          date: _date2
         });
       }
       if (tl.bloomStart) {
-        const date = doyToICSDate(tl.bloomStart);
+        var _date3 = doyToICSDate(tl.bloomStart);
         events.push({
           summary: `Expected Bloom: ${species}`,
           description: `${species} should begin blooming`,
-          date: date
+          date: _date3
         });
       }
     });
-    let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Midcoast Maine Garden Planner//EN\nCALSCALE:GREGORIAN\n`;
+    var ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Midcoast Maine Garden Planner//EN\nCALSCALE:GREGORIAN\n`;
     events.forEach(e => {
-      const nextDay = String(parseInt(e.date) + 1).padStart(8, '0');
+      var nextDay = String(parseInt(e.date) + 1).padStart(8, '0');
       ics += `BEGIN:VEVENT\nDTSTART;VALUE=DATE:${e.date}\nDTEND;VALUE=DATE:${nextDay}\nSUMMARY:${e.summary}\nDESCRIPTION:${e.description}\nEND:VEVENT\n`;
     });
     ics += `END:VCALENDAR`;
-    const blob = new Blob([ics], {
+    var blob = new Blob([ics], {
       type: 'text/calendar'
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
     a.href = url;
     a.download = 'garden-plan.ics';
     a.click();
     URL.revokeObjectURL(url);
   }, [myGarden, speciesData]);
-  const today = new Date();
-  const todayDoy = doy(today.getMonth() + 1, today.getDate());
-  const todayPct = (todayDoy - 1) / 365 * 100;
-  const hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha' || filterDeer !== 'all' || filterPollinator !== 'all';
-  const activeFilterCount = [searchTerm, filterSow !== 'all', filterType !== 'all', filterHeight !== 'all', filterColorFamily !== 'all', filterPlantNow, filterBloomNow, filterMyGarden, filterDeer !== 'all', filterPollinator !== 'all'].filter(Boolean).length;
-  const clearAllFilters = useCallback(() => {
+  var [searchTerm, setSearchTerm] = useState('');
+  var [searchFocused, setSearchFocused] = useState(false);
+  var [filterSow, setFilterSow] = useState('all');
+  var [filterType, setFilterType] = useState('all');
+  var [filterPlantNow, setFilterPlantNow] = useState(false);
+  var [filterBloomNow, setFilterBloomNow] = useState(false);
+  var [filterDeer, setFilterDeer] = useState('all');
+  var [filterPollinator, setFilterPollinator] = useState('all');
+  var today = new Date();
+  var todayDoy = doy(today.getMonth() + 1, today.getDate());
+  var todayPct = (todayDoy - 1) / 365 * 100;
+  var hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha' || filterDeer !== 'all' || filterPollinator !== 'all';
+  var activeFilterCount = [searchTerm, filterSow !== 'all', filterType !== 'all', filterHeight !== 'all', filterColorFamily !== 'all', filterPlantNow, filterBloomNow, filterMyGarden, filterDeer !== 'all', filterPollinator !== 'all'].filter(Boolean).length;
+  var clearAllFilters = useCallback(() => {
     setSearchTerm('');
     setFilterSow('all');
     setFilterType('all');
@@ -2077,11 +2076,11 @@ function PlantingCalendar() {
   }, []);
 
   // Build species-level data with timeline + varieties
-  const speciesData = useMemo(() => {
-    const result = [];
+  var speciesData = useMemo(() => {
+    var result = [];
     Object.entries(FLOWER_DATABASE).forEach(([species, sd]) => {
-      const tl = calcTimeline(sd, customMidcoast);
-      const varieties = sd.varieties.map(v => ({
+      var tl = calcTimeline(sd, customMidcoast);
+      var varieties = sd.varieties.map(v => ({
         name: v.name,
         url: v.url,
         img: getImageUrl(v.url)
@@ -2107,11 +2106,11 @@ function PlantingCalendar() {
       });
     });
     // Compute bi-directional companions
-    const speciesNames = new Set(result.map(s => s.species));
+    var speciesNames = new Set(result.map(s => s.species));
     result.forEach(sd => {
       sd.companions.forEach(comp => {
         if (!speciesNames.has(comp)) return; // skip companions not in database
-        const target = result.find(s => s.species === comp);
+        var target = result.find(s => s.species === comp);
         if (target && !target.companions.includes(sd.species)) {
           target.companions = [...target.companions, sd.species];
         }
@@ -2119,7 +2118,7 @@ function PlantingCalendar() {
     });
     return result;
   }, [customMidcoast]);
-  const enableNotifications = useCallback(() => {
+  var enableNotifications = useCallback(() => {
     if (!('Notification' in window)) {
       alert('Your browser does not support notifications.');
       return;
@@ -2132,16 +2131,16 @@ function PlantingCalendar() {
       }
     });
   }, []);
-  const checkAndNotify = useCallback(() => {
+  var checkAndNotify = useCallback(() => {
     if (!notificationsEnabled || Notification.permission !== 'granted') return;
-    const today = new Date();
-    const tdoy = doy(today.getMonth() + 1, today.getDate());
-    const notified = JSON.parse(localStorage.getItem('notifiedEvents') || '{}');
+    var today = new Date();
+    var tdoy = doy(today.getMonth() + 1, today.getDate());
+    var notified = JSON.parse(localStorage.getItem('notifiedEvents') || '{}');
     Object.keys(myGarden).forEach(key => {
-      const [species] = key.split('||');
-      const sd = speciesData.find(s => s.species === species);
+      var [species] = key.split('||');
+      var sd = speciesData.find(s => s.species === species);
       if (!sd) return;
-      const events = [sd.tl.indoorStart && {
+      var events = [sd.tl.indoorStart && {
         doy: sd.tl.indoorStart,
         label: 'Start indoors'
       }, sd.tl.transplant && {
@@ -2152,8 +2151,8 @@ function PlantingCalendar() {
         label: 'Direct sow'
       }].filter(Boolean);
       events.forEach(evt => {
-        const daysUntil = evt.doy - tdoy;
-        const notifKey = `${species}-${evt.label}-${evt.doy}`;
+        var daysUntil = evt.doy - tdoy;
+        var notifKey = `${species}-${evt.label}-${evt.doy}`;
         if (daysUntil >= 0 && daysUntil <= 3 && !notified[notifKey]) {
           new Notification(`🌱 ${evt.label}: ${species}`, {
             body: daysUntil === 0 ? 'Today!' : `In ${daysUntil} day${daysUntil > 1 ? 's' : ''}. ${formatDoy(evt.doy)}`,
@@ -2168,30 +2167,30 @@ function PlantingCalendar() {
   React.useEffect(() => {
     if (!notificationsEnabled) return;
     checkAndNotify();
-    const interval = setInterval(checkAndNotify, 3600000);
+    var interval = setInterval(checkAndNotify, 3600000);
     return () => clearInterval(interval);
   }, [notificationsEnabled, checkAndNotify]);
-  const filtered = useMemo(() => {
+  var filtered = useMemo(() => {
     return speciesData.filter(sd => {
       if (searchTerm) {
-        const q = searchTerm.toLowerCase();
-        const nameMatch = sd.species.toLowerCase().includes(q);
-        const varMatch = sd.varieties.some(v => v.name.toLowerCase().includes(q));
+        var q = searchTerm.toLowerCase();
+        var nameMatch = sd.species.toLowerCase().includes(q);
+        var varMatch = sd.varieties.some(v => v.name.toLowerCase().includes(q));
         if (!nameMatch && !varMatch) return false;
       }
       if (filterSow === 'indoor' && !sd.sowMethod.includes('startIndoors')) return false;
       if (filterSow === 'direct' && !sd.sowMethod.includes('directSow')) return false;
       if (filterType !== 'all' && sd.type !== filterType) return false;
       if (filterPlantNow) {
-        const tl = sd.tl;
-        const inSow = tl.sowStart && todayDoy >= tl.sowStart && todayDoy <= tl.sowEnd || tl.indoorStart && todayDoy >= tl.indoorStart && todayDoy <= (tl.indoorEnd || tl.indoorStart + 42);
+        var tl = sd.tl;
+        var inSow = tl.sowStart && todayDoy >= tl.sowStart && todayDoy <= tl.sowEnd || tl.indoorStart && todayDoy >= tl.indoorStart && todayDoy <= (tl.indoorEnd || tl.indoorStart + 42);
         if (!inSow) return false;
       }
       if (filterBloomNow) {
         if (!(todayDoy >= sd.tl.bloomStart && todayDoy <= sd.tl.bloomEnd)) return false;
       }
       if (filterMyGarden) {
-        const hasSelected = sd.varieties.some(v => myGarden[sd.species + '||' + v.name]);
+        var hasSelected = sd.varieties.some(v => myGarden[sd.species + '||' + v.name]);
         if (!hasSelected) return false;
       }
       if (filterHeight !== 'all' && sd.height !== filterHeight) return false;
@@ -2202,9 +2201,9 @@ function PlantingCalendar() {
       return true;
     });
   }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy, filterDeer, filterPollinator]);
-  const totalVarieties = useMemo(() => filtered.reduce((sum, sd) => sum + sd.varieties.length, 0), [filtered]);
-  const sortedFiltered = useMemo(() => {
-    const arr = [...filtered];
+  var totalVarieties = useMemo(() => filtered.reduce((sum, sd) => sum + sd.varieties.length, 0), [filtered]);
+  var sortedFiltered = useMemo(() => {
+    var arr = [...filtered];
     arr.sort((a, b) => {
       switch (sortBy) {
         case 'sowDate':
@@ -2215,15 +2214,15 @@ function PlantingCalendar() {
           return b.varieties.length - a.varieties.length;
         case 'type':
           {
-            const ta = a.type === 'annual' ? 0 : 1;
-            const tb = b.type === 'annual' ? 0 : 1;
+            var ta = a.type === 'annual' ? 0 : 1;
+            var tb = b.type === 'annual' ? 0 : 1;
             return ta !== tb ? ta - tb : a.species.localeCompare(b.species);
           }
         case 'nextAction':
           {
-            const getNext = sd => {
-              const todayDoy = doy(new Date().getMonth() + 1, new Date().getDate());
-              const actions = [sd.tl.indoorStart, sd.tl.transplant, sd.tl.sowStart, sd.tl.bloomStart].filter(d => d && d > todayDoy);
+            var getNext = sd => {
+              var todayDoy = doy(new Date().getMonth() + 1, new Date().getDate());
+              var actions = [sd.tl.indoorStart, sd.tl.transplant, sd.tl.sowStart, sd.tl.bloomStart].filter(d => d && d > todayDoy);
               return actions.length > 0 ? Math.min(...actions) : 999;
             };
             return getNext(a) - getNext(b);
@@ -2235,8 +2234,8 @@ function PlantingCalendar() {
     // Apply custom garden order if in My Garden mode
     if (filterMyGarden && gardenOrder.length > 0) {
       arr.sort((a, b) => {
-        const ai = gardenOrder.indexOf(a.species);
-        const bi = gardenOrder.indexOf(b.species);
+        var ai = gardenOrder.indexOf(a.species);
+        var bi = gardenOrder.indexOf(b.species);
         if (ai === -1 && bi === -1) return 0;
         if (ai === -1) return 1;
         if (bi === -1) return -1;
@@ -2245,19 +2244,19 @@ function PlantingCalendar() {
     }
     return arr;
   }, [filtered, sortBy, filterMyGarden, gardenOrder]);
-  const dashboardItems = useMemo(() => {
-    const window = 14;
-    const items = {
+  var dashboardItems = useMemo(() => {
+    var window = 14;
+    var items = {
       indoors: [],
       transplant: [],
       directSow: [],
       blooming: [],
       nextUp: null
     };
-    let nearestFuture = Infinity;
-    let nearestLabel = '';
+    var nearestFuture = Infinity;
+    var nearestLabel = '';
     speciesData.forEach(sd => {
-      const tl = sd.tl;
+      var tl = sd.tl;
       // Indoor start
       if (tl.indoorStart) {
         if (todayDoy >= tl.indoorStart && todayDoy <= (tl.indoorEnd || tl.indoorStart + 42)) {
@@ -2331,22 +2330,22 @@ function PlantingCalendar() {
     }
     return items;
   }, [speciesData, todayDoy]);
-  const toggleSpecies = useCallback(sp => {
+  var toggleSpecies = useCallback(sp => {
     setExpandedSpecies(prev => ({
       ...prev,
       [sp]: !prev[sp]
     }));
   }, []);
-  const dismissOnboarding = useCallback(() => {
+  var dismissOnboarding = useCallback(() => {
     setShowOnboarding(false);
     localStorage.setItem('onboardingDismissed', '1');
   }, []);
-  const toggleAllSpecies = useCallback(() => {
+  var toggleAllSpecies = useCallback(() => {
     if (allExpanded) {
       setExpandedSpecies({});
       setAllExpanded(false);
     } else {
-      const all = {};
+      var all = {};
       sortedFiltered.forEach(sd => {
         all[sd.species] = true;
       });
@@ -2356,17 +2355,17 @@ function PlantingCalendar() {
   }, [allExpanded, sortedFiltered]);
 
   // Full-year timeline bar with month gridlines
-  const YearBar = ({
+  var YearBar = ({
     tl,
     height = 20,
     showGridlines = true,
     bloomColor = null
   }) => {
-    const segments = [];
-    let prevPhase = null;
-    let segStart = 1;
-    for (let d = 1; d <= 366; d++) {
-      const phase = d <= 365 ? getPhaseAtDoy(tl, d) : null;
+    var segments = [];
+    var prevPhase = null;
+    var segStart = 1;
+    for (var d = 1; d <= 366; d++) {
+      var phase = d <= 365 ? getPhaseAtDoy(tl, d) : null;
       if (phase !== prevPhase) {
         if (prevPhase && prevPhase !== 'dormant') {
           segments.push({
@@ -2387,8 +2386,8 @@ function PlantingCalendar() {
         height: '14px'
       }
     }, MONTHS.map((m, mi) => {
-      const left = MONTH_START_DOY[mi] / 365 * 100;
-      const width = MONTH_DAYS[mi] / 365 * 100;
+      var left = MONTH_START_DOY[mi] / 365 * 100;
+      var width = MONTH_DAYS[mi] / 365 * 100;
       return /*#__PURE__*/React.createElement("span", {
         key: m,
         className: "absolute text-center",
@@ -2422,8 +2421,8 @@ function PlantingCalendar() {
       key: i,
       className: "absolute top-0 bottom-0 year-bar-seg",
       title: (() => {
-        const base = `${PHASE_COLORS[seg.phase].label}: ${formatDoy(seg.startDoy)} – ${formatDoy(seg.endDoy)}`;
-        const tips = {
+        var base = `${PHASE_COLORS[seg.phase].label}: ${formatDoy(seg.startDoy)} – ${formatDoy(seg.endDoy)}`;
+        var tips = {
           indoor: 'Sow seeds in trays under grow lights or on a sunny windowsill.',
           harden: 'Move seedlings to a sheltered outdoor location for a few hours daily, gradually increasing exposure.',
           transplant: 'Move hardened-off seedlings outdoors after frost danger passes.',
@@ -2454,14 +2453,14 @@ function PlantingCalendar() {
   };
 
   // Current phase badge (hide dormant)
-  const PhaseBadge = ({
+  var PhaseBadge = ({
     tl,
     bloomColor
   }) => {
-    const phase = getPhaseAtDoy(tl, todayDoy);
+    var phase = getPhaseAtDoy(tl, todayDoy);
     if (phase === 'dormant') return null;
-    const c = PHASE_COLORS[phase];
-    const bgColor = phase === 'bloom' && bloomColorMode && bloomColor ? bloomColor : c.bg;
+    var c = PHASE_COLORS[phase];
+    var bgColor = phase === 'bloom' && bloomColorMode && bloomColor ? bloomColor : c.bg;
     return /*#__PURE__*/React.createElement("span", {
       className: "text-xs px-2 py-0.5 font-bold uppercase",
       style: {
@@ -2474,11 +2473,11 @@ function PlantingCalendar() {
   };
 
   // Key dates summary (compact text)
-  const KeyDates = ({
+  var KeyDates = ({
     tl,
     type
   }) => {
-    const parts = [];
+    var parts = [];
     if (tl.indoorStart) parts.push({
       label: 'Indoor',
       date: formatDoy(tl.indoorStart),
@@ -2515,7 +2514,7 @@ function PlantingCalendar() {
       className: "tabular-nums"
     }, p.date))));
   };
-  const dm = useMemo(() => ({
+  var dm = useMemo(() => ({
     bg: darkMode ? '#0f172a' : '#f8fafc',
     cardBg: darkMode ? '#1e293b' : '#fff',
     border: darkMode ? '#334155' : '#e2e8f0',
@@ -2523,7 +2522,7 @@ function PlantingCalendar() {
     textMuted: darkMode ? '#94a3b8' : '#64748b',
     textFaint: darkMode ? '#64748b' : '#94a3b8',
     headerBg: darkMode ? '#1e293b' : '#1e293b',
-    toolbarBg: darkMode ? 'rgba(30,41,59,0.97)' : 'rgba(241,245,249,0.98)',
+    toolbarBg: darkMode ? 'rgba(30,41,59,0.97)' : 'rgba(255,255,255,0.98)',
     inputBg: darkMode ? '#334155' : '#fff',
     chipBg: darkMode ? '#1e293b' : '#fff',
     altRow: darkMode ? '#1e293b' : '#f8fafc'
@@ -2764,10 +2763,10 @@ function PlantingCalendar() {
     onChange: e => setZipCode(e.target.value.trim()),
     onKeyDown: e => {
       if (e.key === 'Enter') {
-        const data = ZIP_FROST_DATA[zipCode];
+        var data = ZIP_FROST_DATA[zipCode];
         if (data) {
-          const lastFrostWeekDiff = Math.round((data.lastFrost - MIDCOAST.lastFrost) / 7);
-          const firstFrostWeekDiff = Math.round((data.firstFrost - MIDCOAST.firstFrost) / 7);
+          var lastFrostWeekDiff = Math.round((data.lastFrost - MIDCOAST.lastFrost) / 7);
+          var firstFrostWeekDiff = Math.round((data.firstFrost - MIDCOAST.firstFrost) / 7);
           setLastFrostOffset(lastFrostWeekDiff);
           setFirstFrostOffset(firstFrostWeekDiff);
           setZipResult(zipCode);
@@ -3028,14 +3027,13 @@ function PlantingCalendar() {
     className: "sticky top-0 z-20",
     style: {
       backgroundColor: dm.toolbarBg,
-      borderTop: '1px solid rgba(30,41,59,0.1)',
       borderBottom: '2px solid ' + dm.border,
       boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
     }
   }, (() => {
-    const weekActions = [];
+    var weekActions = [];
     speciesData.forEach(sd => {
-      const tl = sd.tl;
+      var tl = sd.tl;
       if (tl.indoorStart && todayDoy >= tl.indoorStart && todayDoy <= tl.indoorStart + 7) {
         weekActions.push({
           action: 'Start indoors',
@@ -3677,10 +3675,10 @@ function PlantingCalendar() {
       color: '#1e293b'
     }
   }, "Seasonal Overview"), (() => {
-    const months = {};
+    var months = {};
     sortedFiltered.forEach(sd => {
-      const tl = sd.tl;
-      const actions = [tl.indoorStart && {
+      var tl = sd.tl;
+      var actions = [tl.indoorStart && {
         doy: tl.indoorStart,
         action: 'Start indoors',
         species: sd.species
@@ -3698,7 +3696,7 @@ function PlantingCalendar() {
         species: sd.species
       }].filter(Boolean);
       actions.forEach(a => {
-        const monthKey = Math.floor((a.doy - 1) / 30.44);
+        var monthKey = Math.floor((a.doy - 1) / 30.44);
         if (!months[monthKey]) months[monthKey] = {
           doy: a.doy,
           actions: {}
@@ -3707,7 +3705,7 @@ function PlantingCalendar() {
         months[monthKey].actions[a.action].push(a.species);
       });
     });
-    const sortedMonths = Object.entries(months).map(([k, v]) => ({
+    var sortedMonths = Object.entries(months).map(([k, v]) => ({
       month: parseInt(k),
       ...v
     })).sort((a, b) => a.month - b.month);
@@ -3720,9 +3718,9 @@ function PlantingCalendar() {
     return /*#__PURE__*/React.createElement("div", {
       className: "space-y-5"
     }, sortedMonths.map(m => {
-      const monthName = MONTHS[m.month];
-      const isPast = m.month < new Date().getMonth();
-      const isCurrent = m.month === new Date().getMonth();
+      var monthName = MONTHS[m.month];
+      var isPast = m.month < new Date().getMonth();
+      var isCurrent = m.month === new Date().getMonth();
       return /*#__PURE__*/React.createElement("div", {
         key: m.month,
         style: {
@@ -3805,8 +3803,8 @@ function PlantingCalendar() {
       height: '14px'
     }
   }, MONTHS.map((m, mi) => {
-    const left = MONTH_START_DOY[mi] / 365 * 100;
-    const width = MONTH_DAYS[mi] / 365 * 100;
+    var left = MONTH_START_DOY[mi] / 365 * 100;
+    var width = MONTH_DAYS[mi] / 365 * 100;
     return /*#__PURE__*/React.createElement("span", {
       key: m,
       className: "absolute text-center",
@@ -3823,9 +3821,9 @@ function PlantingCalendar() {
   }))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-1"
   }, sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999)).map((sd, rowIdx) => {
-    const bloomLeft = (sd.tl.bloomStart - 1) / 365 * 100;
-    const bloomWidth = (sd.tl.bloomEnd - sd.tl.bloomStart) / 365 * 100;
-    const color = bloomColorMode && sd.bloomColor ? sd.bloomColor : PHASE_COLORS.bloom.bg;
+    var bloomLeft = (sd.tl.bloomStart - 1) / 365 * 100;
+    var bloomWidth = (sd.tl.bloomEnd - sd.tl.bloomStart) / 365 * 100;
+    var color = bloomColorMode && sd.bloomColor ? sd.bloomColor : PHASE_COLORS.bloom.bg;
     return /*#__PURE__*/React.createElement("div", {
       key: sd.species,
       className: "gantt-row",
@@ -3897,12 +3895,12 @@ function PlantingCalendar() {
       }
     })));
   })), (() => {
-    const sorted = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
-    const start = Math.min(...sorted.map(s => s.tl.bloomStart).filter(Boolean));
-    const end = Math.max(...sorted.map(s => s.tl.bloomEnd).filter(Boolean));
-    const gaps = [];
-    for (let d = start; d <= end; d++) {
-      const anyBlooming = sorted.some(s => d >= s.tl.bloomStart && d <= s.tl.bloomEnd);
+    var sorted = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
+    var start = Math.min(...sorted.map(s => s.tl.bloomStart).filter(Boolean));
+    var end = Math.max(...sorted.map(s => s.tl.bloomEnd).filter(Boolean));
+    var gaps = [];
+    var _loop = function (d) {
+      var anyBlooming = sorted.some(s => d >= s.tl.bloomStart && d <= s.tl.bloomEnd);
       if (!anyBlooming) {
         if (gaps.length === 0 || gaps[gaps.length - 1].end !== d - 1) {
           gaps.push({
@@ -3913,6 +3911,9 @@ function PlantingCalendar() {
           gaps[gaps.length - 1].end = d;
         }
       }
+    };
+    for (var d = start; d <= end; d++) {
+      _loop(d);
     }
     if (gaps.length === 0) return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -3979,8 +3980,8 @@ function PlantingCalendar() {
       height: '14px'
     }
   }, MONTHS.map((m, mi) => {
-    const left = MONTH_START_DOY[mi] / 365 * 100;
-    const width = MONTH_DAYS[mi] / 365 * 100;
+    var left = MONTH_START_DOY[mi] / 365 * 100;
+    var width = MONTH_DAYS[mi] / 365 * 100;
     return /*#__PURE__*/React.createElement("span", {
       key: m,
       className: "absolute text-center",
@@ -3997,12 +3998,12 @@ function PlantingCalendar() {
   }))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-1"
   }, sortedFiltered.slice().sort((a, b) => {
-    const aStart = a.tl.indoorStart || a.tl.sowStart || 999;
-    const bStart = b.tl.indoorStart || b.tl.sowStart || 999;
+    var aStart = a.tl.indoorStart || a.tl.sowStart || 999;
+    var bStart = b.tl.indoorStart || b.tl.sowStart || 999;
     return aStart - bStart;
   }).map((sd, rowIdx) => {
-    const tl = sd.tl;
-    const phases = [];
+    var tl = sd.tl;
+    var phases = [];
     if (tl.indoorStart && tl.indoorEnd) phases.push({
       start: tl.indoorStart,
       end: tl.indoorEnd,
@@ -4182,10 +4183,10 @@ function PlantingCalendar() {
       color: '#1e293b'
     }
   }, "Weekly Planting Schedule"), (() => {
-    const weeks = {};
+    var weeks = {};
     sortedFiltered.forEach(sd => {
-      const tl = sd.tl;
-      const actions = [tl.indoorStart && {
+      var tl = sd.tl;
+      var actions = [tl.indoorStart && {
         doy: tl.indoorStart,
         action: 'Start indoors',
         phase: 'indoor'
@@ -4199,7 +4200,7 @@ function PlantingCalendar() {
         phase: 'sow'
       }].filter(Boolean);
       actions.forEach(a => {
-        const weekKey = Math.floor(a.doy / 7);
+        var weekKey = Math.floor(a.doy / 7);
         if (!weeks[weekKey]) weeks[weekKey] = {
           doy: a.doy - (a.doy + 5) % 7,
           items: []
@@ -4213,7 +4214,7 @@ function PlantingCalendar() {
         });
       });
     });
-    const sortedWeeks = Object.values(weeks).sort((a, b) => a.doy - b.doy);
+    var sortedWeeks = Object.values(weeks).sort((a, b) => a.doy - b.doy);
     if (sortedWeeks.length === 0) return /*#__PURE__*/React.createElement("p", {
       style: {
         color: '#94a3b8',
@@ -4223,9 +4224,9 @@ function PlantingCalendar() {
     return /*#__PURE__*/React.createElement("div", {
       className: "space-y-4"
     }, sortedWeeks.map((week, wi) => {
-      const weekLabel = formatDoy(week.doy);
-      const isPast = week.doy + 7 < todayDoy;
-      const isCurrent = todayDoy >= week.doy && todayDoy < week.doy + 7;
+      var weekLabel = formatDoy(week.doy);
+      var isPast = week.doy + 7 < todayDoy;
+      var isCurrent = todayDoy >= week.doy && todayDoy < week.doy + 7;
       return /*#__PURE__*/React.createElement("div", {
         key: wi,
         style: {
@@ -4340,17 +4341,17 @@ function PlantingCalendar() {
       color: '#1e293b'
     }
   }, sortedFiltered.length), " species"), sortedFiltered.length > 0 && (() => {
-    const starts = sortedFiltered.map(s => s.tl.indoorStart || s.tl.sowStart).filter(Boolean);
-    const blooms = sortedFiltered.map(s => s.tl.bloomEnd).filter(Boolean);
+    var starts = sortedFiltered.map(s => s.tl.indoorStart || s.tl.sowStart).filter(Boolean);
+    var blooms = sortedFiltered.map(s => s.tl.bloomEnd).filter(Boolean);
     if (starts.length === 0) return null;
 
     // Bloom gap analysis
-    const sorted = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
-    const bloomStart = Math.min(...sorted.map(s => s.tl.bloomStart).filter(Boolean));
-    const bloomEnd = Math.max(...sorted.map(s => s.tl.bloomEnd).filter(Boolean));
-    const gaps = [];
-    for (let d = bloomStart; d <= bloomEnd; d++) {
-      const anyBlooming = sorted.some(s => d >= s.tl.bloomStart && d <= s.tl.bloomEnd);
+    var sorted = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
+    var bloomStart = Math.min(...sorted.map(s => s.tl.bloomStart).filter(Boolean));
+    var bloomEnd = Math.max(...sorted.map(s => s.tl.bloomEnd).filter(Boolean));
+    var gaps = [];
+    var _loop2 = function (d) {
+      var anyBlooming = sorted.some(s => d >= s.tl.bloomStart && d <= s.tl.bloomEnd);
       if (!anyBlooming) {
         if (gaps.length === 0 || gaps[gaps.length - 1].end !== d - 1) {
           gaps.push({
@@ -4361,8 +4362,11 @@ function PlantingCalendar() {
           gaps[gaps.length - 1].end = d;
         }
       }
+    };
+    for (var d = bloomStart; d <= bloomEnd; d++) {
+      _loop2(d);
     }
-    const gapText = gaps.length === 0 ? 'Continuous bloom coverage ✓' : `Bloom gaps: ${gaps.map(g => `${formatDoy(g.start)} – ${formatDoy(g.end)} (${g.end - g.start + 1} days)`).join(', ')}`;
+    var gapText = gaps.length === 0 ? 'Continuous bloom coverage ✓' : `Bloom gaps: ${gaps.map(g => `${formatDoy(g.start)} – ${formatDoy(g.end)} (${g.end - g.start + 1} days)`).join(', ')}`;
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", null, "First planting: ", /*#__PURE__*/React.createElement("strong", {
       style: {
         color: '#1e293b'
@@ -4381,7 +4385,7 @@ function PlantingCalendar() {
       }
     }, gapText)));
   })()), (() => {
-    const tiers = {
+    var tiers = {
       ground: [],
       short: [],
       medium: [],
@@ -4391,16 +4395,16 @@ function PlantingCalendar() {
     sortedFiltered.forEach(sd => {
       if (sd.height && tiers[sd.height]) tiers[sd.height].push(sd.species);
     });
-    const activeTiers = Object.entries(tiers).filter(([, species]) => species.length > 0);
+    var activeTiers = Object.entries(tiers).filter(([, species]) => species.length > 0);
     if (activeTiers.length <= 1) return null;
-    const TIER_LABELS = {
+    var TIER_LABELS = {
       ground: 'Front · 0–6"',
       short: 'Low · 6–18"',
       medium: 'Mid · 18–36"',
       tall: 'Back · 36–60"',
       vine: 'Trellis'
     };
-    const TIER_COLORS = {
+    var TIER_COLORS = {
       ground: '#a3e635',
       short: '#84cc16',
       medium: '#16a34a',
@@ -4463,9 +4467,9 @@ function PlantingCalendar() {
       }
     }, "Arrange tallest at back, shortest in front for visibility."));
   })(), (() => {
-    const gardenSpecies = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
+    var gardenSpecies = sortedFiltered.slice().sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
     if (gardenSpecies.length < 2) return null;
-    const totalDays = gardenSpecies.reduce((sum, s) => sum + (s.tl.bloomEnd - s.tl.bloomStart), 0);
+    var totalDays = gardenSpecies.reduce((sum, s) => sum + (s.tl.bloomEnd - s.tl.bloomStart), 0);
     return /*#__PURE__*/React.createElement("div", {
       style: {
         backgroundColor: dm.cardBg,
@@ -4492,8 +4496,8 @@ function PlantingCalendar() {
         border: '1px solid ' + dm.border
       }
     }, gardenSpecies.map((sd, i) => {
-      const duration = sd.tl.bloomEnd - sd.tl.bloomStart;
-      const pct = duration / totalDays * 100;
+      var duration = sd.tl.bloomEnd - sd.tl.bloomStart;
+      var pct = duration / totalDays * 100;
       return /*#__PURE__*/React.createElement("div", {
         key: i,
         title: `${sd.species}: ${formatDoy(sd.tl.bloomStart)} – ${formatDoy(sd.tl.bloomEnd)}`,
@@ -4522,10 +4526,10 @@ function PlantingCalendar() {
       }
     }), sd.species))));
   })()), (() => {
-    const actions = [];
-    const window = 7; // this week only
+    var actions = [];
+    var window = 7; // this week only
     speciesData.forEach(sd => {
-      const tl = sd.tl;
+      var tl = sd.tl;
       if (tl.indoorStart && todayDoy >= tl.indoorStart && todayDoy <= tl.indoorStart + window) {
         actions.push({
           phase: 'indoor',
@@ -4625,9 +4629,9 @@ function PlantingCalendar() {
       }
     }, "(", a.varieties, " var) \xB7 ", a.date)))));
   })(), compareMode && compareSpecies.length === 2 && (() => {
-    const [a, b] = compareSpecies.map(name => speciesData.find(s => s.species === name)).filter(Boolean);
+    var [a, b] = compareSpecies.map(name => speciesData.find(s => s.species === name)).filter(Boolean);
     if (!a || !b) return null;
-    const rows = [{
+    var rows = [{
       label: 'Type',
       a: a.type,
       b: b.type
@@ -4668,9 +4672,9 @@ function PlantingCalendar() {
       a: a.companions.join(', ') || 'None',
       b: b.companions.join(', ') || 'None'
     }];
-    const isCompanion = a.companions.includes(b.species) || b.companions.includes(a.species);
-    const bloomOverlap = Math.max(0, Math.min(a.tl.bloomEnd, b.tl.bloomEnd) - Math.max(a.tl.bloomStart, b.tl.bloomStart));
-    const HEIGHT_LABELS = {
+    var isCompanion = a.companions.includes(b.species) || b.companions.includes(a.species);
+    var bloomOverlap = Math.max(0, Math.min(a.tl.bloomEnd, b.tl.bloomEnd) - Math.max(a.tl.bloomStart, b.tl.bloomStart));
+    var HEIGHT_LABELS = {
       ground: '0–6" groundcover',
       short: '6–18"',
       medium: '18–36"',
@@ -4798,9 +4802,9 @@ function PlantingCalendar() {
     onDrop: filterMyGarden ? e => {
       e.preventDefault();
       if (!draggedSpecies || draggedSpecies === sd.species) return;
-      const currentOrder = gardenOrder.length > 0 ? [...gardenOrder] : sortedFiltered.map(s => s.species);
-      const fromIdx = currentOrder.indexOf(draggedSpecies);
-      const toIdx = currentOrder.indexOf(sd.species);
+      var currentOrder = gardenOrder.length > 0 ? [...gardenOrder] : sortedFiltered.map(s => s.species);
+      var fromIdx = currentOrder.indexOf(draggedSpecies);
+      var toIdx = currentOrder.indexOf(sd.species);
       if (fromIdx === -1 || toIdx === -1) return;
       currentOrder.splice(fromIdx, 1);
       currentOrder.splice(toIdx, 0, draggedSpecies);
@@ -4810,7 +4814,6 @@ function PlantingCalendar() {
     onDragEnd: () => setDraggedSpecies(null),
     className: 'species-card overflow-hidden ' + (expandedSpecies[sd.species] ? 'species-card-expanded' : 'species-card-collapsed'),
     style: {
-      borderLeftColor: !expandedSpecies[sd.species] ? sd.bloomColor || '#94a3b8' : undefined,
       border: '1px solid ' + dm.border,
       backgroundColor: dm.cardBg,
       borderRadius: '8px',
@@ -4820,8 +4823,8 @@ function PlantingCalendar() {
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex gap-4 px-5 py-4 flex-col sm:flex-row"
   }, (() => {
-    const withImg = sd.varieties.filter(v => v.img);
-    const pick = withImg.length > 1 ? withImg[1] : withImg[0];
+    var withImg = sd.varieties.filter(v => v.img);
+    var pick = withImg.length > 1 ? withImg[1] : withImg[0];
     return pick ? /*#__PURE__*/React.createElement("div", {
       className: "img-skeleton shrink-0 hidden sm:block",
       style: {
@@ -4923,30 +4926,18 @@ function PlantingCalendar() {
       color: dm.text
     }
   }, sd.species), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: '9px',
-      padding: '1px 5px',
-      borderRadius: '3px',
-      backgroundColor: sd.type === 'perennial' ? '#dbeafe' : '#fef3c7',
-      color: sd.type === 'perennial' ? '#1d4ed8' : '#92400e',
-      whiteSpace: 'nowrap',
-      fontSize: '8px',
-      fontWeight: 600,
-      marginLeft: '6px'
-    }
-  }, sd.type), /*#__PURE__*/React.createElement("span", {
     className: "text-xs tabular-nums",
     style: {
       color: '#94a3b8'
     }
   }, (() => {
-    const selCount = sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]).length;
+    var selCount = sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]).length;
     return /*#__PURE__*/React.createElement("span", null, selCount > 0 ? `${selCount}/` : '', sd.varieties.length, " var");
   })()), /*#__PURE__*/React.createElement(PhaseBadge, {
     tl: sd.tl,
     bloomColor: sd.bloomColor
   }), (() => {
-    const cd = getCountdown(sd.tl, todayDoy);
+    var cd = getCountdown(sd.tl, todayDoy);
     if (!cd) return null;
     return /*#__PURE__*/React.createElement("span", {
       style: {
@@ -5091,13 +5082,13 @@ function PlantingCalendar() {
     stroke: "#e2e8f0",
     strokeWidth: "1"
   }), (() => {
-    const sp = SPACING_DATA[sd.height];
-    const count = Math.min(Math.floor(72 / (sp.spacing * 72 / 36)) + 1, 5);
-    const gap = 72 / Math.max(count - 1, 1);
+    var sp = SPACING_DATA[sd.height];
+    var count = Math.min(Math.floor(72 / (sp.spacing * 72 / 36)) + 1, 5);
+    var gap = 72 / Math.max(count - 1, 1);
     return Array.from({
       length: count
     }, (_, i) => {
-      const cx = 4 + i * gap;
+      var cx = 4 + i * gap;
       return /*#__PURE__*/React.createElement("g", {
         key: i
       }, /*#__PURE__*/React.createElement("line", {
@@ -5116,10 +5107,10 @@ function PlantingCalendar() {
       }));
     });
   })(), (() => {
-    const sp = SPACING_DATA[sd.height];
-    const count = Math.min(Math.floor(72 / (sp.spacing * 72 / 36)) + 1, 5);
+    var sp = SPACING_DATA[sd.height];
+    var count = Math.min(Math.floor(72 / (sp.spacing * 72 / 36)) + 1, 5);
     if (count < 2) return null;
-    const gap = 72 / Math.max(count - 1, 1);
+    var gap = 72 / Math.max(count - 1, 1);
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("line", {
       x1: "4",
       y1: "2",
@@ -5179,11 +5170,11 @@ function PlantingCalendar() {
   }, /*#__PURE__*/React.createElement("span", null, "Sow every 2\u20133 weeks for continuous bloom:"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-1 mt-1"
   }, (() => {
-    const dates = [];
-    const interval = 14;
-    const start = sd.tl.sowStart;
-    const end = sd.tl.sowEnd || sd.tl.sowStart + 42;
-    for (let d = start; d <= end; d += interval) {
+    var dates = [];
+    var interval = 14;
+    var start = sd.tl.sowStart;
+    var end = sd.tl.sowEnd || sd.tl.sowStart + 42;
+    for (var d = start; d <= end; d += interval) {
       dates.push(d);
     }
     return dates.map((d, i) => /*#__PURE__*/React.createElement("span", {
@@ -5297,7 +5288,7 @@ function PlantingCalendar() {
     },
     className: "px-5 py-4"
   }, (() => {
-    const withImg = (filterMyGarden ? sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]) : sd.varieties).filter(v => v.img);
+    var withImg = (filterMyGarden ? sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]) : sd.varieties).filter(v => v.img);
     if (withImg.length < 2) return null;
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5368,14 +5359,24 @@ function PlantingCalendar() {
         overflow: 'hidden',
         textOverflow: 'ellipsis'
       }
-    }, v.name)))));
+    }, /*#__PURE__*/React.createElement("a", {
+      href: v.url,
+      target: "_blank",
+      rel: "noopener noreferrer",
+      style: {
+        textDecoration: 'none',
+        color: 'inherit'
+      },
+      onMouseOver: e => e.target.style.textDecoration = 'underline',
+      onMouseOut: e => e.target.style.textDecoration = 'none'
+    }, v.name))))));
   })(), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-2",
     style: {
       gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))'
     }
   }, (filterMyGarden ? sd.varieties.filter(v => myGarden[sd.species + '||' + v.name]) : sd.varieties).map((v, i) => {
-    const inGarden = myGarden[sd.species + '||' + v.name];
+    var inGarden = myGarden[sd.species + '||' + v.name];
     return /*#__PURE__*/React.createElement("div", {
       key: i,
       onClick: () => setSelectedVariety({
@@ -5576,14 +5577,14 @@ function PlantingCalendar() {
     },
     onClick: e => e.stopPropagation()
   }, (() => {
-    const sd = speciesData.find(s => s.species === selectedVariety.species);
+    var sd = speciesData.find(s => s.species === selectedVariety.species);
     if (!sd || sd.varieties.length <= 1) return null;
-    const idx = sd.varieties.findIndex(v => v.name === selectedVariety.name);
+    var idx = sd.varieties.findIndex(v => v.name === selectedVariety.name);
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
       onClick: e => {
         e.stopPropagation();
-        const ni = (idx - 1 + sd.varieties.length) % sd.varieties.length;
-        const v = sd.varieties[ni];
+        var ni = (idx - 1 + sd.varieties.length) % sd.varieties.length;
+        var v = sd.varieties[ni];
         setSelectedVariety({
           ...v,
           species: sd.species,
@@ -5618,8 +5619,8 @@ function PlantingCalendar() {
     }, "\u2039"), /*#__PURE__*/React.createElement("button", {
       onClick: e => {
         e.stopPropagation();
-        const ni = (idx + 1) % sd.varieties.length;
-        const v = sd.varieties[ni];
+        var ni = (idx + 1) % sd.varieties.length;
+        var v = sd.varieties[ni];
         setSelectedVariety({
           ...v,
           species: sd.species,
@@ -5726,9 +5727,9 @@ function PlantingCalendar() {
   }, "\xD7")), /*#__PURE__*/React.createElement("div", {
     className: "p-5 space-y-4"
   }, (() => {
-    const sd = speciesData.find(s => s.species === selectedVariety.species);
+    var sd = speciesData.find(s => s.species === selectedVariety.species);
     if (!sd || sd.varieties.length <= 1) return null;
-    const idx = sd.varieties.findIndex(v => v.name === selectedVariety.name);
+    var idx = sd.varieties.findIndex(v => v.name === selectedVariety.name);
     return /*#__PURE__*/React.createElement("div", {
       style: {
         textAlign: 'center',
@@ -5839,11 +5840,11 @@ function PlantingCalendar() {
   }, /*#__PURE__*/React.createElement("span", null, "Sow every 2\u20133 weeks for continuous bloom:"), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-wrap gap-1 mt-1"
   }, (() => {
-    const dates = [];
-    const interval = 14;
-    const start = selectedVariety.tl.sowStart;
-    const end = selectedVariety.tl.sowEnd || selectedVariety.tl.sowStart + 42;
-    for (let d = start; d <= end; d += interval) {
+    var dates = [];
+    var interval = 14;
+    var start = selectedVariety.tl.sowStart;
+    var end = selectedVariety.tl.sowEnd || selectedVariety.tl.sowStart + 42;
+    for (var d = start; d <= end; d += interval) {
       dates.push(d);
     }
     return dates.map((d, i) => /*#__PURE__*/React.createElement("span", {
@@ -6039,7 +6040,7 @@ function PlantingCalendar() {
         ...prev,
         [e.target.value]: true
       }));
-      const el = document.querySelector(`[data-species="${e.target.value}"]`);
+      var el = document.querySelector(`[data-species="${e.target.value}"]`);
       if (el) el.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
@@ -6151,7 +6152,7 @@ function PlantingCalendar() {
       color: dm.textMuted,
       lineHeight: '20px'
     }
-  }, /*#__PURE__*/React.createElement("div", null, "Seed data sourced from ", /*#__PURE__*/React.createElement("a", {
+  }, /*#__PURE__*/React.createElement("div", null, "Seed data from ", /*#__PURE__*/React.createElement("a", {
     href: "https://www.rareseeds.com",
     target: "_blank",
     rel: "noopener noreferrer",
@@ -6178,7 +6179,7 @@ function PlantingCalendar() {
     }
   }, "Last updated: February 2026"))));
 }
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(PlantingCalendar, null));
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(PlantingCalendar, null));
     </script>
 
 <script>
