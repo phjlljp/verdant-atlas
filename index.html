@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Interactive planting calendar for Midcoast Maine (Zone 5b). 147 flower varieties with timelines, bloom dates, and garden planning tools.">
+    <meta name="description" content="Verdant Atlas — interactive planting calendar for Zone 5b. 147 flower varieties with timelines, bloom dates, and garden planning tools.">
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta property="og:title" content="Midcoast Maine Planting Calendar">
+    <meta property="og:title" content="Verdant Atlas">
     <meta property="og:description" content="Plan your flower garden with 147 heirloom varieties. Interactive timelines, bloom charts, and My Garden planning for Zone 5b.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌱</text></svg>">
-    <title>Midcoast Maine Planting Calendar</title>
+    <title>Verdant Atlas</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1454,7 +1454,7 @@ function PlantingCalendar() {
     });
     items.sort((a, b) => a.species.localeCompare(b.species) || a.variety.localeCompare(b.variety));
     const text = items.map(i => `${i.species} - ${i.variety}\n  ${i.url}`).join('\n\n');
-    const header = `Midcoast Maine Garden Plan (${items.length} varieties)\n${'='.repeat(45)}\n\n`;
+    const header = `Verdant Atlas Garden Plan (${items.length} varieties)\n${'='.repeat(45)}\n\n`;
     navigator.clipboard.writeText(header + text).then(() => {
       setCopiedList(true);
       setTimeout(() => setCopiedList(false), 2000);
@@ -1536,7 +1536,7 @@ function PlantingCalendar() {
         });
       }
     });
-    let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Midcoast Maine Garden Planner//EN\nCALSCALE:GREGORIAN\n`;
+    let ics = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Verdant Atlas//EN\nCALSCALE:GREGORIAN\n`;
     events.forEach(e => {
       const nextDay = String(parseInt(e.date) + 1).padStart(8, '0');
       ics += `BEGIN:VEVENT\nDTSTART;VALUE=DATE:${e.date}\nDTEND;VALUE=DATE:${nextDay}\nSUMMARY:${e.summary}\nDESCRIPTION:${e.description}\nEND:VEVENT\n`;
@@ -1948,7 +1948,7 @@ function PlantingCalendar() {
         <div className="max-w-6xl mx-auto px-5 py-3" style={{ paddingLeft: '20px', paddingRight: '20px' }}>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 className="font-bold" style={{ fontSize: '20px', letterSpacing: '4px', textTransform: 'uppercase', color: '#fff' }}>MIDCOAST MAINE</h1>
+              <h1 className="font-bold" style={{ fontSize: '20px', letterSpacing: '4px', textTransform: 'uppercase', color: '#fff' }}>VERDANT ATLAS</h1>
               <p style={{ fontWeight: 400, color: '#94a3b8', letterSpacing: '3px', fontSize: '11px', textTransform: 'uppercase' }}>Planting Calendar</p>
               <p className="mt-1" style={{ fontWeight: 400, color: '#64748b', letterSpacing: '1px', fontSize: '11px' }}>Zone 5b · {totalVarieties} varieties, {filtered.length} species</p>
               <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ fontSize: '11px' }}>
@@ -3547,7 +3547,7 @@ function PlantingCalendar() {
               {modalTab === 'timeline' && (
                 <>
                   <div>
-                    <p className="font-bold mb-2.5" style={{ fontSize: '12px', color: dm.text, letterSpacing: '2px', textTransform: 'uppercase' }}>Midcoast Maine Timeline</p>
+                    <p className="font-bold mb-2.5" style={{ fontSize: '12px', color: dm.text, letterSpacing: '2px', textTransform: 'uppercase' }}>Timeline</p>
                     <div className="space-y-2">
                       {[
                         selectedVariety.tl.indoorStart && { phase: 'indoor', label: 'Start indoors', date: formatDoy(selectedVariety.tl.indoorStart) },
@@ -3756,9 +3756,9 @@ function PlantingCalendar() {
 
       {/* Footer */}
       <footer style={{ backgroundColor: '#1e293b', color: '#94a3b8', padding: '24px 20px', marginTop: '40px', textAlign: 'center', fontSize: '12px', lineHeight: '1.8', marginBottom: Object.keys(myGarden).length > 0 && !footerDismissed && viewMode === 'list' && !filterMyGarden ? '44px' : 0 }}>
-        <p style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: '4px' }}>Midcoast Maine Planting Calendar</p>
+        <p style={{ fontWeight: 600, color: '#e2e8f0', marginBottom: '4px' }}>Verdant Atlas</p>
         <p>USDA Zone 5b · Last frost ~May 15 · First frost ~Oct 1</p>
-        <p style={{ marginTop: '8px' }}>Seed data sourced from <a href="https://www.rareseeds.com" target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'underline' }}>Baker Creek Heirloom Seeds</a>. Dates are estimates for the Midcoast Maine region.</p>
+        <p style={{ marginTop: '8px' }}>Seed data sourced from <a href="https://www.rareseeds.com" target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'underline' }}>Baker Creek Heirloom Seeds</a>. Dates are estimates for Midcoast Maine (Zone 5b).</p>
       </footer>
     </div>
   );
@@ -3771,7 +3771,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(<PlantingCalendar />
 if ('serviceWorker' in navigator) {
   const swCode = `
     const CACHE_NAME = 'garden-planner-v1';
-    const ASSETS = ['/maine-garden-planner/'];
+    const ASSETS = ['/verdant-atlas/'];
     self.addEventListener('install', e => {
       e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
       self.skipWaiting();
@@ -3787,7 +3787,7 @@ if ('serviceWorker' in navigator) {
             caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
           }
           return resp;
-        }).catch(() => caches.match('/maine-garden-planner/')))
+        }).catch(() => caches.match('/verdant-atlas/')))
       );
     });
   `;
