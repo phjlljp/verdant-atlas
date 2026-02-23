@@ -48,6 +48,8 @@ export default function Toolbar({
   darkMode, setDarkMode, dm,
   // Expand/collapse
   onExpandAll, onCollapseAll,
+  // Category filter
+  filterCategory, setFilterCategory,
   // Scrolled state
   scrolledPast,
 }) {
@@ -118,6 +120,19 @@ export default function Toolbar({
             <p className="hidden sm:block" style={{ fontSize: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', color: '#94a3b8', marginBottom: '2px' }}>Filter</p>
             <div className="flex gap-2 flex-wrap items-center flex-1 min-w-0">
               <SearchInput searchTerm={searchTerm} setSearchTerm={setSearchTerm} darkMode={darkMode} dm={dm} />
+              {/* Category toggle */}
+              <div className="segment-group" style={{ display: 'inline-flex', borderRadius: '4px', overflow: 'hidden', border: '1px solid ' + dm.border }}>
+                {['all', 'flowers', 'vegetables'].map(cat => (
+                  <button key={cat} onClick={() => setFilterCategory(cat)}
+                    className="filter-btn px-3 py-2 text-sm font-bold whitespace-nowrap"
+                    style={filterCategory === cat
+                      ? { backgroundColor: '#1e293b', color: '#fff', minHeight: '44px' }
+                      : { backgroundColor: dm.chipBg, color: dm.textMuted, minHeight: '44px' }
+                    }>
+                    {cat === 'all' ? 'All' : cat === 'flowers' ? 'Flowers' : 'Vegetables'}
+                  </button>
+                ))}
+              </div>
               {/* Filter collapse toggle + dark mode */}
               <button onClick={() => setFiltersOpen(!filtersOpen)}
                 className="filter-btn px-3 py-2 text-sm font-bold"
