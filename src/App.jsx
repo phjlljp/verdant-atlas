@@ -54,6 +54,9 @@ export default function App() {
     try { return localStorage.getItem('onboardingDismissed') ? null : 0; } catch { return 0; }
   });
   const [scrolledPast, setScrolledPast] = useState(false);
+  const [filterHintDismissed, setFilterHintDismissed] = useState(() => {
+    try { return !!localStorage.getItem('filterHintDismissed'); } catch { return false; }
+  });
   const [footerDismissed, setFooterDismissed] = useState(false);
   const [toastMsg, setToastMsg] = useState(null);
   const [copiedList, setCopiedList] = useState(false);
@@ -460,6 +463,29 @@ export default function App() {
         {/* List view */}
         {viewMode === 'list' && (
           <div className="space-y-2 py-4">
+            {/* Progressive filter hint */}
+            {!filterHintDismissed && sortedFiltered.length > 20 && !hasActiveFilters && !searchTerm && (() => {
+              const hasPlantable = speciesData.some(sd => {
+                const tl = sd.tl;
+                return (tl.indoorStart && todayDoy >= tl.indoorStart - 7 && todayDoy <= tl.indoorStart + 14) ||
+                       (tl.sowStart && todayDoy >= tl.sowStart - 7 && todayDoy <= tl.sowStart + 14);
+              });
+              const hasBlooming = speciesData.some(sd => todayDoy >= sd.tl.bloomStart && todayDoy <= sd.tl.bloomEnd);
+              const tip = hasPlantable
+                ? { text: 'Try "Plant Now" to see species you can start this week.', action: () => setFilterPlantNow(true) }
+                : hasBlooming
+                ? { text: 'Try "Blooming" to see what\'s flowering right now.', action: () => setFilterBloomNow(true) }
+                : { text: 'Try sorting by "Next action" to see your most urgent tasks.', action: () => setSortBy('nextAction') };
+              return (
+                <div style={{ borderLeft: '3px solid #6366f1', backgroundColor: isDark ? '#1e1b4b' : '#eef2ff', padding: '8px 14px', borderRadius: '0 6px 6px 0', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
+                  <span style={{ color: '#6366f1', fontWeight: 700, fontSize: '11px' }}>TIP</span>
+                  <button onClick={tip.action} style={{ background: 'none', border: 'none', cursor: 'pointer', color: isDark ? '#a5b4fc' : '#4338ca', fontWeight: 500, padding: 0, textAlign: 'left', flex: 1 }}>{tip.text}</button>
+                  <button onClick={() => { setFilterHintDismissed(true); localStorage.setItem('filterHintDismissed', '1'); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: '14px', padding: '2px 6px' }}>&times;</button>
+                </div>
+              );
+            })()}
+
             {sortedFiltered.length === 0 && (
               <div className="text-center py-12" style={{ color: dm.textMuted }}>
                 <p style={{ fontSize: '16px', fontWeight: 600 }}>No species match your filters</p>
