@@ -167,7 +167,7 @@ export default function VarietyModal({
                   { label: 'Height', value: HEIGHT_LABELS[variety.height] || '?' },
                   { label: 'Spacing', value: SPACING_DATA[variety.height]?.label || '?' },
                   { label: 'Germination', value: variety.germination ? `${variety.germination[0]}–${variety.germination[1]}d` : '?' },
-                  { label: 'Days to Bloom', value: variety.bloomDays ? `${variety.bloomDays[0]}–${variety.bloomDays[1]}d` : '?' },
+                  { label: variety.daysToMaturity ? 'Days to Harvest' : 'Days to Bloom', value: variety.daysToMaturity ? `${variety.daysToMaturity[0]}–${variety.daysToMaturity[1]}d` : variety.bloomDays ? `${variety.bloomDays[0]}–${variety.bloomDays[1]}d` : '?' },
                   { label: 'Sowing', value: variety.sowMethod ? variety.sowMethod.map(m => m === 'startIndoors' ? 'Indoor' : 'Direct').join(' / ') : '?' },
                 ].map((item, i) => (
                   <div key={i} className="text-center" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '12px 8px', borderRadius: '6px' }}>
@@ -239,7 +239,12 @@ export default function VarietyModal({
                     variety.tl.transplant && { phase: 'transplant', label: 'Transplant', date: formatDoy(variety.tl.transplant) },
                     variety.tl.sowStart && { phase: 'sow', label: 'Direct sow', date: `${formatDoy(variety.tl.sowStart)} – ${formatDoy(variety.tl.sowEnd)}` },
                     { phase: 'germination', label: 'Germination', date: formatDoy(variety.tl.germEnd) },
-                    { phase: 'bloom', label: 'First bloom', date: formatDoy(variety.tl.bloomStart) },
+                    variety.tl.harvestStart
+                      ? { phase: 'harvest', label: 'Harvest begins', date: formatDoy(variety.tl.harvestStart) }
+                      : variety.tl.bloomStart && { phase: 'bloom', label: 'First bloom', date: formatDoy(variety.tl.bloomStart) },
+                    variety.tl.harvestEnd
+                      ? { phase: 'harvest', label: 'Harvest ends', date: formatDoy(variety.tl.harvestEnd) }
+                      : null,
                     { phase: 'decline', label: variety.type === 'annual' ? 'Frost kill' : 'Dormancy', date: formatDoy(variety.tl.seasonEnd) },
                   ].filter(Boolean).map((item, i) => (
                     <div key={i} className="flex items-center gap-2.5" style={{ fontSize: '13px' }}>

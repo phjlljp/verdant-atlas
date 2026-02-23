@@ -59,7 +59,7 @@ export default function GanttView({ sortedFiltered, mode = 'bloom', onClickSpeci
   const sortedData = useMemo(() => {
     const data = sortedFiltered.slice();
     if (mode === 'bloom') {
-      return data.sort((a, b) => (a.tl.bloomStart || 999) - (b.tl.bloomStart || 999));
+      return data.sort((a, b) => (a.tl.bloomStart || a.tl.harvestStart || 999) - (b.tl.bloomStart || b.tl.harvestStart || 999));
     }
     return data.sort((a, b) => {
       const aStart = a.tl.indoorStart || a.tl.sowStart || 999;
@@ -71,6 +71,10 @@ export default function GanttView({ sortedFiltered, mode = 'bloom', onClickSpeci
   const getPhases = (sd) => {
     if (mode === 'bloom') {
       const tl = sd.tl;
+      // Show harvest bar for vegetables, bloom bar for flowers
+      if (tl.harvestStart && tl.harvestEnd) {
+        return [{ start: tl.harvestStart, end: tl.harvestEnd, color: PHASE_COLORS.harvest.bg, label: 'Harvest' }];
+      }
       if (!tl.bloomStart || !tl.bloomEnd) return [];
       return [{ start: tl.bloomStart, end: tl.bloomEnd, color: PHASE_COLORS.bloom.bg, label: 'Bloom' }];
     }
@@ -80,6 +84,7 @@ export default function GanttView({ sortedFiltered, mode = 'bloom', onClickSpeci
     if (tl.transplant) phases.push({ start: tl.transplant - 3, end: tl.transplant + 3, color: PHASE_COLORS.transplant.bg, label: 'Transplant' });
     if (tl.sowStart && tl.sowEnd) phases.push({ start: tl.sowStart, end: tl.sowEnd, color: PHASE_COLORS.sow.bg, label: 'Direct Sow' });
     if (tl.germStart && tl.germEnd) phases.push({ start: tl.germStart, end: tl.germEnd, color: PHASE_COLORS.germination.bg, label: 'Germination' });
+    if (tl.harvestStart && tl.harvestEnd) phases.push({ start: tl.harvestStart, end: tl.harvestEnd, color: PHASE_COLORS.harvest.bg + '40', label: 'Harvest' });
     if (tl.bloomStart && tl.bloomEnd) phases.push({ start: tl.bloomStart, end: tl.bloomEnd, color: PHASE_COLORS.bloom.bg + '40', label: 'Bloom' });
     return phases;
   };
@@ -108,7 +113,7 @@ export default function GanttView({ sortedFiltered, mode = 'bloom', onClickSpeci
   return (
     <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', padding: '20px', borderRadius: '8px' }}>
       <h3 style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px', color: '#1e293b' }}>
-        {mode === 'bloom' ? 'Bloom Calendar' : 'Planting Calendar'}
+        {mode === 'bloom' ? 'Bloom & Harvest Calendar' : 'Planting Calendar'}
       </h3>
       <MonthLabels />
       <div className="space-y-1">
@@ -147,6 +152,7 @@ export default function GanttView({ sortedFiltered, mode = 'bloom', onClickSpeci
           <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: PHASE_COLORS.transplant.bg }} /> Transplant</span>
           <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: PHASE_COLORS.sow.bg }} /> Direct Sow</span>
           <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: PHASE_COLORS.germination.bg }} /> Germination</span>
+          <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: PHASE_COLORS.harvest.bg + '40' }} /> Harvest (faded)</span>
           <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '10px', height: '10px', backgroundColor: PHASE_COLORS.bloom.bg + '40' }} /> Bloom (faded)</span>
           <span className="flex items-center gap-1"><span style={{ display: 'inline-block', width: '2px', height: '10px', backgroundColor: '#c00' }} /> Today</span>
         </div>
