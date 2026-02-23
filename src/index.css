@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #6366f1;
+  --color-phase-indoor: #7c3aed;
+  --color-phase-harden: #0891b2;
+  --color-phase-transplant: #2563eb;
+  --color-phase-sow: #16a34a;
+  --color-phase-germination: #84cc16;
+  --color-phase-growing: #a3e635;
+  --color-phase-bloom: #ec4899;
+  --color-phase-decline: #f59e0b;
+  --color-phase-dormant: #f1f5f9;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
