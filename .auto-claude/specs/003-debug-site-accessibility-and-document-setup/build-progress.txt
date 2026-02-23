@@ -1,0 +1,99 @@
+=== AUTO-BUILD PROGRESS ===
+
+Project: Debug Site Accessibility and Document Setup (Spec 003)
+Workspace: verdant-atlas
+Started: 2026-02-22
+
+Workflow Type: feature
+Rationale: Two workstreams — (1) create net-new README.md documenting the project and (2) diagnose + fix broken GitHub Pages deployment. Both produce new deliverables, fitting the feature workflow.
+
+Session 1 (Planner):
+- Completed deep codebase investigation
+- Discovered local main is 26 commits behind origin/main (both PRs merged remotely)
+- Identified likely GH Pages root cause: serving from main (Vite entry-point, not built output) + no gh-pages branch
+- Created implementation_plan.json with 4 phases, 6 subtasks
+- Created init.sh
+- Updated context.json and project_index.json with findings
+
+Phase Summary:
+- Phase 1 (Repository Sync): 1 subtask, depends on nothing — sync local with origin/main
+- Phase 2 (GitHub Pages Diagnosis and Fix): 3 subtasks, depends on Phase 1 — diagnose, build+deploy, configure GH Pages
+- Phase 3 (README Creation): 1 subtask, depends on Phase 1 — create comprehensive README.md
+- Phase 4 (Integration Verification): 1 subtask, depends on Phases 2+3 — end-to-end verification
+
+Services Involved:
+- verdant-atlas: Single static React app (Vite 7 + React 19 + Tailwind v4), deployed to GitHub Pages
+
+Key Investigation Findings:
+- origin/main has both PR #1 (full Vite refactor) and PR #2 (.nojekyll fix) merged
+- Local main still has old monolithic index.html (3,791 lines) — needs sync
+- vite.config.js already has correct base: '/verdant-atlas/'
+- package.json deploy script is correct: 'vite build && gh-pages -d dist'
+- .nojekyll exists on origin/main
+- gh-pages branch likely doesn't exist (npm run deploy never run)
+- Root cause hypothesis: GH Pages serves from main, but main's index.html is a Vite entry-point (<script type="module" src="/src/main.jsx">) that can't be processed statically
+
+Parallelism Analysis:
+- Max parallel phases: 2
+- Recommended workers: 2
+- Parallel groups: [Phase 2 + Phase 3] — both depend only on Phase 1, no file overlap
+
+=== STARTUP COMMAND ===
+
+To continue building this spec, run:
+
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 003 --parallel 2
+
+Example:
+  source auto-claude/.venv/bin/activate && python auto-claude/run.py --spec 003 --parallel 2
+
+=== END SESSION 1 ===
+
+=== SESSION 2: Subtask 2-1 (GitHub Pages Diagnostic) ===
+
+Diagnostic Checklist Results:
+
+1. GH Pages Config (gh api repos/.../pages):
+   - BLOCKED: gh CLI returned "Forbidden" — insufficient API permissions
+   - Inference from codebase: GH Pages likely configured to serve from main branch (default)
+
+2. gh-pages Branch Exists?
+   - NO — `git branch -r` shows only origin/main, no origin/gh-pages
+   - `npm run deploy` has never been successfully run (or branch was deleted)
+
+3. gh-pages Branch Contents:
+   - N/A — branch does not exist
+
+4. What's on main at root:
+   - index.html exists (27 lines) — this is a Vite entry-point, NOT a built app
+   - It references `<script type="module" src="/src/main.jsx">` which requires Vite to serve
+   - .nojekyll exists (from PR #2)
+   - src/ directory with full React component tree exists
+   - vite.config.js has correct base: '/verdant-atlas/'
+   - package.json deploy script: "vite build && gh-pages -d dist"
+
+5. Live Site (curl):
+   - BLOCKED: Network access restricted in sandbox environment
+   - Expected behavior: GitHub Pages serves main's index.html, which tries to load /src/main.jsx
+   - This will fail because GH Pages is a static host — it cannot process JSX/module imports
+
+6. Pages Build Status (gh api .../pages/builds):
+   - BLOCKED: gh CLI permissions insufficient
+
+Root Cause Conclusion:
+   (a) GH Pages serves from: main branch (default config, no gh-pages branch exists)
+   (b) gh-pages branch exists: NO
+   (c) HTTP status of live site: Likely 200 but renders blank page or errors —
+       main's index.html is a Vite dev entry-point that imports /src/main.jsx,
+       which GitHub Pages cannot process (static hosting, no build step)
+   (d) Root cause: The `npm run deploy` command has never been run.
+       This command would: (1) build the app via Vite into dist/, (2) push dist/
+       to a gh-pages branch via the gh-pages npm package. Without this, GH Pages
+       serves the raw Vite entry-point from main, which cannot work on static hosting.
+
+Fix Required:
+   1. Run `npm run deploy` to build and push to gh-pages branch
+   2. Configure GitHub Pages to serve from gh-pages branch (may need manual config or gh CLI)
+   3. Verify the deployed site loads correctly
+
+=== END SUBTASK 2-1 ===
