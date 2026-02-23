@@ -154,6 +154,7 @@ export default function Toolbar({
                   filterColorFamily={filterColorFamily} setFilterColorFamily={setFilterColorFamily}
                   filterDeer={filterDeer} setFilterDeer={setFilterDeer}
                   filterPollinator={filterPollinator} setFilterPollinator={setFilterPollinator}
+                  filterCategory={filterCategory}
                   sortBy={sortBy} setSortBy={setSortBy}
                   dm={dm}
                 />
