@@ -2,6 +2,9 @@
 
 @theme {
   --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-light: rgba(99, 102, 241, 0.15);
+
   --color-phase-indoor: #7c3aed;
   --color-phase-harden: #0891b2;
   --color-phase-transplant: #2563eb;
@@ -11,5 +14,146 @@
   --color-phase-bloom: #ec4899;
   --color-phase-decline: #f59e0b;
   --color-phase-dormant: #f1f5f9;
+
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --animate-modal-in: modal-in 0.2s ease-out;
+  --animate-fade-in: fade-in 0.15s ease-out;
+  --animate-card-expand: card-expand 0.25s ease-out;
+  --animate-shimmer: shimmer 1.5s infinite;
+
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes card-expand {
+    from { opacity: 0; max-height: 0; }
+    to { opacity: 1; max-height: 2000px; }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+  }
+}
+
+/* Dark mode CSS variables */
+:root {
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+  --card-border-active: #6366f1;
+  --card-shadow: rgba(0, 0, 0, 0.04);
+  --card-shadow-expanded: rgba(0, 0, 0, 0.08);
+  --tooltip-bg: #1e293b;
+  --tooltip-text: #fff;
+  --input-focus-ring: rgba(99, 102, 241, 0.15);
+  --hover-bg: #f1f5f9;
+  --shimmer-from: #f1f5f9;
+  --shimmer-via: #e2e8f0;
+}
+
+.dark {
+  --scrollbar-track: #1e293b;
+  --scrollbar-thumb: #475569;
+  --scrollbar-thumb-hover: #64748b;
+  --card-shadow: rgba(0, 0, 0, 0.2);
+  --card-shadow-expanded: rgba(0, 0, 0, 0.3);
+  --tooltip-bg: #f8fafc;
+  --tooltip-text: #0f172a;
+  --input-focus-ring: rgba(99, 102, 241, 0.3);
+  --hover-bg: #1e293b;
+  --shimmer-from: #1e293b;
+  --shimmer-via: #334155;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+/* Card transitions */
+.species-card { transition: all 0.15s ease; }
+.species-card-collapsed { border-left: 3px solid transparent; box-shadow: 0 1px 3px var(--card-shadow); }
+.species-card-expanded { border-left: 3px solid var(--card-border-active); box-shadow: 0 4px 12px var(--card-shadow-expanded); }
+
+/* Interactive elements */
+.species-name-btn { border-radius: 4px; transition: background-color 0.1s ease; min-height: 44px; }
+.species-name-btn:hover { background-color: var(--hover-bg); }
+.variety-chip { transition: all 0.15s ease; border-radius: 6px; }
+.variety-chip:hover { background-color: var(--hover-bg) !important; }
+.filter-btn { transition: all 0.15s ease; border-radius: 4px; min-height: 44px; min-width: 44px; }
+select { min-height: 44px; }
+
+/* Segment group */
+.segment-group { display: inline-flex; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
+.dark .segment-group { border-color: #334155; }
+.segment-group button { border-radius: 0; border: none; margin: 0; }
+.segment-group button:not(:last-child) { border-right: 1px solid #e2e8f0; }
+.dark .segment-group button:not(:last-child) { border-right-color: #334155; }
+
+/* Year bar */
+.year-bar-seg { transition: opacity 0.15s ease; }
+.year-bar-seg:hover { opacity: 0.75; }
+.year-bar-tooltip {
+  position: absolute; bottom: calc(100% + 8px); transform: translateX(-50%);
+  background: var(--tooltip-bg); color: var(--tooltip-text);
+  padding: 6px 10px; border-radius: 6px; font-size: 11px; line-height: 1.4;
+  white-space: nowrap; pointer-events: none; z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.year-bar-tooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 5px solid transparent; border-top-color: var(--tooltip-bg);
+}
+
+/* Shimmer loading skeleton */
+.img-skeleton {
+  background: linear-gradient(90deg, var(--shimmer-from) 25%, var(--shimmer-via) 50%, var(--shimmer-from) 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Input focus */
+input:focus, select:focus {
+  outline: none;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 2px var(--input-focus-ring);
+}
+
+/* Gantt row hover */
+.gantt-row:hover { background-color: var(--hover-bg) !important; }
+
+/* Print styles */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body::before, body::after { display: none !important; }
+  .sticky { position: relative !important; }
+  .sticky.top-0 { display: none !important; }
+  .species-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ccc !important;
+    margin-bottom: 8px !important;
+  }
+  .variety-chip { break-inside: avoid; }
+  button[aria-label], .filter-btn { display: none !important; }
+  .fixed.inset-0 { display: none !important; }
+  .fixed.z-30 { display: none !important; }
+  .year-bar-seg { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .variety-chip .absolute.z-10 { display: none !important; }
+  nav, [role="navigation"] { display: none !important; }
+  @page { margin: 0.75in; }
 }
