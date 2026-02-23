@@ -8,11 +8,11 @@ export const VEGETABLE_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-12 weeks before last frost',
     height: 'tall', companions: ['Sunflower', 'Tarragon'], harvestDuration: 60,
-    deerResistant: true, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: true, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Green Globe Improved', url: 'https://www.rareseeds.com/artichoke-green-globe-improved' },
       { name: 'Imperial Star', url: 'https://www.rareseeds.com/artichoke-imperial-star' },
-      { name: 'Purple of Romagna', url: 'https://www.rareseeds.com/artichoke-purple-of-romagna' },
+      { name: 'Purple Romagna', url: 'https://www.rareseeds.com/artichoke-purple-romagna' },
       { name: 'Violetto', url: 'https://www.rareseeds.com/artichoke-violetto' }
     ]
   },
@@ -21,14 +21,13 @@ export const VEGETABLE_DATABASE = {
     germination: [14, 28],
     daysToMaturity: [730, 1095],
     frostHardy: true,
-    sun: [6, 10],
-    sowMethod: ['startIndoors', 'directSow'],
-    sowTiming: 'Start indoors in late winter or direct sow in spring',
+    sun: [6, 12],
+    sowMethod: ['directSow', 'startIndoors'],
+    sowTiming: 'Direct sow in spring or start indoors',
     height: 'tall', companions: ['Tomato', 'Basil', 'Parsley'], harvestDuration: 60,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Mary Washington', url: 'https://www.rareseeds.com/asparagus-mary-washington' },
-      { name: 'Precoce D\'Argenteuil', url: 'https://www.rareseeds.com/asparagus-precoce-d-argenteuil' },
       { name: 'Purple Passion', url: 'https://www.rareseeds.com/asparagus-purple-passion' },
       { name: 'UC 157', url: 'https://www.rareseeds.com/asparagus-uc-157' }
     ]
@@ -42,7 +41,7 @@ export const VEGETABLE_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost when soil is warm',
     height: 'medium', companions: ['Corn', 'Squash', 'Cucumber'], harvestDuration: 45,
-    deerResistant: false, soil: 'any', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: false, soil: 'any', moisture: 'moist',
     varieties: [
       { name: 'Blue Lake Bush 274', url: 'https://www.rareseeds.com/bean-blue-lake-bush-274' },
       { name: 'Calima', url: 'https://www.rareseeds.com/bean-calima' },
@@ -50,20 +49,20 @@ export const VEGETABLE_DATABASE = {
       { name: 'Contender', url: 'https://www.rareseeds.com/bean-contender' },
       { name: 'Dragon Tongue', url: 'https://www.rareseeds.com/bean-dragon-tongue' },
       { name: 'Gold Rush Yellow Wax', url: 'https://www.rareseeds.com/bean-gold-rush-yellow-wax' },
+      { name: 'Hidatsa Shield Figure', url: 'https://www.rareseeds.com/bean-hidatsa-shield-figure' },
       { name: 'Jade', url: 'https://www.rareseeds.com/bean-jade' },
       { name: 'Kentucky Wonder', url: 'https://www.rareseeds.com/bean-kentucky-wonder' },
       { name: 'Lazy Housewife', url: 'https://www.rareseeds.com/bean-lazy-housewife' },
       { name: 'Masai', url: 'https://www.rareseeds.com/bean-masai' },
+      { name: 'Painted Pony', url: 'https://www.rareseeds.com/bean-painted-pony' },
       { name: 'Provider', url: 'https://www.rareseeds.com/bean-provider' },
-      { name: 'Purple King', url: 'https://www.rareseeds.com/bean-purple-king' },
+      { name: 'Purple Podded Pole', url: 'https://www.rareseeds.com/bean-purple-podded-pole' },
       { name: 'Rattlesnake', url: 'https://www.rareseeds.com/bean-rattlesnake' },
       { name: 'Roma II', url: 'https://www.rareseeds.com/bean-roma-ii' },
       { name: 'Royal Burgundy', url: 'https://www.rareseeds.com/bean-royal-burgundy' },
       { name: 'Scarlet Runner', url: 'https://www.rareseeds.com/bean-scarlet-runner' },
       { name: 'Tendergreen Improved', url: 'https://www.rareseeds.com/bean-tendergreen-improved' },
-      { name: 'Tiger Eye', url: 'https://www.rareseeds.com/bean-tiger-eye' },
-      { name: 'Top Notch Golden Wax', url: 'https://www.rareseeds.com/bean-top-notch-golden-wax' },
-      { name: 'Triomphe de Farcy', url: 'https://www.rareseeds.com/bean-triomphe-de-farcy' }
+      { name: 'Tiger Eye', url: 'https://www.rareseeds.com/bean-tiger-eye' }
     ]
   },
   Beet: {
@@ -71,11 +70,11 @@ export const VEGETABLE_DATABASE = {
     germination: [7, 14],
     daysToMaturity: [50, 65],
     frostHardy: true,
-    sun: [6, 8],
+    sun: [6, 10],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow 2-4 weeks before last frost',
     height: 'short', companions: ['Lettuce', 'Onion', 'Cabbage'], harvestDuration: 30,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Bull\'s Blood', url: 'https://www.rareseeds.com/beet-bulls-blood' },
       { name: 'Chioggia', url: 'https://www.rareseeds.com/beet-chioggia' },
@@ -83,20 +82,19 @@ export const VEGETABLE_DATABASE = {
       { name: 'Detroit Dark Red', url: 'https://www.rareseeds.com/beet-detroit-dark-red' },
       { name: 'Early Wonder Tall Top', url: 'https://www.rareseeds.com/beet-early-wonder-tall-top' },
       { name: 'Golden', url: 'https://www.rareseeds.com/beet-golden' },
-      { name: 'Lutz Green Leaf', url: 'https://www.rareseeds.com/beet-lutz-green-leaf' },
-      { name: 'Touchstone Gold', url: 'https://www.rareseeds.com/beet-touchstone-gold' }
+      { name: 'Lutz Green Leaf', url: 'https://www.rareseeds.com/beet-lutz-green-leaf' }
     ]
   },
   Broccoli: {
     category: 'vegetable',
     germination: [5, 10],
-    daysToMaturity: [60, 80],
+    daysToMaturity: [60, 90],
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
     height: 'medium', companions: ['Onion', 'Celery', 'Beet'], harvestDuration: 21,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Calabrese', url: 'https://www.rareseeds.com/broccoli-calabrese' },
       { name: 'De Cicco', url: 'https://www.rareseeds.com/broccoli-de-cicco' },
@@ -108,17 +106,17 @@ export const VEGETABLE_DATABASE = {
   'Brussels Sprout': {
     category: 'vegetable',
     germination: [5, 10],
-    daysToMaturity: [90, 110],
+    daysToMaturity: [90, 120],
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 4-6 weeks before last frost',
     height: 'medium', companions: ['Beet', 'Carrot', 'Onion'], harvestDuration: 30,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Catskill', url: 'https://www.rareseeds.com/brussels-sprout-catskill' },
       { name: 'Long Island Improved', url: 'https://www.rareseeds.com/brussels-sprout-long-island-improved' },
-      { name: 'Red Rubine', url: 'https://www.rareseeds.com/brussels-sprout-red-rubine' }
+      { name: 'Red Bull', url: 'https://www.rareseeds.com/brussels-sprout-red-bull' }
     ]
   },
   Cabbage: {
@@ -128,16 +126,16 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['startIndoors', 'directSow'],
-    sowTiming: 'Start indoors 6-8 weeks before last frost or direct sow in early spring',
-    height: 'short', companions: ['Beet', 'Celery', 'Onion'], harvestDuration: 21,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    sowTiming: 'Start indoors 6-8 weeks before last frost or direct sow',
+    height: 'short', companions: ['Celery', 'Onion', 'Dill'], harvestDuration: 21,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Charleston Wakefield', url: 'https://www.rareseeds.com/cabbage-charleston-wakefield' },
       { name: 'Copenhagen Market', url: 'https://www.rareseeds.com/cabbage-copenhagen-market' },
       { name: 'Golden Acre', url: 'https://www.rareseeds.com/cabbage-golden-acre' },
       { name: 'January King', url: 'https://www.rareseeds.com/cabbage-january-king' },
       { name: 'Mammoth Red Rock', url: 'https://www.rareseeds.com/cabbage-mammoth-red-rock' },
-      { name: 'Red Acre', url: 'https://www.rareseeds.com/cabbage-red-acre' }
+      { name: 'Red Express', url: 'https://www.rareseeds.com/cabbage-red-express' }
     ]
   },
   Carrot: {
@@ -148,24 +146,22 @@ export const VEGETABLE_DATABASE = {
     sun: [6, 10],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow 2-3 weeks before last frost',
-    height: 'short', companions: ['Lettuce', 'Onion', 'Tomato'], harvestDuration: 30,
-    deerResistant: false, soil: 'sandy', moisture: 'moist', pollinators: [],
+    height: 'short', companions: ['Onion', 'Lettuce', 'Tomato'], harvestDuration: 30,
+    deerResistant: false, soil: 'sandy', moisture: 'moist',
     varieties: [
       { name: 'Atomic Red', url: 'https://www.rareseeds.com/carrot-atomic-red' },
-      { name: 'Chantenay Red Core', url: 'https://www.rareseeds.com/carrot-chantenay-red-core' },
       { name: 'Cosmic Purple', url: 'https://www.rareseeds.com/carrot-cosmic-purple' },
       { name: 'Danvers 126', url: 'https://www.rareseeds.com/carrot-danvers-126' },
       { name: 'Dragon', url: 'https://www.rareseeds.com/carrot-dragon' },
-      { name: 'Imperator 58', url: 'https://www.rareseeds.com/carrot-imperator-58' },
       { name: 'Little Finger', url: 'https://www.rareseeds.com/carrot-little-finger' },
       { name: 'Lunar White', url: 'https://www.rareseeds.com/carrot-lunar-white' },
-      { name: 'Nantes', url: 'https://www.rareseeds.com/carrot-nantes' },
+      { name: 'Napoli', url: 'https://www.rareseeds.com/carrot-napoli' },
+      { name: 'Oxheart', url: 'https://www.rareseeds.com/carrot-oxheart' },
       { name: 'Paris Market', url: 'https://www.rareseeds.com/carrot-paris-market' },
-      { name: 'Purple Haze', url: 'https://www.rareseeds.com/carrot-purple-haze' },
       { name: 'Rainbow Mix', url: 'https://www.rareseeds.com/carrot-rainbow-mix' },
       { name: 'Scarlet Nantes', url: 'https://www.rareseeds.com/carrot-scarlet-nantes' },
       { name: 'Solar Yellow', url: 'https://www.rareseeds.com/carrot-solar-yellow' },
-      { name: 'Tendersweet', url: 'https://www.rareseeds.com/carrot-tendersweet' }
+      { name: 'Tonda di Parigi', url: 'https://www.rareseeds.com/carrot-tonda-di-parigi' }
     ]
   },
   Cauliflower: {
@@ -176,11 +172,12 @@ export const VEGETABLE_DATABASE = {
     sun: [6, 8],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
-    height: 'medium', companions: ['Beet', 'Celery', 'Onion'], harvestDuration: 14,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    height: 'medium', companions: ['Celery', 'Onion', 'Beet'], harvestDuration: 14,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Amazing', url: 'https://www.rareseeds.com/cauliflower-amazing' },
-      { name: 'Graffiti Purple', url: 'https://www.rareseeds.com/cauliflower-graffiti-purple' },
+      { name: 'Cheddar', url: 'https://www.rareseeds.com/cauliflower-cheddar' },
+      { name: 'Graffiti', url: 'https://www.rareseeds.com/cauliflower-graffiti' },
       { name: 'Purple of Sicily', url: 'https://www.rareseeds.com/cauliflower-purple-of-sicily' },
       { name: 'Snowball Self-Blanching', url: 'https://www.rareseeds.com/cauliflower-snowball-self-blanching' }
     ]
@@ -194,9 +191,9 @@ export const VEGETABLE_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 10-12 weeks before last frost',
     height: 'medium', companions: ['Cabbage', 'Tomato', 'Bean'], harvestDuration: 30,
-    deerResistant: false, soil: 'rich', moisture: 'wet', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'wet',
     varieties: [
-      { name: 'Giant Pascal', url: 'https://www.rareseeds.com/celery-giant-pascal' },
+      { name: 'Giant Red', url: 'https://www.rareseeds.com/celery-giant-red' },
       { name: 'Golden Self-Blanching', url: 'https://www.rareseeds.com/celery-golden-self-blanching' },
       { name: 'Tall Utah', url: 'https://www.rareseeds.com/celery-tall-utah' },
       { name: 'Tendercrisp', url: 'https://www.rareseeds.com/celery-tendercrisp' }
@@ -211,7 +208,7 @@ export const VEGETABLE_DATABASE = {
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow after last frost when soil is warm',
     height: 'tall', companions: ['Bean', 'Squash', 'Cucumber'], harvestDuration: 14,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Bloody Butcher', url: 'https://www.rareseeds.com/corn-bloody-butcher' },
       { name: 'Country Gentleman', url: 'https://www.rareseeds.com/corn-country-gentleman' },
@@ -231,8 +228,8 @@ export const VEGETABLE_DATABASE = {
     sun: [6, 10],
     sowMethod: ['directSow', 'startIndoors'],
     sowTiming: 'Direct sow after last frost or start indoors 3-4 weeks before',
-    height: 'vine', companions: ['Bean', 'Corn', 'Sunflower'], harvestDuration: 45,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    height: 'vine', companions: ['Bean', 'Corn', 'Radish'], harvestDuration: 45,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Armenian', url: 'https://www.rareseeds.com/cucumber-armenian' },
       { name: 'Boston Pickling', url: 'https://www.rareseeds.com/cucumber-boston-pickling' },
@@ -240,11 +237,12 @@ export const VEGETABLE_DATABASE = {
       { name: 'Japanese Climbing', url: 'https://www.rareseeds.com/cucumber-japanese-climbing' },
       { name: 'Lemon', url: 'https://www.rareseeds.com/cucumber-lemon' },
       { name: 'Marketmore 76', url: 'https://www.rareseeds.com/cucumber-marketmore-76' },
+      { name: 'Mexican Sour Gherkin', url: 'https://www.rareseeds.com/cucumber-mexican-sour-gherkin' },
       { name: 'National Pickling', url: 'https://www.rareseeds.com/cucumber-national-pickling' },
       { name: 'Poona Kheera', url: 'https://www.rareseeds.com/cucumber-poona-kheera' },
       { name: 'Spacemaster', url: 'https://www.rareseeds.com/cucumber-spacemaster' },
-      { name: 'Suyo Long', url: 'https://www.rareseeds.com/cucumber-suyo-long' },
-      { name: 'White Wonder', url: 'https://www.rareseeds.com/cucumber-white-wonder' }
+      { name: 'Straight Eight', url: 'https://www.rareseeds.com/cucumber-straight-eight' },
+      { name: 'Suyo Long', url: 'https://www.rareseeds.com/cucumber-suyo-long' }
     ]
   },
   Eggplant: {
@@ -252,38 +250,37 @@ export const VEGETABLE_DATABASE = {
     germination: [7, 14],
     daysToMaturity: [65, 85],
     frostHardy: false,
-    sun: [8, 12],
+    sun: [6, 10],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
     height: 'medium', companions: ['Pepper', 'Tomato', 'Bean'], harvestDuration: 60,
-    deerResistant: true, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: true, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Black Beauty', url: 'https://www.rareseeds.com/eggplant-black-beauty' },
       { name: 'Casper', url: 'https://www.rareseeds.com/eggplant-casper' },
       { name: 'Diamond', url: 'https://www.rareseeds.com/eggplant-diamond' },
-      { name: 'Japanese White Egg', url: 'https://www.rareseeds.com/eggplant-japanese-white-egg' },
       { name: 'Listada de Gandia', url: 'https://www.rareseeds.com/eggplant-listada-de-gandia' },
       { name: 'Long Purple', url: 'https://www.rareseeds.com/eggplant-long-purple' },
-      { name: 'Ping Tung Long', url: 'https://www.rareseeds.com/eggplant-ping-tung-long' },
-      { name: 'Rosa Bianca', url: 'https://www.rareseeds.com/eggplant-rosa-bianca' }
+      { name: 'Rosa Bianca', url: 'https://www.rareseeds.com/eggplant-rosa-bianca' },
+      { name: 'Thai Long Green', url: 'https://www.rareseeds.com/eggplant-thai-long-green' }
     ]
   },
   Garlic: {
     category: 'vegetable',
-    germination: [14, 21],
-    daysToMaturity: [180, 270],
+    germination: [7, 14],
+    daysToMaturity: [90, 120],
     frostHardy: true,
     sun: [6, 10],
     sowMethod: ['directSow'],
-    sowTiming: 'Plant cloves in fall, 4-6 weeks before ground freezes',
-    height: 'short', companions: ['Tomato', 'Pepper', 'Lettuce'], harvestDuration: 14,
-    deerResistant: true, soil: 'rich', moisture: 'moist', pollinators: [],
+    sowTiming: 'Plant cloves in fall 4-6 weeks before ground freezes',
+    height: 'short', companions: ['Tomato', 'Pepper', 'Beet'], harvestDuration: 14,
+    deerResistant: true, soil: 'rich', moisture: 'moist',
     varieties: [
-      { name: 'Chesnok Red', url: 'https://www.rareseeds.com/garlic-chesnok-red' },
       { name: 'Early Italian Purple', url: 'https://www.rareseeds.com/garlic-early-italian-purple' },
-      { name: 'German White', url: 'https://www.rareseeds.com/garlic-german-white' },
       { name: 'Inchelium Red', url: 'https://www.rareseeds.com/garlic-inchelium-red' },
-      { name: 'Music', url: 'https://www.rareseeds.com/garlic-music' }
+      { name: 'Lorz Italian', url: 'https://www.rareseeds.com/garlic-lorz-italian' },
+      { name: 'Music', url: 'https://www.rareseeds.com/garlic-music' },
+      { name: 'Silver White', url: 'https://www.rareseeds.com/garlic-silver-white' }
     ]
   },
   Kale: {
@@ -293,17 +290,17 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['directSow', 'startIndoors'],
-    sowTiming: 'Direct sow 4-6 weeks before last frost or start indoors',
+    sowTiming: 'Direct sow in spring or fall, or start indoors',
     height: 'medium', companions: ['Beet', 'Celery', 'Onion'], harvestDuration: 90,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
+      { name: 'Blue Curled Scotch', url: 'https://www.rareseeds.com/kale-blue-curled-scotch' },
       { name: 'Dinosaur (Lacinato)', url: 'https://www.rareseeds.com/kale-dinosaur-lacinato' },
-      { name: 'Dwarf Blue Curled Scotch', url: 'https://www.rareseeds.com/kale-dwarf-blue-curled-scotch' },
-      { name: 'Premier', url: 'https://www.rareseeds.com/kale-premier' },
+      { name: 'Dwarf Siberian', url: 'https://www.rareseeds.com/kale-dwarf-siberian' },
+      { name: 'Nero di Toscana', url: 'https://www.rareseeds.com/kale-nero-di-toscana' },
       { name: 'Rainbow Lacinato', url: 'https://www.rareseeds.com/kale-rainbow-lacinato' },
       { name: 'Red Russian', url: 'https://www.rareseeds.com/kale-red-russian' },
-      { name: 'Scarlet', url: 'https://www.rareseeds.com/kale-scarlet' },
-      { name: 'White Russian', url: 'https://www.rareseeds.com/kale-white-russian' }
+      { name: 'Scarlet', url: 'https://www.rareseeds.com/kale-scarlet' }
     ]
   },
   Kohlrabi: {
@@ -313,13 +310,13 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['directSow', 'startIndoors'],
-    sowTiming: 'Direct sow in early spring or start indoors',
-    height: 'short', companions: ['Beet', 'Onion', 'Celery'], harvestDuration: 14,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    sowTiming: 'Direct sow in spring or start indoors 4-6 weeks before last frost',
+    height: 'short', companions: ['Beet', 'Onion', 'Cucumber'], harvestDuration: 14,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Early Purple Vienna', url: 'https://www.rareseeds.com/kohlrabi-early-purple-vienna' },
       { name: 'Early White Vienna', url: 'https://www.rareseeds.com/kohlrabi-early-white-vienna' },
-      { name: 'Giant Purple', url: 'https://www.rareseeds.com/kohlrabi-giant-purple' }
+      { name: 'Giant', url: 'https://www.rareseeds.com/kohlrabi-giant' }
     ]
   },
   Leek: {
@@ -331,12 +328,12 @@ export const VEGETABLE_DATABASE = {
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 10-12 weeks before last frost',
     height: 'medium', companions: ['Carrot', 'Celery', 'Onion'], harvestDuration: 30,
-    deerResistant: true, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: true, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'American Flag', url: 'https://www.rareseeds.com/leek-american-flag' },
+      { name: 'Blue Solaise', url: 'https://www.rareseeds.com/leek-blue-solaise' },
       { name: 'Giant Musselburgh', url: 'https://www.rareseeds.com/leek-giant-musselburgh' },
-      { name: 'King Richard', url: 'https://www.rareseeds.com/leek-king-richard' },
-      { name: 'Blue Solaise', url: 'https://www.rareseeds.com/leek-blue-solaise' }
+      { name: 'King Richard', url: 'https://www.rareseeds.com/leek-king-richard' }
     ]
   },
   Lettuce: {
@@ -346,55 +343,53 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [4, 8],
     sowMethod: ['directSow', 'startIndoors'],
-    sowTiming: 'Direct sow in early spring or fall, start indoors 4-6 weeks before transplant',
-    height: 'short', companions: ['Carrot', 'Radish', 'Strawberry'], harvestDuration: 30,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    sowTiming: 'Direct sow in early spring or fall',
+    height: 'short', companions: ['Carrot', 'Radish', 'Onion'], harvestDuration: 30,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Black Seeded Simpson', url: 'https://www.rareseeds.com/lettuce-black-seeded-simpson' },
       { name: 'Buttercrunch', url: 'https://www.rareseeds.com/lettuce-buttercrunch' },
       { name: 'Forellenschluss', url: 'https://www.rareseeds.com/lettuce-forellenschluss' },
       { name: 'Grandpa Admire\'s', url: 'https://www.rareseeds.com/lettuce-grandpa-admires' },
-      { name: 'Iceberg', url: 'https://www.rareseeds.com/lettuce-iceberg' },
       { name: 'Jericho', url: 'https://www.rareseeds.com/lettuce-jericho' },
       { name: 'Little Gem', url: 'https://www.rareseeds.com/lettuce-little-gem' },
       { name: 'Lollo Rossa', url: 'https://www.rareseeds.com/lettuce-lollo-rossa' },
-      { name: 'Parris Island Cos', url: 'https://www.rareseeds.com/lettuce-parris-island-cos' },
-      { name: 'Red Romaine', url: 'https://www.rareseeds.com/lettuce-red-romaine' },
-      { name: 'Rouge d\'Hiver', url: 'https://www.rareseeds.com/lettuce-rouge-d-hiver' },
+      { name: 'Paris Island Cos', url: 'https://www.rareseeds.com/lettuce-paris-island-cos' },
+      { name: 'Red Sails', url: 'https://www.rareseeds.com/lettuce-red-sails' },
+      { name: 'Rouge d\'Hiver', url: 'https://www.rareseeds.com/lettuce-rouge-dhiver' },
+      { name: 'Speckled Amish', url: 'https://www.rareseeds.com/lettuce-speckled-amish' },
       { name: 'Tom Thumb', url: 'https://www.rareseeds.com/lettuce-tom-thumb' }
     ]
   },
   Melon: {
     category: 'vegetable',
     germination: [5, 10],
-    daysToMaturity: [75, 95],
+    daysToMaturity: [70, 90],
     frostHardy: false,
     sun: [8, 12],
-    sowMethod: ['startIndoors', 'directSow'],
-    sowTiming: 'Start indoors 3-4 weeks before last frost or direct sow after frost',
+    sowMethod: ['directSow', 'startIndoors'],
+    sowTiming: 'Start indoors 3-4 weeks before last frost or direct sow after',
     height: 'vine', companions: ['Corn', 'Sunflower', 'Radish'], harvestDuration: 30,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
-      { name: 'Banana', url: 'https://www.rareseeds.com/melon-banana' },
-      { name: 'Charentais', url: 'https://www.rareseeds.com/melon-charentais' },
       { name: 'Collective Farm Woman', url: 'https://www.rareseeds.com/melon-collective-farm-woman' },
-      { name: 'Delice de la Table', url: 'https://www.rareseeds.com/melon-delice-de-la-table' },
-      { name: 'Eden\'s Gem', url: 'https://www.rareseeds.com/melon-edens-gem' },
       { name: 'Hale\'s Best Jumbo', url: 'https://www.rareseeds.com/melon-hales-best-jumbo' },
       { name: 'Hearts of Gold', url: 'https://www.rareseeds.com/melon-hearts-of-gold' },
-      { name: 'Noir des Carmes', url: 'https://www.rareseeds.com/melon-noir-des-carmes' }
+      { name: 'Honeydew Green Flesh', url: 'https://www.rareseeds.com/melon-honeydew-green-flesh' },
+      { name: 'Minnesota Midget', url: 'https://www.rareseeds.com/melon-minnesota-midget' },
+      { name: 'Prescott Fond Blanc', url: 'https://www.rareseeds.com/melon-prescott-fond-blanc' }
     ]
   },
   Okra: {
     category: 'vegetable',
     germination: [7, 14],
-    daysToMaturity: [50, 65],
+    daysToMaturity: [55, 65],
     frostHardy: false,
     sun: [8, 12],
     sowMethod: ['directSow', 'startIndoors'],
     sowTiming: 'Direct sow after last frost or start indoors 4-6 weeks before',
     height: 'tall', companions: ['Pepper', 'Eggplant', 'Melon'], harvestDuration: 60,
-    deerResistant: true, soil: 'any', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: true, soil: 'any', moisture: 'moist',
     varieties: [
       { name: 'Burgundy', url: 'https://www.rareseeds.com/okra-burgundy' },
       { name: 'Clemson Spineless', url: 'https://www.rareseeds.com/okra-clemson-spineless' },
@@ -412,12 +407,11 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 10],
     sowMethod: ['startIndoors', 'directSow'],
-    sowTiming: 'Start indoors 8-10 weeks before last frost or direct sow in early spring',
+    sowTiming: 'Start indoors 8-10 weeks before last frost',
     height: 'short', companions: ['Carrot', 'Lettuce', 'Beet'], harvestDuration: 14,
-    deerResistant: true, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: true, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Ailsa Craig', url: 'https://www.rareseeds.com/onion-ailsa-craig' },
-      { name: 'Cipollini Red', url: 'https://www.rareseeds.com/onion-cipollini-red' },
       { name: 'Red Burgundy', url: 'https://www.rareseeds.com/onion-red-burgundy' },
       { name: 'Texas Early Grano', url: 'https://www.rareseeds.com/onion-texas-early-grano' },
       { name: 'Walla Walla', url: 'https://www.rareseeds.com/onion-walla-walla' },
@@ -431,9 +425,9 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['directSow'],
-    sowTiming: 'Direct sow in early spring as soon as soil can be worked',
-    height: 'short', companions: ['Radish', 'Onion', 'Lettuce'], harvestDuration: 30,
-    deerResistant: false, soil: 'sandy', moisture: 'moist', pollinators: [],
+    sowTiming: 'Direct sow in early spring',
+    height: 'medium', companions: ['Radish', 'Onion', 'Pea'], harvestDuration: 30,
+    deerResistant: false, soil: 'sandy', moisture: 'moist',
     varieties: [
       { name: 'All American', url: 'https://www.rareseeds.com/parsnip-all-american' },
       { name: 'Hollow Crown', url: 'https://www.rareseeds.com/parsnip-hollow-crown' },
@@ -447,20 +441,19 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['directSow'],
-    sowTiming: 'Direct sow 4-6 weeks before last frost',
+    sowTiming: 'Direct sow as soon as soil can be worked in spring',
     height: 'vine', companions: ['Carrot', 'Radish', 'Turnip'], harvestDuration: 21,
-    deerResistant: false, soil: 'any', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: false, soil: 'any', moisture: 'moist',
     varieties: [
       { name: 'Alaska', url: 'https://www.rareseeds.com/pea-alaska' },
-      { name: 'Blue Podded Blauwschokker', url: 'https://www.rareseeds.com/pea-blue-podded-blauwschokker' },
+      { name: 'Blue Podded', url: 'https://www.rareseeds.com/pea-blue-podded' },
       { name: 'Golden Sweet', url: 'https://www.rareseeds.com/pea-golden-sweet' },
+      { name: 'Green Arrow', url: 'https://www.rareseeds.com/pea-green-arrow' },
       { name: 'Lincoln', url: 'https://www.rareseeds.com/pea-lincoln' },
-      { name: 'Mammoth Melting Sugar', url: 'https://www.rareseeds.com/pea-mammoth-melting-sugar' },
-      { name: 'Oregon Sugar Pod II', url: 'https://www.rareseeds.com/pea-oregon-sugar-pod-ii' },
-      { name: 'Sugar Ann', url: 'https://www.rareseeds.com/pea-sugar-ann' },
-      { name: 'Tall Telephone', url: 'https://www.rareseeds.com/pea-tall-telephone' },
-      { name: 'Tom Thumb', url: 'https://www.rareseeds.com/pea-tom-thumb' },
-      { name: 'Wando', url: 'https://www.rareseeds.com/pea-wando' }
+      { name: 'Magnolia Blossom', url: 'https://www.rareseeds.com/pea-magnolia-blossom' },
+      { name: 'Oregon Sugar Pod', url: 'https://www.rareseeds.com/pea-oregon-sugar-pod' },
+      { name: 'Sugar Snap', url: 'https://www.rareseeds.com/pea-sugar-snap' },
+      { name: 'Tall Telephone', url: 'https://www.rareseeds.com/pea-tall-telephone' }
     ]
   },
   Pepper: {
@@ -468,53 +461,51 @@ export const VEGETABLE_DATABASE = {
     germination: [10, 21],
     daysToMaturity: [60, 90],
     frostHardy: false,
-    sun: [8, 12],
+    sun: [6, 10],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 8-10 weeks before last frost',
     height: 'medium', companions: ['Tomato', 'Basil', 'Carrot'], harvestDuration: 60,
-    deerResistant: true, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: true, soil: 'rich', moisture: 'moist',
     varieties: [
+      { name: 'Aji Amarillo', url: 'https://www.rareseeds.com/pepper-aji-amarillo' },
       { name: 'Anaheim', url: 'https://www.rareseeds.com/pepper-anaheim' },
-      { name: 'Bell California Wonder', url: 'https://www.rareseeds.com/pepper-bell-california-wonder' },
-      { name: 'Bull Nose', url: 'https://www.rareseeds.com/pepper-bull-nose' },
+      { name: 'Banana', url: 'https://www.rareseeds.com/pepper-banana' },
+      { name: 'Bulgarian Carrot', url: 'https://www.rareseeds.com/pepper-bulgarian-carrot' },
+      { name: 'California Wonder', url: 'https://www.rareseeds.com/pepper-california-wonder' },
       { name: 'Cayenne Long Slim', url: 'https://www.rareseeds.com/pepper-cayenne-long-slim' },
-      { name: 'Cherry Bomb', url: 'https://www.rareseeds.com/pepper-cherry-bomb' },
-      { name: 'Chocolate Beauty', url: 'https://www.rareseeds.com/pepper-chocolate-beauty' },
+      { name: 'Chocolate Habanero', url: 'https://www.rareseeds.com/pepper-chocolate-habanero' },
       { name: 'Fish', url: 'https://www.rareseeds.com/pepper-fish' },
       { name: 'Golden Marconi', url: 'https://www.rareseeds.com/pepper-golden-marconi' },
       { name: 'Habanero', url: 'https://www.rareseeds.com/pepper-habanero' },
-      { name: 'Hungarian Hot Wax', url: 'https://www.rareseeds.com/pepper-hungarian-hot-wax' },
       { name: 'Italian Sweet', url: 'https://www.rareseeds.com/pepper-italian-sweet' },
-      { name: 'Jalapeno', url: 'https://www.rareseeds.com/pepper-jalapeno' },
-      { name: 'Jimmy Nardello\'s', url: 'https://www.rareseeds.com/pepper-jimmy-nardellos' },
-      { name: 'King of the North', url: 'https://www.rareseeds.com/pepper-king-of-the-north' },
-      { name: 'Lemon Drop', url: 'https://www.rareseeds.com/pepper-lemon-drop' },
-      { name: 'Padron', url: 'https://www.rareseeds.com/pepper-padron' },
-      { name: 'Purple Beauty', url: 'https://www.rareseeds.com/pepper-purple-beauty' },
+      { name: 'Jalapeño', url: 'https://www.rareseeds.com/pepper-jalapeno' },
+      { name: 'Jimmy Nardello', url: 'https://www.rareseeds.com/pepper-jimmy-nardello' },
+      { name: 'Lunchbox Mix', url: 'https://www.rareseeds.com/pepper-lunchbox-mix' },
+      { name: 'Poblano', url: 'https://www.rareseeds.com/pepper-poblano' },
       { name: 'Serrano', url: 'https://www.rareseeds.com/pepper-serrano' },
       { name: 'Shishito', url: 'https://www.rareseeds.com/pepper-shishito' },
-      { name: 'Sweet Banana', url: 'https://www.rareseeds.com/pepper-sweet-banana' }
+      { name: 'Thai Hot', url: 'https://www.rareseeds.com/pepper-thai-hot' }
     ]
   },
   Pumpkin: {
     category: 'vegetable',
-    germination: [7, 10],
+    germination: [7, 14],
     daysToMaturity: [90, 120],
     frostHardy: false,
     sun: [6, 10],
-    sowMethod: ['directSow', 'startIndoors'],
-    sowTiming: 'Direct sow after last frost or start indoors 2-3 weeks before',
-    height: 'vine', companions: ['Corn', 'Bean', 'Sunflower'], harvestDuration: 14,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    sowMethod: ['directSow'],
+    sowTiming: 'Direct sow after last frost when soil is warm',
+    height: 'vine', companions: ['Corn', 'Bean', 'Radish'], harvestDuration: 14,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
-      { name: 'Connecticut Field', url: 'https://www.rareseeds.com/pumpkin-connecticut-field' },
+      { name: 'Atlantic Giant', url: 'https://www.rareseeds.com/pumpkin-atlantic-giant' },
+      { name: 'Blue Jarrahdale', url: 'https://www.rareseeds.com/pumpkin-blue-jarrahdale' },
       { name: 'Cinderella', url: 'https://www.rareseeds.com/pumpkin-cinderella' },
+      { name: 'Connecticut Field', url: 'https://www.rareseeds.com/pumpkin-connecticut-field' },
       { name: 'Jack Be Little', url: 'https://www.rareseeds.com/pumpkin-jack-be-little' },
-      { name: 'Jarrahdale', url: 'https://www.rareseeds.com/pumpkin-jarrahdale' },
       { name: 'Long Island Cheese', url: 'https://www.rareseeds.com/pumpkin-long-island-cheese' },
-      { name: 'Musquee de Provence', url: 'https://www.rareseeds.com/pumpkin-musquee-de-provence' },
-      { name: 'New England Pie', url: 'https://www.rareseeds.com/pumpkin-new-england-pie' },
-      { name: 'Rouge Vif d\'Etampes', url: 'https://www.rareseeds.com/pumpkin-rouge-vif-d-etampes' }
+      { name: 'Musquée de Provence', url: 'https://www.rareseeds.com/pumpkin-musquee-de-provence' },
+      { name: 'Small Sugar', url: 'https://www.rareseeds.com/pumpkin-small-sugar' }
     ]
   },
   Radish: {
@@ -522,17 +513,19 @@ export const VEGETABLE_DATABASE = {
     germination: [3, 7],
     daysToMaturity: [22, 35],
     frostHardy: true,
-    sun: [4, 8],
+    sun: [6, 8],
     sowMethod: ['directSow'],
     sowTiming: 'Direct sow in early spring or fall',
     height: 'short', companions: ['Carrot', 'Lettuce', 'Pea'], harvestDuration: 14,
-    deerResistant: false, soil: 'any', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'any', moisture: 'moist',
     varieties: [
       { name: 'Black Spanish Round', url: 'https://www.rareseeds.com/radish-black-spanish-round' },
       { name: 'Cherry Belle', url: 'https://www.rareseeds.com/radish-cherry-belle' },
       { name: 'China Rose', url: 'https://www.rareseeds.com/radish-china-rose' },
+      { name: 'Daikon Miyashige', url: 'https://www.rareseeds.com/radish-daikon-miyashige' },
       { name: 'Easter Egg', url: 'https://www.rareseeds.com/radish-easter-egg' },
       { name: 'French Breakfast', url: 'https://www.rareseeds.com/radish-french-breakfast' },
+      { name: 'Purple Plum', url: 'https://www.rareseeds.com/radish-purple-plum' },
       { name: 'Watermelon', url: 'https://www.rareseeds.com/radish-watermelon' },
       { name: 'White Icicle', url: 'https://www.rareseeds.com/radish-white-icicle' }
     ]
@@ -540,40 +533,42 @@ export const VEGETABLE_DATABASE = {
   Spinach: {
     category: 'vegetable',
     germination: [7, 14],
-    daysToMaturity: [35, 50],
+    daysToMaturity: [37, 50],
     frostHardy: true,
-    sun: [4, 6],
+    sun: [4, 8],
     sowMethod: ['directSow'],
-    sowTiming: 'Direct sow 4-6 weeks before last frost or in fall',
-    height: 'short', companions: ['Strawberry', 'Pea', 'Lettuce'], harvestDuration: 30,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    sowTiming: 'Direct sow in early spring or fall',
+    height: 'short', companions: ['Strawberry', 'Pea', 'Radish'], harvestDuration: 30,
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Bloomsdale Long Standing', url: 'https://www.rareseeds.com/spinach-bloomsdale-long-standing' },
       { name: 'Giant Noble', url: 'https://www.rareseeds.com/spinach-giant-noble' },
       { name: 'Malabar Red Stem', url: 'https://www.rareseeds.com/spinach-malabar-red-stem' },
+      { name: 'Matador', url: 'https://www.rareseeds.com/spinach-matador' },
       { name: 'New Zealand', url: 'https://www.rareseeds.com/spinach-new-zealand' },
-      { name: 'Viroflay', url: 'https://www.rareseeds.com/spinach-viroflay' }
+      { name: 'Red Cardinal', url: 'https://www.rareseeds.com/spinach-red-cardinal' }
     ]
   },
   Squash: {
     category: 'vegetable',
-    germination: [5, 10],
+    germination: [7, 14],
     daysToMaturity: [45, 60],
     frostHardy: false,
     sun: [6, 10],
-    sowMethod: ['directSow', 'startIndoors'],
-    sowTiming: 'Direct sow after last frost or start indoors 2-3 weeks before',
+    sowMethod: ['directSow'],
+    sowTiming: 'Direct sow after last frost when soil is warm',
     height: 'vine', companions: ['Corn', 'Bean', 'Radish'], harvestDuration: 45,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Black Beauty Zucchini', url: 'https://www.rareseeds.com/squash-black-beauty-zucchini' },
       { name: 'Blue Hubbard', url: 'https://www.rareseeds.com/squash-blue-hubbard' },
       { name: 'Butternut Waltham', url: 'https://www.rareseeds.com/squash-butternut-waltham' },
       { name: 'Costata Romanesco', url: 'https://www.rareseeds.com/squash-costata-romanesco' },
+      { name: 'Dark Star Zucchini', url: 'https://www.rareseeds.com/squash-dark-star-zucchini' },
       { name: 'Delicata', url: 'https://www.rareseeds.com/squash-delicata' },
       { name: 'Golden Scallop', url: 'https://www.rareseeds.com/squash-golden-scallop' },
       { name: 'Luffa', url: 'https://www.rareseeds.com/squash-luffa' },
-      { name: 'Pattypan', url: 'https://www.rareseeds.com/squash-pattypan' },
+      { name: 'Patty Pan', url: 'https://www.rareseeds.com/squash-patty-pan' },
       { name: 'Red Kuri', url: 'https://www.rareseeds.com/squash-red-kuri' },
       { name: 'Spaghetti', url: 'https://www.rareseeds.com/squash-spaghetti' },
       { name: 'Table Queen Acorn', url: 'https://www.rareseeds.com/squash-table-queen-acorn' },
@@ -588,16 +583,31 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['directSow', 'startIndoors'],
-    sowTiming: 'Direct sow 2-3 weeks before last frost or start indoors',
+    sowTiming: 'Direct sow 2-4 weeks before last frost',
     height: 'medium', companions: ['Bean', 'Cabbage', 'Onion'], harvestDuration: 60,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: [],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Bright Lights', url: 'https://www.rareseeds.com/swiss-chard-bright-lights' },
       { name: 'Fordhook Giant', url: 'https://www.rareseeds.com/swiss-chard-fordhook-giant' },
-      { name: 'Lucullus', url: 'https://www.rareseeds.com/swiss-chard-lucullus' },
       { name: 'Peppermint', url: 'https://www.rareseeds.com/swiss-chard-peppermint' },
-      { name: 'Rainbow', url: 'https://www.rareseeds.com/swiss-chard-rainbow' },
-      { name: 'Rhubarb', url: 'https://www.rareseeds.com/swiss-chard-rhubarb' }
+      { name: 'Rhubarb', url: 'https://www.rareseeds.com/swiss-chard-rhubarb' },
+      { name: 'Ruby Red', url: 'https://www.rareseeds.com/swiss-chard-ruby-red' }
+    ]
+  },
+  Tomatillo: {
+    category: 'vegetable',
+    germination: [7, 14],
+    daysToMaturity: [60, 75],
+    frostHardy: false,
+    sun: [6, 10],
+    sowMethod: ['startIndoors'],
+    sowTiming: 'Start indoors 6-8 weeks before last frost',
+    height: 'medium', companions: ['Pepper', 'Basil', 'Carrot'], harvestDuration: 45,
+    deerResistant: true, soil: 'any', moisture: 'moist',
+    varieties: [
+      { name: 'Grande Rio Verde', url: 'https://www.rareseeds.com/tomatillo-grande-rio-verde' },
+      { name: 'Purple', url: 'https://www.rareseeds.com/tomatillo-purple' },
+      { name: 'Purple de Milpa', url: 'https://www.rareseeds.com/tomatillo-purple-de-milpa' }
     ]
   },
   Tomato: {
@@ -605,13 +615,14 @@ export const VEGETABLE_DATABASE = {
     germination: [7, 14],
     daysToMaturity: [60, 85],
     frostHardy: false,
-    sun: [8, 12],
+    sun: [6, 10],
     sowMethod: ['startIndoors'],
     sowTiming: 'Start indoors 6-8 weeks before last frost',
     height: 'tall', companions: ['Basil', 'Carrot', 'Pepper'], harvestDuration: 75,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
       { name: 'Amish Paste', url: 'https://www.rareseeds.com/tomato-amish-paste' },
+      { name: 'Beefsteak', url: 'https://www.rareseeds.com/tomato-beefsteak' },
       { name: 'Black Cherry', url: 'https://www.rareseeds.com/tomato-black-cherry' },
       { name: 'Black Krim', url: 'https://www.rareseeds.com/tomato-black-krim' },
       { name: 'Brandywine Pink', url: 'https://www.rareseeds.com/tomato-brandywine-pink' },
@@ -620,13 +631,11 @@ export const VEGETABLE_DATABASE = {
       { name: 'German Johnson', url: 'https://www.rareseeds.com/tomato-german-johnson' },
       { name: 'Gold Medal', url: 'https://www.rareseeds.com/tomato-gold-medal' },
       { name: 'Green Zebra', url: 'https://www.rareseeds.com/tomato-green-zebra' },
-      { name: 'Hillbilly', url: 'https://www.rareseeds.com/tomato-hillbilly' },
       { name: 'Japanese Black Trifele', url: 'https://www.rareseeds.com/tomato-japanese-black-trifele' },
       { name: 'Mortgage Lifter', url: 'https://www.rareseeds.com/tomato-mortgage-lifter' },
-      { name: 'Mr. Stripey', url: 'https://www.rareseeds.com/tomato-mr-stripey' },
+      { name: 'Oxheart', url: 'https://www.rareseeds.com/tomato-oxheart' },
       { name: 'Pineapple', url: 'https://www.rareseeds.com/tomato-pineapple' },
-      { name: 'Roma', url: 'https://www.rareseeds.com/tomato-roma' },
-      { name: 'Rutgers', url: 'https://www.rareseeds.com/tomato-rutgers' },
+      { name: 'Roma VF', url: 'https://www.rareseeds.com/tomato-roma-vf' },
       { name: 'San Marzano', url: 'https://www.rareseeds.com/tomato-san-marzano' },
       { name: 'Stupice', url: 'https://www.rareseeds.com/tomato-stupice' },
       { name: 'Sun Gold', url: 'https://www.rareseeds.com/tomato-sun-gold' },
@@ -640,35 +649,35 @@ export const VEGETABLE_DATABASE = {
     frostHardy: true,
     sun: [6, 8],
     sowMethod: ['directSow'],
-    sowTiming: 'Direct sow in early spring or late summer for fall harvest',
-    height: 'short', companions: ['Pea', 'Lettuce', 'Onion'], harvestDuration: 21,
-    deerResistant: false, soil: 'any', moisture: 'moist', pollinators: [],
+    sowTiming: 'Direct sow in early spring or late summer',
+    height: 'short', companions: ['Pea', 'Onion', 'Lettuce'], harvestDuration: 21,
+    deerResistant: false, soil: 'any', moisture: 'moist',
     varieties: [
       { name: 'Golden Globe', url: 'https://www.rareseeds.com/turnip-golden-globe' },
       { name: 'Purple Top White Globe', url: 'https://www.rareseeds.com/turnip-purple-top-white-globe' },
       { name: 'Scarlet Queen', url: 'https://www.rareseeds.com/turnip-scarlet-queen' },
-      { name: 'Tokyo Cross', url: 'https://www.rareseeds.com/turnip-tokyo-cross' }
+      { name: 'Shogoin', url: 'https://www.rareseeds.com/turnip-shogoin' },
+      { name: 'White Egg', url: 'https://www.rareseeds.com/turnip-white-egg' }
     ]
   },
   Watermelon: {
     category: 'vegetable',
     germination: [5, 10],
-    daysToMaturity: [70, 95],
+    daysToMaturity: [70, 90],
     frostHardy: false,
     sun: [8, 12],
-    sowMethod: ['startIndoors', 'directSow'],
-    sowTiming: 'Start indoors 3-4 weeks before last frost or direct sow after frost',
+    sowMethod: ['directSow', 'startIndoors'],
+    sowTiming: 'Start indoors 3-4 weeks before last frost or direct sow after',
     height: 'vine', companions: ['Corn', 'Sunflower', 'Radish'], harvestDuration: 21,
-    deerResistant: false, soil: 'rich', moisture: 'moist', pollinators: ['bee'],
+    deerResistant: false, soil: 'rich', moisture: 'moist',
     varieties: [
-      { name: 'Ali Baba', url: 'https://www.rareseeds.com/watermelon-ali-baba' },
       { name: 'Black Diamond', url: 'https://www.rareseeds.com/watermelon-black-diamond' },
       { name: 'Charleston Gray', url: 'https://www.rareseeds.com/watermelon-charleston-gray' },
       { name: 'Crimson Sweet', url: 'https://www.rareseeds.com/watermelon-crimson-sweet' },
       { name: 'Moon and Stars', url: 'https://www.rareseeds.com/watermelon-moon-and-stars' },
       { name: 'Orangeglo', url: 'https://www.rareseeds.com/watermelon-orangeglo' },
       { name: 'Sugar Baby', url: 'https://www.rareseeds.com/watermelon-sugar-baby' },
-      { name: 'Tom Watson', url: 'https://www.rareseeds.com/watermelon-tom-watson' }
+      { name: 'Yellow Crimson', url: 'https://www.rareseeds.com/watermelon-yellow-crimson' }
     ]
   }
 };
