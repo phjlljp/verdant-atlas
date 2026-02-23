@@ -158,6 +158,8 @@ export default function App() {
   }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy, filterDeer, filterPollinator, filterCategory]);
 
   const totalVarieties = useMemo(() => filtered.reduce((sum, sd) => sum + sd.varieties.length, 0), [filtered]);
+  const flowerCount = useMemo(() => filtered.filter(sd => sd.category === 'flower').length, [filtered]);
+  const vegetableCount = useMemo(() => filtered.filter(sd => sd.category === 'vegetable').length, [filtered]);
 
   // --- Sorting ---
   const sortedFiltered = useMemo(() => {
@@ -442,6 +444,8 @@ export default function App() {
           onDashboardItemClick={handleDashboardItemClick}
           totalVarieties={totalVarieties}
           filteredCount={filtered.length}
+          flowerCount={flowerCount}
+          vegetableCount={vegetableCount}
           todayDoy={todayDoy}
           dm={dm}
         />

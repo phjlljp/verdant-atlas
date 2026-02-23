@@ -24,6 +24,8 @@ export default function Header({
   // Stats
   totalVarieties,
   filteredCount,
+  flowerCount,
+  vegetableCount,
   // Today
   todayDoy,
   // Theme
@@ -36,7 +38,7 @@ export default function Header({
           <div>
             <h1 className="font-bold" style={{ fontSize: '20px', letterSpacing: '4px', textTransform: 'uppercase', color: '#fff' }}>VERDANT ATLAS</h1>
             <p style={{ fontWeight: 400, color: '#94a3b8', letterSpacing: '3px', fontSize: '11px', textTransform: 'uppercase' }}>Planting Calendar</p>
-            <p className="mt-1" style={{ fontWeight: 400, color: '#64748b', letterSpacing: '1px', fontSize: '11px' }}>Zone 5b &middot; {totalVarieties} varieties, {filteredCount} species</p>
+            <p className="mt-1" style={{ fontWeight: 400, color: '#64748b', letterSpacing: '1px', fontSize: '11px' }}>Zone 5b &middot; {flowerCount} flowers, {vegetableCount} vegetables, {totalVarieties} varieties</p>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ fontSize: '11px' }}>
               {/* Last frost controls */}
               <div className="flex items-center gap-2">
