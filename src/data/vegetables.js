@@ -1,6 +1,7 @@
 export const VEGETABLE_DATABASE = {
   Artichoke: {
     category: 'vegetable',
+    type: 'perennial',
     germination: [10, 21],
     daysToMaturity: [150, 180],
     frostHardy: false,
@@ -18,6 +19,7 @@ export const VEGETABLE_DATABASE = {
   },
   Asparagus: {
     category: 'vegetable',
+    type: 'perennial',
     germination: [14, 28],
     daysToMaturity: [730, 1095],
     frostHardy: true,
@@ -34,6 +36,7 @@ export const VEGETABLE_DATABASE = {
   },
   Bean: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [50, 70],
     frostHardy: false,
@@ -67,6 +70,7 @@ export const VEGETABLE_DATABASE = {
   },
   Beet: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [50, 65],
     frostHardy: true,
@@ -87,6 +91,7 @@ export const VEGETABLE_DATABASE = {
   },
   Broccoli: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [60, 90],
     frostHardy: true,
@@ -105,6 +110,7 @@ export const VEGETABLE_DATABASE = {
   },
   'Brussels Sprout': {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [90, 120],
     frostHardy: true,
@@ -121,6 +127,7 @@ export const VEGETABLE_DATABASE = {
   },
   Cabbage: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [65, 95],
     frostHardy: true,
@@ -140,6 +147,7 @@ export const VEGETABLE_DATABASE = {
   },
   Carrot: {
     category: 'vegetable',
+    type: 'annual',
     germination: [14, 21],
     daysToMaturity: [60, 80],
     frostHardy: true,
@@ -166,6 +174,7 @@ export const VEGETABLE_DATABASE = {
   },
   Cauliflower: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [55, 80],
     frostHardy: true,
@@ -184,6 +193,7 @@ export const VEGETABLE_DATABASE = {
   },
   Celery: {
     category: 'vegetable',
+    type: 'annual',
     germination: [14, 21],
     daysToMaturity: [80, 120],
     frostHardy: true,
@@ -201,6 +211,7 @@ export const VEGETABLE_DATABASE = {
   },
   Corn: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [60, 100],
     frostHardy: false,
@@ -222,6 +233,7 @@ export const VEGETABLE_DATABASE = {
   },
   Cucumber: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [50, 70],
     frostHardy: false,
@@ -247,6 +259,7 @@ export const VEGETABLE_DATABASE = {
   },
   Eggplant: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [65, 85],
     frostHardy: false,
@@ -267,6 +280,7 @@ export const VEGETABLE_DATABASE = {
   },
   Garlic: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [90, 120],
     frostHardy: true,
@@ -285,6 +299,7 @@ export const VEGETABLE_DATABASE = {
   },
   Kale: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [50, 65],
     frostHardy: true,
@@ -305,6 +320,7 @@ export const VEGETABLE_DATABASE = {
   },
   Kohlrabi: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [45, 60],
     frostHardy: true,
@@ -321,6 +337,7 @@ export const VEGETABLE_DATABASE = {
   },
   Leek: {
     category: 'vegetable',
+    type: 'annual',
     germination: [10, 14],
     daysToMaturity: [80, 120],
     frostHardy: true,
@@ -338,6 +355,7 @@ export const VEGETABLE_DATABASE = {
   },
   Lettuce: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [30, 60],
     frostHardy: true,
@@ -363,6 +381,7 @@ export const VEGETABLE_DATABASE = {
   },
   Melon: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [70, 90],
     frostHardy: false,
@@ -382,6 +401,7 @@ export const VEGETABLE_DATABASE = {
   },
   Okra: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [55, 65],
     frostHardy: false,
@@ -402,6 +422,7 @@ export const VEGETABLE_DATABASE = {
   },
   Onion: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [90, 120],
     frostHardy: true,
@@ -420,6 +441,7 @@ export const VEGETABLE_DATABASE = {
   },
   Parsnip: {
     category: 'vegetable',
+    type: 'annual',
     germination: [14, 28],
     daysToMaturity: [100, 130],
     frostHardy: true,
@@ -436,6 +458,7 @@ export const VEGETABLE_DATABASE = {
   },
   Pea: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [55, 70],
     frostHardy: true,
@@ -458,6 +481,7 @@ export const VEGETABLE_DATABASE = {
   },
   Pepper: {
     category: 'vegetable',
+    type: 'annual',
     germination: [10, 21],
     daysToMaturity: [60, 90],
     frostHardy: false,
@@ -489,6 +513,7 @@ export const VEGETABLE_DATABASE = {
   },
   Pumpkin: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [90, 120],
     frostHardy: false,
@@ -510,6 +535,7 @@ export const VEGETABLE_DATABASE = {
   },
   Radish: {
     category: 'vegetable',
+    type: 'annual',
     germination: [3, 7],
     daysToMaturity: [22, 35],
     frostHardy: true,
@@ -532,6 +558,7 @@ export const VEGETABLE_DATABASE = {
   },
   Spinach: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [37, 50],
     frostHardy: true,
@@ -551,6 +578,7 @@ export const VEGETABLE_DATABASE = {
   },
   Squash: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [45, 60],
     frostHardy: false,
@@ -578,6 +606,7 @@ export const VEGETABLE_DATABASE = {
   },
   'Swiss Chard': {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [50, 60],
     frostHardy: true,
@@ -596,6 +625,7 @@ export const VEGETABLE_DATABASE = {
   },
   Tomatillo: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [60, 75],
     frostHardy: false,
@@ -612,6 +642,7 @@ export const VEGETABLE_DATABASE = {
   },
   Tomato: {
     category: 'vegetable',
+    type: 'annual',
     germination: [7, 14],
     daysToMaturity: [60, 85],
     frostHardy: false,
@@ -644,6 +675,7 @@ export const VEGETABLE_DATABASE = {
   },
   Turnip: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [35, 60],
     frostHardy: true,
@@ -662,6 +694,7 @@ export const VEGETABLE_DATABASE = {
   },
   Watermelon: {
     category: 'vegetable',
+    type: 'annual',
     germination: [5, 10],
     daysToMaturity: [70, 90],
     frostHardy: false,
