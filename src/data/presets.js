@@ -16,4 +16,8 @@ export const GARDEN_PRESETS = [
   { name: 'Cut Flower Bouquets', icon: '💐', species: ['Zinnia', 'Cosmos', 'Snapdragon', 'Stock', 'Bachelor\'s Button'] },
   { name: 'Shade Tolerant', icon: '🌿', species: ['Foxglove', 'Columbine', 'Bleeding Heart', 'Forget-Me-Not'] },
   { name: 'Continuous Bloom', icon: '🌸', species: ['Calendula', 'Cosmos', 'Zinnia', 'Marigold', 'Snapdragon', 'Aster'] },
+  { name: 'Salad Garden', icon: '🥬', species: ['Lettuce', 'Spinach', 'Arugula', 'Radish', 'Cucumber'] },
+  { name: 'Salsa Garden', icon: '🌶', species: ['Tomato', 'Pepper', 'Onion', 'Cilantro', 'Jalapeño'] },
+  { name: 'Root Vegetable Garden', icon: '🥕', species: ['Carrot', 'Beet', 'Turnip', 'Radish', 'Parsnip'] },
+  { name: 'Summer Vegetable Garden', icon: '🍅', species: ['Tomato', 'Zucchini', 'Cucumber', 'Bean', 'Pepper'] },
 ];

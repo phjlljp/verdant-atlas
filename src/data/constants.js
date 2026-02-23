@@ -14,6 +14,8 @@ export const PHASE_COLORS = {
   germination: { bg: '#84cc16', label: 'Germination' },
   growing: { bg: '#a3e635', label: 'Growing' },
   bloom: { bg: '#ec4899', label: 'Bloom' },
+  harvest: { bg: '#f97316', label: 'Harvest' },
+  'post-harvest': { bg: '#78716c', label: 'Post-Harvest' },
   decline: { bg: '#f59e0b', label: 'Decline/Frost Kill' },
   dormant: { bg: '#f1f5f9', label: 'Dormant' }
 };
@@ -26,6 +28,8 @@ export const PHASE_TIPS = {
   germination: 'Seeds sprouting. Keep soil moist.',
   growing: 'Plants establishing. Water & feed.',
   bloom: 'Flowers open. Deadhead to extend.',
+  harvest: 'Fruits/vegetables ready to pick.',
+  'post-harvest': 'Clean up spent plants. Amend soil.',
   decline: 'Season ending. Collect seeds.'
 };
 
