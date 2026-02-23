@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { FLOWER_DATABASE } from './data/flowers.js';
+import { VEGETABLE_DATABASE } from './data/vegetables.js';
 import { getImageUrl } from './data/images.js';
 import { calcTimeline, getCountdown } from './utils/timeline.js';
 import { doy, formatDoy } from './utils/dates.js';
@@ -36,6 +37,7 @@ export default function App() {
     filterMyGarden, setFilterMyGarden, filterDeer, setFilterDeer,
     filterPollinator, setFilterPollinator, sortBy, setSortBy,
     viewMode, setViewMode, hasActiveFilters, clearAllFilters,
+    filterCategory, setFilterCategory,
   } = filters;
 
   const frost = useFrostDates();
@@ -75,13 +77,30 @@ export default function App() {
         name: v.name, url: v.url, img: getImageUrl(v.url),
       }));
       result.push({
-        species, type: sd.type, germination: sd.germination,
+        species, category: 'flower', type: sd.type, germination: sd.germination,
         bloomDays: sd.bloomDays || [60, 90], frostHardy: sd.frostHardy,
         sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun,
         bloomColor: sd.bloomColor, height: sd.height, flag: sd.flag,
         zoneRange: sd.zoneRange, companions: sd.companions || [],
         bloomDuration: sd.bloomDuration, firstYearBloom: sd.firstYearBloom,
         deerResistant: sd.deerResistant, pollinators: sd.pollinators || [],
+        soil: sd.soil, moisture: sd.moisture,
+        tl, varieties,
+      });
+    });
+    Object.entries(VEGETABLE_DATABASE).forEach(([species, sd]) => {
+      const tl = calcTimeline(sd, customMidcoast);
+      const varieties = sd.varieties.map(v => ({
+        name: v.name, url: v.url, img: getImageUrl(v.url),
+      }));
+      result.push({
+        species, category: 'vegetable', type: sd.category || 'vegetable',
+        germination: sd.germination,
+        daysToMaturity: sd.daysToMaturity, frostHardy: sd.frostHardy,
+        sowMethod: sd.sowMethod, sowTiming: sd.sowTiming, sun: sd.sun,
+        height: sd.height, companions: sd.companions || [],
+        harvestDuration: sd.harvestDuration,
+        deerResistant: sd.deerResistant,
         soil: sd.soil, moisture: sd.moisture,
         tl, varieties,
       });
@@ -133,11 +152,14 @@ export default function App() {
       if (filterDeer === 'resistant' && !sd.deerResistant) return false;
       if (filterDeer === 'vulnerable' && sd.deerResistant) return false;
       if (filterPollinator !== 'all' && (!sd.pollinators || !sd.pollinators.includes(filterPollinator))) return false;
+      if (filterCategory !== 'all' && sd.category !== filterCategory) return false;
       return true;
     });
-  }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy, filterDeer, filterPollinator]);
+  }, [speciesData, searchTerm, filterSow, filterType, filterPlantNow, filterBloomNow, filterMyGarden, myGarden, filterHeight, filterColorFamily, todayDoy, filterDeer, filterPollinator, filterCategory]);
 
   const totalVarieties = useMemo(() => filtered.reduce((sum, sd) => sum + sd.varieties.length, 0), [filtered]);
+  const flowerCount = useMemo(() => filtered.filter(sd => sd.category === 'flower').length, [filtered]);
+  const vegetableCount = useMemo(() => filtered.filter(sd => sd.category === 'vegetable').length, [filtered]);
 
   // --- Sorting ---
   const sortedFiltered = useMemo(() => {
@@ -326,16 +348,18 @@ export default function App() {
   }, []);
 
   // --- Garden actions ---
+  const mergedDatabase = useMemo(() => ({ ...FLOWER_DATABASE, ...VEGETABLE_DATABASE }), []);
+
   const handleCopyList = useCallback(() => {
-    copyShoppingList(myGarden, FLOWER_DATABASE).then(() => {
+    copyShoppingList(myGarden, mergedDatabase).then(() => {
       setCopiedList(true);
       setTimeout(() => setCopiedList(false), 2000);
     });
-  }, [myGarden]);
+  }, [myGarden, mergedDatabase]);
 
   const handleExportCSV = useCallback(() => {
-    exportCSV(myGarden, FLOWER_DATABASE, customMidcoast);
-  }, [myGarden, customMidcoast]);
+    exportCSV(myGarden, mergedDatabase, customMidcoast);
+  }, [myGarden, mergedDatabase, customMidcoast]);
 
   const handleDownloadCalendar = useCallback(() => {
     downloadICSCalendar(myGarden, speciesData);
@@ -420,6 +444,8 @@ export default function App() {
           onDashboardItemClick={handleDashboardItemClick}
           totalVarieties={totalVarieties}
           filteredCount={filtered.length}
+          flowerCount={flowerCount}
+          vegetableCount={vegetableCount}
           todayDoy={todayDoy}
           dm={dm}
         />
@@ -437,6 +463,7 @@ export default function App() {
         filterMyGarden={filterMyGarden} setFilterMyGarden={setFilterMyGarden}
         filterDeer={filterDeer} setFilterDeer={setFilterDeer}
         filterPollinator={filterPollinator} setFilterPollinator={setFilterPollinator}
+        filterCategory={filterCategory} setFilterCategory={setFilterCategory}
         sortBy={sortBy} setSortBy={setSortBy}
         hasActiveFilters={hasActiveFilters}
         clearAllFilters={clearAllFilters}

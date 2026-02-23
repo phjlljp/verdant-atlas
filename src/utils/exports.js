@@ -19,7 +19,7 @@ export function copyShoppingList(myGarden, flowerDatabase) {
 }
 
 export function exportCSV(myGarden, flowerDatabase, midcoast) {
-  const headers = ['Species', 'Variety', 'Type', 'Height', 'Indoor Start', 'Transplant', 'Direct Sow', 'Bloom Start', 'Bloom End', 'Deer Resistant', 'Pollinators', 'URL'];
+  const headers = ['Species', 'Variety', 'Category', 'Type', 'Height', 'Indoor Start', 'Transplant', 'Direct Sow', 'Bloom Start', 'Bloom End', 'Harvest Start', 'Harvest End', 'Deer Resistant', 'Pollinators', 'URL'];
   const rows = [];
   Object.keys(myGarden).sort().forEach(key => {
     const [species, variety] = key.split('||');
@@ -29,16 +29,20 @@ export function exportCSV(myGarden, flowerDatabase, midcoast) {
     const v = sd.varieties.find(vr => vr.name === variety);
     if (!v) return;
     const tl = calcTimeline(sd, midcoast);
+    const isVegetable = !!sd.daysToMaturity;
     rows.push([
       species,
       variety,
-      sd.type,
+      isVegetable ? 'Vegetable' : 'Flower',
+      sd.type || sd.category || '',
       HEIGHT_LABELS[sd.height] || '',
       tl.indoorStart ? formatDoy(tl.indoorStart) : '',
       tl.transplant ? formatDoy(tl.transplant) : '',
       tl.sowStart ? formatDoy(tl.sowStart) : '',
-      formatDoy(tl.bloomStart),
-      formatDoy(tl.bloomEnd),
+      tl.bloomStart ? formatDoy(tl.bloomStart) : '',
+      tl.bloomEnd ? formatDoy(tl.bloomEnd) : '',
+      tl.harvestStart ? formatDoy(tl.harvestStart) : '',
+      tl.harvestEnd ? formatDoy(tl.harvestEnd) : '',
       sd.deerResistant ? 'Yes' : 'No',
       (sd.pollinators || []).join('; '),
       v.url
@@ -86,6 +90,13 @@ export function downloadICSCalendar(myGarden, speciesData) {
         summary: `Expected Bloom: ${species}`,
         description: `${species} should begin blooming`,
         date: doyToICSDate(tl.bloomStart)
+      });
+    }
+    if (tl.harvestStart) {
+      events.push({
+        summary: `Harvest Begins: ${species}`,
+        description: `${species} should be ready to harvest`,
+        date: doyToICSDate(tl.harvestStart)
       });
     }
   });

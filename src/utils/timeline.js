@@ -1,6 +1,9 @@
 export function calcTimeline(sd, midcoast) {
   const germDays = Math.round((sd.germination[0] + sd.germination[1]) / 2);
-  const bloomDays = sd.bloomDays ? Math.round((sd.bloomDays[0] + sd.bloomDays[1]) / 2) : 75;
+  const isVegetable = !!sd.daysToMaturity;
+  const maturityDays = isVegetable
+    ? Math.round((sd.daysToMaturity[0] + sd.daysToMaturity[1]) / 2)
+    : (sd.bloomDays ? Math.round((sd.bloomDays[0] + sd.bloomDays[1]) / 2) : 75);
   const t = {};
   if (sd.sowMethod.includes('startIndoors')) {
     t.indoorStart = midcoast.lastFrost - 56; // 8 weeks before
@@ -21,14 +24,23 @@ export function calcTimeline(sd, midcoast) {
   const effectiveSow = t.transplant || t.sowStart || midcoast.lastFrost;
   t.germStart = effectiveSow;
   t.germEnd = effectiveSow + germDays;
-  t.bloomStart = effectiveSow + bloomDays;
-  const duration = sd.bloomDuration || 60;
-  t.bloomEnd = Math.min(effectiveSow + bloomDays + duration, sd.type === 'annual' ? midcoast.firstFrost : midcoast.firstFrost + 14);
+  if (isVegetable) {
+    t.harvestStart = effectiveSow + maturityDays;
+    const duration = sd.harvestDuration || 60;
+    t.harvestEnd = Math.min(effectiveSow + maturityDays + duration, sd.type === 'annual' ? midcoast.firstFrost : midcoast.firstFrost + 14);
+  } else {
+    t.bloomStart = effectiveSow + maturityDays;
+    const duration = sd.bloomDuration || 60;
+    t.bloomEnd = Math.min(effectiveSow + maturityDays + duration, sd.type === 'annual' ? midcoast.firstFrost : midcoast.firstFrost + 14);
+  }
   t.seasonEnd = sd.type === 'annual' ? midcoast.firstFrost : 334;
   return t;
 }
 
 export function getPhaseAtDoy(tl, dayOfYear) {
+  const peakStart = tl.harvestStart || tl.bloomStart;
+  const peakEnd = tl.harvestEnd || tl.bloomEnd;
+  const peakPhase = tl.harvestStart ? 'harvest' : 'bloom';
   // Indoor phase: from indoorStart until harden start
   if (tl.indoorStart && tl.hardenStart && dayOfYear >= tl.indoorStart && dayOfYear < tl.hardenStart) return 'indoor';
   // Indoor-only (no transplant): use indoorEnd
@@ -42,21 +54,24 @@ export function getPhaseAtDoy(tl, dayOfYear) {
   if (tl.sowStart && tl.transplant && dayOfYear >= tl.sowStart && dayOfYear <= tl.sowEnd) return 'sow';
   // Germination (fallback if not covered by transplant/sow above)
   if (dayOfYear >= tl.germStart && dayOfYear < tl.germEnd) return 'germination';
-  // Vegetative growth: germination done, waiting for bloom
-  if (dayOfYear >= tl.germEnd && dayOfYear < tl.bloomStart) return 'growing';
-  // Bloom
-  if (dayOfYear >= tl.bloomStart && dayOfYear <= tl.bloomEnd) return 'bloom';
+  // Vegetative growth: germination done, waiting for bloom/harvest
+  if (dayOfYear >= tl.germEnd && dayOfYear < peakStart) return 'growing';
+  // Bloom or Harvest
+  if (dayOfYear >= peakStart && dayOfYear <= peakEnd) return peakPhase;
   // Decline / frost kill
-  if (dayOfYear > tl.bloomEnd && dayOfYear <= tl.seasonEnd) return 'decline';
+  if (dayOfYear > peakEnd && dayOfYear <= tl.seasonEnd) return 'decline';
   return 'dormant';
 }
 
 export function getCountdown(tl, todayDoy) {
+  const isVegetable = !!tl.harvestStart;
   const actions = [
     tl.indoorStart && { doy: tl.indoorStart, label: 'Start indoors' },
     tl.transplant && { doy: tl.transplant, label: 'Transplant' },
     tl.sowStart && { doy: tl.sowStart, label: 'Sow' },
-    { doy: tl.bloomStart, label: 'Bloom' }
+    isVegetable
+      ? { doy: tl.harvestStart, label: 'Harvest' }
+      : tl.bloomStart && { doy: tl.bloomStart, label: 'Bloom' }
   ].filter(Boolean);
   // Find the nearest future action
   const future = actions.filter(a => a.doy > todayDoy).sort((a, b) => a.doy - b.doy);
@@ -75,6 +90,7 @@ export const PHASE_COLORS = {
   germination: { bg: '#84cc16', label: 'Germination' },
   growing: { bg: '#a3e635', label: 'Growing' },
   bloom: { bg: '#ec4899', label: 'Bloom' },
+  harvest: { bg: '#f97316', label: 'Harvest' },
   decline: { bg: '#f59e0b', label: 'Decline/Frost Kill' },
   dormant: { bg: '#f1f5f9', label: 'Dormant' }
 };

@@ -21,8 +21,10 @@ export default function FilterDropdowns({
   filterDeer, setFilterDeer,
   filterPollinator, setFilterPollinator,
   sortBy, setSortBy,
+  filterCategory,
   dm,
 }) {
+  const isVegetables = filterCategory === 'vegetables';
   const style = selectStyle(dm);
 
   return (
@@ -36,6 +38,7 @@ export default function FilterDropdowns({
         <option value="all">All types</option>
         <option value="annual">Annual</option>
         <option value="perennial">Perennial</option>
+        {isVegetables && <option value="biennial">Biennial</option>}
       </select>
       <select value={filterHeight} onChange={e => setFilterHeight(e.target.value)} className={selectClass} style={style}>
         <option value="all">All heights</option>
@@ -45,22 +48,26 @@ export default function FilterDropdowns({
         <option value="tall">Tall (36-60&quot;)</option>
         <option value="vine">Vine</option>
       </select>
-      <select value={filterColorFamily} onChange={e => setFilterColorFamily(e.target.value)} className={selectClass} style={style}>
-        {Object.entries(COLOR_FAMILIES).map(([k, v]) => (
-          <option key={k} value={k}>{v}</option>
-        ))}
-      </select>
+      {!isVegetables && (
+        <select value={filterColorFamily} onChange={e => setFilterColorFamily(e.target.value)} className={selectClass} style={style}>
+          {Object.entries(COLOR_FAMILIES).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>
+      )}
       <select value={filterDeer} onChange={e => setFilterDeer(e.target.value)} className={selectClass} style={style}>
         <option value="all">All deer</option>
         <option value="resistant">Deer resistant</option>
         <option value="vulnerable">Deer vulnerable</option>
       </select>
-      <select value={filterPollinator} onChange={e => setFilterPollinator(e.target.value)} className={selectClass} style={style}>
-        <option value="all">All pollinators</option>
-        <option value="bee">Bee friendly</option>
-        <option value="butterfly">Butterfly</option>
-        <option value="hummingbird">Hummingbird</option>
-      </select>
+      {!isVegetables && (
+        <select value={filterPollinator} onChange={e => setFilterPollinator(e.target.value)} className={selectClass} style={style}>
+          <option value="all">All pollinators</option>
+          <option value="bee">Bee friendly</option>
+          <option value="butterfly">Butterfly</option>
+          <option value="hummingbird">Hummingbird</option>
+        </select>
+      )}
       <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={selectClass} style={style}>
         <option value="alpha">Sort: A-Z</option>
         <option value="sowDate">Sort: Sow date</option>

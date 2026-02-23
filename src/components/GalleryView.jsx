@@ -5,7 +5,7 @@ function getVarietySlug(species, variety) {
   return (variety || species).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-function GalleryCard({ species, variety, slug }) {
+function GalleryCard({ species, variety, slug, isVegetable }) {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   const imagePath = IMAGE_MAP[slug];
@@ -38,7 +38,7 @@ function GalleryCard({ species, variety, slug }) {
           </>
         ) : (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '24px' }}>
-            🌸
+            {isVegetable ? '🥬' : '🌸'}
           </div>
         )}
       </div>
@@ -59,7 +59,7 @@ export default function GalleryView({ sortedFiltered }) {
       sd.varieties.forEach(v => {
         const slug = getVarietySlug(sd.species, v.name);
         if (IMAGE_MAP[slug]) {
-          result.push({ species: sd.species, variety: v.name, slug });
+          result.push({ species: sd.species, variety: v.name, slug, isVegetable: sd.category === 'vegetable' });
         }
       });
     });
@@ -88,6 +88,7 @@ export default function GalleryView({ sortedFiltered }) {
             species={item.species}
             variety={item.variety}
             slug={item.slug}
+            isVegetable={item.isVegetable}
           />
         ))}
       </div>

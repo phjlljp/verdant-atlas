@@ -21,6 +21,7 @@ export function useFilters() {
   const [filterMyGarden, setFilterMyGarden] = useState(false);
   const [filterDeer, setFilterDeer] = useState('all');
   const [filterPollinator, setFilterPollinator] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
   const [sortBy, setSortBy] = useState('alpha');
   const [viewMode, setViewMode] = useState('list');
   const [lastFrostOffset, setLastFrostOffset] = useState(0);
@@ -43,6 +44,7 @@ export function useFilters() {
     if (params.get('frostF')) setFirstFrostOffset(parseInt(params.get('frostF')) || 0);
     if (params.get('deer')) setFilterDeer(params.get('deer'));
     if (params.get('poll')) setFilterPollinator(params.get('poll'));
+    if (params.get('cat')) setFilterCategory(params.get('cat'));
   }, []);
 
   // --- write state to URL hash ---
@@ -60,18 +62,19 @@ export function useFilters() {
     if (firstFrostOffset !== 0) params.set('frostF', String(firstFrostOffset));
     if (filterDeer !== 'all') params.set('deer', filterDeer);
     if (filterPollinator !== 'all') params.set('poll', filterPollinator);
+    if (filterCategory !== 'all') params.set('cat', filterCategory);
     const hash = params.toString();
     window.history.replaceState(null, '', hash ? '#' + hash : window.location.pathname);
-  }, [viewMode, filterSow, filterType, filterHeight, filterColorFamily, sortBy, searchTerm, filterMyGarden, lastFrostOffset, firstFrostOffset, filterDeer, filterPollinator]);
+  }, [viewMode, filterSow, filterType, filterHeight, filterColorFamily, sortBy, searchTerm, filterMyGarden, lastFrostOffset, firstFrostOffset, filterDeer, filterPollinator, filterCategory]);
 
   // --- derived ---
-  const hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha' || filterDeer !== 'all' || filterPollinator !== 'all';
+  const hasActiveFilters = searchTerm || filterSow !== 'all' || filterType !== 'all' || filterHeight !== 'all' || filterColorFamily !== 'all' || filterPlantNow || filterBloomNow || filterMyGarden || sortBy !== 'alpha' || filterDeer !== 'all' || filterPollinator !== 'all' || filterCategory !== 'all';
 
   const activeFilterCount = useMemo(() => [
     searchTerm, filterSow !== 'all', filterType !== 'all', filterHeight !== 'all',
     filterColorFamily !== 'all', filterPlantNow, filterBloomNow, filterMyGarden,
-    filterDeer !== 'all', filterPollinator !== 'all',
-  ].filter(Boolean).length, [searchTerm, filterSow, filterType, filterHeight, filterColorFamily, filterPlantNow, filterBloomNow, filterMyGarden, filterDeer, filterPollinator]);
+    filterDeer !== 'all', filterPollinator !== 'all', filterCategory !== 'all',
+  ].filter(Boolean).length, [searchTerm, filterSow, filterType, filterHeight, filterColorFamily, filterPlantNow, filterBloomNow, filterMyGarden, filterDeer, filterPollinator, filterCategory]);
 
   const clearAllFilters = useCallback(() => {
     setSearchTerm('');
@@ -85,6 +88,7 @@ export function useFilters() {
     setSortBy('alpha');
     setFilterDeer('all');
     setFilterPollinator('all');
+    setFilterCategory('all');
   }, []);
 
   return {
@@ -98,6 +102,7 @@ export function useFilters() {
     filterMyGarden, setFilterMyGarden,
     filterDeer, setFilterDeer,
     filterPollinator, setFilterPollinator,
+    filterCategory, setFilterCategory,
     sortBy, setSortBy,
     viewMode, setViewMode,
     lastFrostOffset, setLastFrostOffset,

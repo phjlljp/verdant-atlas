@@ -32,6 +32,10 @@ export default function SpeciesCard({
   focused,
   dragProps,
 }) {
+  const isVegetable = sd.category === 'vegetable';
+  const borderColor = isVegetable
+    ? (PHASE_COLORS.harvest?.bg || '#f97316')
+    : (sd.bloomColor || '#94a3b8');
   const bloomColor = sd.bloomColor || '#94a3b8';
 
   // Species thumbnail: prefer second variety with image, fallback to first
@@ -78,7 +82,7 @@ export default function SpeciesCard({
       className={'species-card overflow-hidden ' + (expanded ? 'species-card-expanded' : 'species-card-collapsed')}
       style={{
         border: '1px solid #e2e8f0',
-        borderLeft: `4px solid ${bloomColor}`,
+        borderLeft: `4px solid ${borderColor}`,
         backgroundColor: '#fff',
         borderRadius: '8px',
         opacity: dragProps?.style?.opacity ?? 1,
@@ -165,7 +169,7 @@ export default function SpeciesCard({
               <span className="capitalize" style={{ color: '#64748b', fontWeight: 600 }}>{sd.type}</span>
               {sd.frostHardy && <span style={{ color: '#64748b' }}>Frost hardy</span>}
               <span>{sd.sowMethod.map((m) => m === 'startIndoors' ? 'Indoor' : 'Direct sow').join(' + ')}</span>
-              <span>Bloom {formatDoy(sd.tl.bloomStart)}</span>
+              <span>{isVegetable ? `Harvest ${formatDoy(sd.tl.harvestStart || sd.tl.bloomStart)}` : `Bloom ${formatDoy(sd.tl.bloomStart)}`}</span>
               {sd.deerResistant && <span>&#128737;&#65039;</span>}
             </div>
           )}
@@ -211,9 +215,11 @@ export default function SpeciesCard({
                 </span>
               </div>
               <div className="flex gap-2">
-                <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Bloom</span>
+                <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>{isVegetable ? 'Maturity' : 'Bloom'}</span>
                 <span className="font-bold tabular-nums" style={{ color: '#475569' }}>
-                  {sd.bloomDays ? `${sd.bloomDays[0]}\u2013${sd.bloomDays[1]} days` : '?'}
+                  {isVegetable
+                    ? (sd.daysToMaturity ? `${sd.daysToMaturity[0]}\u2013${sd.daysToMaturity[1]} days` : '?')
+                    : (sd.bloomDays ? `${sd.bloomDays[0]}\u2013${sd.bloomDays[1]} days` : '?')}
                 </span>
               </div>
               <div className="flex gap-2">
@@ -272,11 +278,11 @@ export default function SpeciesCard({
                   <span style={{ color: '#f59e0b', fontSize: '10px', fontWeight: 600 }}>May not bloom first year from seed</span>
                 </div>
               )}
-              {sd.type === 'annual' && sd.sowMethod.includes('directSow') && sd.bloomDuration && sd.bloomDuration <= 45 && (
+              {sd.type === 'annual' && sd.sowMethod.includes('directSow') && (sd.bloomDuration || sd.harvestDuration) && (sd.bloomDuration || sd.harvestDuration) <= 45 && (
                 <div className="flex gap-2 items-start">
                   <span style={{ width: '90px', color: '#94a3b8', flexShrink: 0 }}>Succession</span>
                   <div style={{ fontSize: '10px', color: '#16a34a', fontWeight: 600 }}>
-                    <span>Sow every 2\u20133 weeks for continuous bloom:</span>
+                    <span>Sow every 2\u20133 weeks for continuous {isVegetable ? 'harvest' : 'bloom'}:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {(() => {
                         const dates = [];
