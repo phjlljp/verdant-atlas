@@ -2,24 +2,34 @@
  * Vegetable seed scraper for rareseeds.com
  *
  * Phase 1: Crawl all vegetable category pages, extract product names and URL slugs.
- * Phase 2: (future) Visit each product URL to extract detailed growing data.
+ * Phase 2: Visit each product URL to extract detailed growing data.
  *
  * Usage:
  *   npx playwright install chromium
  *   node scripts/scrape-vegetables.mjs
  *
- * Output: scripts/output/vegetable-urls.json
+ * Output:
+ *   scripts/output/vegetable-urls.json    (Phase 1)
+ *   scripts/output/vegetable-details.json (Phase 2)
  */
 
 import { chromium } from 'playwright';
 import { writeFile, readFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { randomDelay, retry, extractSlug } from './scrape-utils.mjs';
+import {
+  randomDelay,
+  retry,
+  extractSlug,
+  parseDaysToMaturity,
+  parseGermination,
+  extractImagePath,
+} from './scrape-utils.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, 'output');
 const OUTPUT_FILE = join(OUTPUT_DIR, 'vegetable-urls.json');
+const DETAILS_FILE = join(OUTPUT_DIR, 'vegetable-details.json');
 
 const BASE_URL = 'https://www.rareseeds.com';
 
@@ -276,6 +286,107 @@ async function phase1CrawlCategories(browser) {
 }
 
 /**
+ * Extract product details from a single product page.
+ * Returns { name, description, imagePath, daysToMaturity, germination }.
+ */
+async function extractProductDetails(page) {
+  return page.evaluate(() => {
+    const name = (document.querySelector('h1.page-title span, h1.page-title, h1')?.textContent || '').trim();
+
+    // Description from product info area
+    const descEl = document.querySelector(
+      '.product.attribute.description .value, .product.info .product-description, .product.attribute.overview .value',
+    );
+    const description = (descEl?.textContent || '').replace(/\s+/g, ' ').trim();
+
+    // Main product image src
+    const imgEl = document.querySelector(
+      '.gallery-placeholder img, .product.media img, .fotorama__img, img.gallery-placeholder__image',
+    );
+    const imageSrc = imgEl?.getAttribute('src') || '';
+
+    return { name, description, imageSrc };
+  });
+}
+
+/**
+ * Phase 2: Visit each product URL and extract detailed growing data.
+ * Reads product list from Phase 1 output, visits each page, and collects details.
+ */
+async function phase2ScrapeDetails(browser) {
+  let urlData;
+  try {
+    const raw = await readFile(OUTPUT_FILE, 'utf-8');
+    urlData = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`Cannot read Phase 1 output (${OUTPUT_FILE}): ${err.message}`);
+  }
+
+  const products = urlData.products || [];
+  if (products.length === 0) {
+    throw new Error('No products found in Phase 1 output');
+  }
+
+  const page = await browser.newPage();
+  const details = [];
+  const total = products.length;
+
+  for (let i = 0; i < total; i++) {
+    const product = products[i];
+    const progress = `[${i + 1}/${total}]`;
+
+    try {
+      const raw = await retry(
+        async () => {
+          await page.goto(product.url, { waitUntil: 'networkidle', timeout: 30000 });
+          return extractProductDetails(page);
+        },
+        { maxAttempts: 3, label: `${progress} ${product.slug}` },
+      );
+
+      const imagePath = extractImagePath(raw.imageSrc);
+      const daysToMaturity = parseDaysToMaturity(raw.description);
+      const germination = parseGermination(raw.description);
+
+      details.push({
+        slug: product.slug,
+        name: raw.name || product.name,
+        category: product.category,
+        subcategory: product.subcategory || null,
+        url: product.url,
+        description: raw.description,
+        imagePath,
+        daysToMaturity,
+        germination,
+      });
+
+      if ((i + 1) % 25 === 0) {
+        process.stderr.write(`${progress} Scraped ${product.slug}\n`);
+      }
+    } catch (err) {
+      process.stderr.write(`${progress} Error scraping ${product.slug}: ${err.message}\n`);
+      details.push({
+        slug: product.slug,
+        name: product.name,
+        category: product.category,
+        subcategory: product.subcategory || null,
+        url: product.url,
+        description: '',
+        imagePath: '',
+        daysToMaturity: null,
+        germination: { days: null, tempF: null },
+        error: err.message,
+      });
+    }
+
+    await randomDelay(1000, 2000);
+  }
+
+  await page.close();
+  return details;
+}
+
+/**
  * Save results to JSON file.
  */
 async function saveResults(data, filePath) {
@@ -320,7 +431,25 @@ async function main() {
       OUTPUT_FILE,
     );
 
-    process.stderr.write(`Results saved to ${OUTPUT_FILE}\n`);
+    process.stderr.write(`Phase 1 results saved to ${OUTPUT_FILE}\n`);
+
+    process.stderr.write('Phase 2: Scraping product details...\n');
+    const details = await phase2ScrapeDetails(browser);
+
+    const successCount = details.filter((d) => !d.error).length;
+    process.stderr.write(`Scraped ${successCount}/${details.length} product details successfully\n`);
+
+    await saveResults(
+      {
+        scraped_at: new Date().toISOString(),
+        total_products: details.length,
+        successful: successCount,
+        products: details,
+      },
+      DETAILS_FILE,
+    );
+
+    process.stderr.write(`Phase 2 results saved to ${DETAILS_FILE}\n`);
   } finally {
     await browser.close();
   }
